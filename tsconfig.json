@@ -15,6 +15,6 @@
     "jsx": "preserve",
     "incremental": true
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", "Components/application.js", "store/slices/mainSlices.tsx", "store/slices/mainSlices.js"],
   "exclude": ["node_modules"]
 }
