@@ -16,7 +16,7 @@ import {
 } from "@mui/material";
 import { Formik } from "formik";
 // import { Editor } from "react-draft-wysiwyg";
-import { EditorState, ContentState,} from "draft-js";
+import { EditorState, ContentState, convertToRaw, convertFromRaw} from "draft-js";
 import "../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import Axios, { AxiosResponse } from "axios";
 import dynamic from "next/dynamic";
@@ -48,7 +48,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
 
   const [contentState, setContentState] = useState()
 
-  const { candidate, setCandidate, role, setRole, editableRole, setEditableRole } = useContext(MainContext) as any
+  const { editableRole } = useContext(MainContext) as any
 
   useEffect(() => {
     if(editableRole && editing) {

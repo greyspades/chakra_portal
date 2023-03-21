@@ -87,7 +87,7 @@ export const Applications = () => {
       
   return (
     <div>
-        <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
+        <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[97%]">
         {!viewing && (
             <div>
                 <div className='flex flex-row'>
@@ -124,7 +124,9 @@ export const Applications = () => {
             </div>
         )}
         {viewing && (
-            <Applicant close={exitView} data={applicant as Candidate} role={roleName as string} />
+            <div className='static'>
+              <Applicant close={exitView} data={applicant as Candidate} role={roleName as string} />
+            </div>
         )}
         </Paper>
     </div>

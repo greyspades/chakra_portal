@@ -27,7 +27,7 @@ export const Application: FC<Role> = ({
   salary,
   name,
   id,
-}: Role) => {
+}: Role, {goBack}: any) => {
   const [info, setInfo] = useState<{
     firstName: string;
     lastName: string;
@@ -77,9 +77,8 @@ export const Application: FC<Role> = ({
     },
   ];
 
-  const handleUpload = (e: any, handleChange: any) => {
+  const handleFileChange = (e: any) => {
     setFile(e.target.files[0]);
-    handleChange("cv");
   };
 
   return (
@@ -109,7 +108,8 @@ export const Application: FC<Role> = ({
               }}
               onSubmit={(value: any) => {
                 setLoading(true);
-                console.log(id);
+                // const fileData = new FormData();
+                // fileData.append("formFile", file);
                 var body = {
                   firstName: value.firstName.toString(),
                   lastName: value.lastName.toString(),
@@ -118,7 +118,7 @@ export const Application: FC<Role> = ({
                   phone: value.phone.toString(),
                   roleId: id,
                   dob: value.dob.toString(),
-                  // cv: file
+                  cv: file
                 };
                 var role = {
                   deadline,
@@ -131,6 +131,7 @@ export const Application: FC<Role> = ({
                 var headers = {
                   "Access-Control-Allow-Origin": "*",
                   "Content-Type": "application/json",
+                  // 'content-length': `${file?.size}`,
                 };
                 Axios.post("http://localhost:5048/api/Candidate", body, {
                   headers: {
@@ -141,11 +142,10 @@ export const Application: FC<Role> = ({
                 })
                   .then((res) => {
                     if (res.data.code == 200) {
-                      console.log(res);
+                      console.log(res.data);
                       setLoading(false);
                       setCandidate(body);
                       setRole(role);
-                      // window.location.href = "/confirmation";
                       router.push("/confirmation");
                     }
                   })
@@ -260,8 +260,7 @@ export const Application: FC<Role> = ({
                         placeholder="Your Resume"
                         type="file"
                         required
-                        value={values.cv}
-                        onChange={handleChange("cv")}
+                        onChange={handleFileChange}
                         // onChange={(e) => handleUpload(e, handleChange)}
                         className="bg-white rounded-md h-[40px] w-[250px] p-4 m-3 md:"
                       />

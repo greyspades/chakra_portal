@@ -38,7 +38,7 @@ export const Navbar = () => {
               <a href="/" className="grid text-white">
                 Listings
               </a>
-              <a href="/" className="grid text-white">
+              <a href="/statusform" className="grid text-white">
                 Check Status
               </a>
             </div>
