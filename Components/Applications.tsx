@@ -5,6 +5,7 @@ import { Candidate } from '../types/candidate'
 import { Role } from '../types/roles'
 import MenuIcon from '@mui/icons-material/Menu';
 import { Applicant } from './applicant'
+import { CvUpload } from './applicationStages/cvUpload'
 
 export const Applications = () => {
     const [id, setId] = useState<string>("");
@@ -14,7 +15,7 @@ export const Applications = () => {
     const [applicant, setApplicant] = useState<Candidate>();
     const [roleName, setRoleName] = useState<string>();
     const [searchVal, setSearchVal] = useState<string>('');
-
+    
     useEffect(() => {
         Axios.get(`http://localhost:5048/api/Candidate/role/${id}`).then((res) => {
           setCandidates(res.data.data);
