@@ -78,7 +78,7 @@ export const EditRole = () => {
       {!editing && (
         <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
         <div className='flex flex-row'>
-        <p className="text-2xl h-[40px]">Edit Role</p>
+        <p className="text-2xl h-[40px]">Edit Job Role</p>
         </div>
         <div className='flex flex-row mt-4'>
           <p>

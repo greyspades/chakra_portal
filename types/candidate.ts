@@ -5,10 +5,13 @@ export type Candidate = {
   roleId: string,
   email: string,
   password: string,
-  applicationDate?: string,
+  applDate?: string,
   cv?: any,
   phone: string,
   stage?: string,
   status?: string,
-  id: string
+  id: string,
+  gender: "Male" | "Female" | "Non Binary",
+  education: string,
+  experience: string
 }

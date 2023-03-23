@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 import { Paper, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Divider, IconButton, Input } from '@mui/material'
-import Axios from 'axios'
+import Axios, { AxiosError } from 'axios'
 import { Candidate } from '../types/candidate'
 import { Role } from '../types/roles'
 import MenuIcon from '@mui/icons-material/Menu';
@@ -16,9 +16,13 @@ export const Applications = () => {
     const [searchVal, setSearchVal] = useState<string>('');
 
     useEffect(() => {
+      console.log(id)
         Axios.get(`http://localhost:5048/api/Candidate/role/${id}`).then((res) => {
           setCandidates(res.data.data);
-          console.log(res.data)
+          console.log(res.data.data)
+        })
+        .catch((e: AxiosError) => {
+          console.log(e.message)
         });
       }, [id]);
 
@@ -27,6 +31,7 @@ export const Applications = () => {
           setRoles(res.data.data);
         });
       }, []);
+
 
     const units: string[] = [
         'Finance',
