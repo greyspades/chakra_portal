@@ -11,10 +11,12 @@ const Context = (props: any) => {
 
     const [editableRole, setEditableRole] = useState<Role>()
 
-    const [activePage, setActivePage] = useState<String>();
+    const [activePage, setActivePage] = useState<string>();
+
+    const [candidates, setCandidates] = useState<Candidate[]>();
 
     return (
-        <MainContext.Provider value={{candidate: candidate, setCandidate: setCandidate, role: role, setRole: setRole, editableRole: editableRole, setEditableRole, activePage, setActivePage} as any}>
+        <MainContext.Provider value={{candidate: candidate, setCandidate: setCandidate, role: role, setRole: setRole, editableRole: editableRole, setEditableRole, activePage, setActivePage, candidates, setCandidates} as any}>
             {props.children}
         </MainContext.Provider>
     )

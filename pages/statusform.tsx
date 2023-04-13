@@ -12,6 +12,7 @@ import { Role } from "../types/roles";
 import { validate } from "../helpers/validation";
 import { useRouter } from "next/router";
 import { MainContext } from "../context";
+import { SignInValidation } from "../helpers/validation";
 
 const StatusForm = () => {
   const [visible, setVisible] = useState<boolean>();
@@ -21,7 +22,7 @@ const StatusForm = () => {
   const [error, setError] = useState<string>();
   const router = useRouter();
 
-  const { candidate, setCandidate } = useContext(MainContext) as any
+  const { candidate, setCandidate, candidates, setCandidates } = useContext(MainContext) as any
 
   const search = () => {
 
@@ -36,29 +37,30 @@ const StatusForm = () => {
     })
   }
 
-  useEffect(() => {
-    axios.get(`http://localhost:5048/roles/Role/byId/${candidate?.roleId}`)
-    .then((res: AxiosResponse) => {
-        if(res.data.code == 200) {
-            setRole(res.data.data);
-        }
-    })
-  }, [candidate?.roleId])
+  // useEffect(() => {
+  //   axios.get(`http://localhost:5048/roles/Role/byId/${candidate?.roleId}`)
+  //   .then((res: AxiosResponse) => {
+  //       if(res.data.code == 200) {
+  //           setRole(res.data.data);
+  //       }
+  //   })
+  // }, [candidate?.roleId])
 
   return (
     <div>
       <Navbar />
       <div className="grid mt-[100px] justify-center">
-        <div className="grid w-[400px] justify-center col-span-1 bg-slate-100 p-4 h-[300px] rounded-md">
+        <Paper className="grid w-[400px] justify-center col-span-1 bg-slate-100 p-4 h-[350px] rounded-md">
         <p className="m-2 text-2xl font-semibold text-center">
-            Please login
+            Please Sign In
         </p>
           <form>
             <Formik
+              validationSchema={SignInValidation}
               initialValues={{ email: "", password: "" }}
-              onSubmit={(value) => {
-                // setLoading(true);
-
+              onSubmit={(value, { validateForm }) => {
+                setLoading(true);
+                validateForm(value);
                 const body = {
                     email: value.email,
                     password: value.password
@@ -67,12 +69,16 @@ const StatusForm = () => {
                 
                   axios.post('http://localhost:5048/status', body)
                 .then((res: AxiosResponse) => {
-                  console.log(res.data);
                     setLoading(false);
+                    console.log(res.data)
                     if(res.data.code == 200 && res.data.data.length > 0) {
-                        setCandidate(res.data.data[0]);
-                        setCurCandidate(res.data.data[0]);
+                          setCandidates(res.data.data)
+                        // setCandidate(res.data.data[0]);
+                        // setCurCandidate(res.data.data[0]);
                         router.push("/applicant");
+                    }
+                    else if(res.data.code == 200 && res.data.length < 1) {
+                      alert('Applicant does not exist, please check the email and password')
                     }
                 })
                 .catch((err) => {
@@ -85,9 +91,10 @@ const StatusForm = () => {
                 // }
               }}
             >
-              {({ handleChange, handleSubmit, values }) => (
+              {({ handleChange, handleSubmit, values, errors }) => (
                 <div>
                   <div className="grid">
+                    <div>
                     <Input
                       placeholder="Email"
                       value={values.email}
@@ -99,7 +106,14 @@ const StatusForm = () => {
                         </InputAdornment>
                       }
                     />
+                    {errors.email && (
+                      <p className="text-red-700 text-[12px] ml-4">
+                        {errors.email}
+                      </p>
+                    )}
+                    </div>
 
+                    <div>
                     <Input
                       placeholder="Password"
                       value={values.password}
@@ -118,6 +132,12 @@ const StatusForm = () => {
                         </InputAdornment>
                       }
                     />
+                    {errors.email && (
+                      <p className="text-red-700 text-[12px] ml-4">
+                        {errors.password}
+                      </p>
+                    )}
+                    </div>
                         {error ! && (
                           <div className="text-red-500 text-center ">
                             {error}
@@ -136,7 +156,7 @@ const StatusForm = () => {
               )}
             </Formik>
           </form>
-        </div>
+        </Paper>
 
         {/* <div className="grid col-span-3">
             <Paper className=" md:h-[400px] bg-slate-100 p-6 align-middle md:fixed w-[72%]">

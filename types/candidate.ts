@@ -4,14 +4,17 @@ export type Candidate = {
   dob: string,
   roleId: string,
   email: string,
-  password: string,
+  password?: string,
   applDate?: string,
   cv?: any,
   phone: string,
   stage?: string,
   status?: string,
-  id: string,
-  gender: "Male" | "Female" | "Non Binary",
-  education: string,
-  experience: string
+  id?: string,
+  gender?: "Male" | "Female",
+  education?: string,
+  experience?: string,
+  flag?: string,
+  otherName?: string,
+  jobName?: string
 }

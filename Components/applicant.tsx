@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Candidate } from "../types/candidate";
 import {
   Divider,
@@ -7,9 +7,16 @@ import {
   IconButton,
   Alert,
   AlertTitle,
+  FormControl,
+  InputLabel,
+  Dialog,
+  Select,
+  SelectChangeEvent,
+  MenuItem,
+  Paper
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import Axios, { AxiosResponse } from "axios";
+import Axios, { AxiosError, AxiosResponse } from "axios";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/esm/Page/TextLayer.css";
 import FindInPageIcon from "@mui/icons-material/FindInPage";
@@ -19,17 +26,23 @@ import PrintIcon from "@mui/icons-material/Print";
 import SchoolIcon from "@mui/icons-material/School";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
 import BookIcon from "@mui/icons-material/Book";
-import CloseIcon from '@mui/icons-material/Close';
-
+import CloseIcon from "@mui/icons-material/Close";
+import WorkIcon from "@mui/icons-material/Work";
+import CalendarToday from "@mui/icons-material/CalendarToday";
+import BadgeIcon from "@mui/icons-material/Badge";
+import { Role } from "../types/roles";
+import { useReactToPrint } from "react-to-print";
+import { ScheduleInterview } from "./interviews/add";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
 type ApplicantProps = {
   data: Candidate;
   close: () => void;
-  role: string;
+  role: Role;
 };
-export const Applicant = ({ data, close, role }: ApplicantProps) => {
+
+export const Applicant = ({ data, close, role}: ApplicantProps) => {
   const [loading, setLoading] = useState(false);
   const [statusCode, setStatusCode] = useState<number>(0);
   const [cvData, setCvData] = useState();
@@ -39,6 +52,43 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   const [page, setPage] = useState<number>(1);
   const [skills, setSkills] = useState<string[]>();
   const [education, setEducation] = useState<{ [key: string]: string }[]>();
+  const [exp, setExp] = useState<{ [key: string]: string }[]>();
+  const [showDialog, setShowDialog] = useState<boolean>(false);
+  const [flag, setFlag] = useState<string>("");
+  const [flagLoading, setFlagLoading] = useState<boolean>(false);
+  const [mailTemplate, setMailTemplate] = useState<string>("");
+  const [mailLoading, setMailLoading] = useState<boolean>(false);
+  const [stage, setStage] = useState<string>();
+  const [interview, setInterview] = useState<boolean>(false);
+
+  const printerRef = useRef(null);
+
+  const handlePrint = useReactToPrint({
+    content: () => printerRef.current,
+    pageStyle: `@media print {
+      @page {
+        size: 400px 800px;
+        margin: 0;
+      }
+    }`,
+  });
+
+  const flags: { [key: string]: string }[] = [
+    {
+      name: "Maybe",
+      value: "maybe",
+    },
+    {
+      name: "Not Fit",
+      value: "notFit",
+    },
+    {
+      name: "Best Fit",
+      value: "bestFit",
+    },
+  ];
+
+  const stages: string[] = ["2", "3", "4"];
 
   const openModal = () => setModalOpen(true);
 
@@ -46,7 +96,6 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
 
   const onDocumentLoadSuccess = ({ numPages }: any) => {
     setNumPages(numPages);
-    console.log(numPages);
     if (numPages > 1) {
       setTimeout(() => {
         setPage(2);
@@ -55,9 +104,10 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   };
 
   useEffect(() => {
-    const edu = JSON.parse(data.education);
-    console.log(edu)
+    const edu = JSON.parse(data?.education as string);
+    const exp = JSON.parse(data?.experience as string);
     setEducation(edu);
+    setExp(exp);
   }, []);
 
   const handleStatusChange = (code: number) => {
@@ -65,17 +115,19 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     setTimeout(() => setStatusCode(0), 4000);
   };
 
-  const moveToNextStage = () => {
+  const moveToNextStage = (e: SelectChangeEvent) => {
     setLoading(true);
     const body = {
       id: data.id,
-      stage: "2",
+      stage: e.target.value,
     };
     Axios.post("http://localhost:5048/stage", body).then(
       (res: AxiosResponse) => {
         setLoading(false);
-        console.log(res.data);
         handleStatusChange(res.data.code);
+        if (res.data.code == 200) {
+          alert("Applicant moved to the next stage");
+        }
       }
     );
   };
@@ -83,13 +135,12 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   useEffect(() => {
     Axios.get(`http://localhost:5048/api/Candidate/skills/${data.id}`).then(
       (res: AxiosResponse) => {
-        // res.data.pop()
         setSkills(res.data);
       }
     );
 
     return;
-  }, [data.id]);
+  }, []);
 
   const displayMessage = (code: number) => {
     switch (code) {
@@ -120,10 +171,51 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     }
   };
 
+  const handleFlag = (e: SelectChangeEvent) => {
+    setFlag(e.target.value);
+    setFlagLoading(true);
+    const body = {
+      id: data.id,
+      flag: e.target.value,
+      roleName: role.name
+    };
+    Axios.post("http://localhost:5048/api/Candidate/flag", body)
+      .then((res: AxiosResponse) => {
+        if (res.data.code == 200) {
+          setFlagLoading(false);
+          alert(`Applicant successfully flagged as`);
+        }
+      })
+      .catch((e: AxiosError) => {
+        console.log(e.message);
+        setFlagLoading(false);
+      });
+  };
+
+  const cancelApplication = () => {
+    const body = {
+      id: data?.id,
+    };
+    Axios.post("http://localhost:5048/api/Candidate/cancel", body)
+      .then((res) => {
+        if (res.data.code == 200) {
+          alert("Application cancelled successfully");
+          setShowDialog(false);
+        }
+      })
+      .catch((e: AxiosError) => {
+        console.log(e.message);
+      });
+  };
+
   const fields: { [key: string]: any }[] = [
     {
       name: "First Name",
       value: data.firstName,
+    },
+    {
+      name: "Other Name",
+      value: data.otherName,
     },
     {
       name: "Last Name",
@@ -135,15 +227,15 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
     {
       name: "Date of Birth",
-      value: data.dob,
+      value: data.dob?.split("T")[0],
     },
     {
       name: "Application Date",
-      value: data.applDate,
+      value: data.applDate?.split("T")[0],
     },
     {
       name: "Job Role Applied",
-      value: role,
+      value: role?.name,
     },
     {
       name: "Phone Number",
@@ -157,8 +249,11 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       name: "Application Status",
       value: data.status,
     },
+    {
+      name: "Flag",
+      value: data.flag ?? "Not yet Flagged",
+    },
   ];
-
 
   const printResume = () => {
     if (document.getElementById("GFG")) {
@@ -174,55 +269,39 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   };
 
   const renderEducation = () => {
-    return education?.map((item: {[key:string]:string}, idx) => (
-      <div key={idx} className="flex flex-row gap-3">
+    return education?.map((item: { [key: string]: string }, idx) => (
+      <div key={idx} className="flex flex-row gap-3 mt-6">
         <div>
-          <p className="text-[11px]">
-          School Attended
-          </p>
-        <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
-          <SchoolIcon className="text-green-700" />
-          <p className="mx-2">
-          {item.school}
-          </p>
-        </div>
+          <p className="text-[11px]">School Attended</p>
+          <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
+            <SchoolIcon className="text-green-700" />
+            <p className="mx-2">{item.school}</p>
+          </div>
         </div>
         <div>
-          <p className="text-[11px]">
-            Course of Study
-          </p>
-        <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
-          <SchoolIcon className="text-green-700" />
-          <p className="mx-2">
-          {item.course}
-          </p>
+          <p className="text-[11px]">Course of Study</p>
+          <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
+            <SchoolIcon className="text-green-700" />
+            <p className="mx-2">{item.course}</p>
+          </div>
         </div>
-        </div>
-       <div>
-        <p className="text-[11px]">
-          Certificate
-        </p>
-       <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
-          <SchoolIcon className="text-green-700" />
-          <p className="mx-2">
-          {item.degree}
-          </p>
-        </div>
-       </div>
         <div>
-          <p className="text-[11px]">
-            Graduation Date
-          </p>
-        <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
-          <SchoolIcon className="text-green-700" />
-          <p className="mx-2">
-          {item.graduationDate}
-          </p>
+          <p className="text-[11px]">Certificate</p>
+          <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
+            <SchoolIcon className="text-green-700" />
+            <p className="mx-2">{item.degree}</p>
+          </div>
         </div>
+        <div>
+          <p className="text-[11px]">Graduation Date</p>
+          <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
+            <CalendarToday className="text-green-700" />
+            <p className="mx-2">{item.graduationDate}</p>
+          </div>
         </div>
       </div>
-    ))
-  }
+    ));
+  };
 
   const renderInfo = () => {
     return fields?.map((item: { [key: string]: string }, idx: number) => (
@@ -236,22 +315,127 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     ));
   };
 
-  const renderSkills = () => {
-    return skills?.map((item: string, idx: number) => (
-      <div
-        className="bg-white p-1 flex place-items-center flex-row justify-items-center rounded-md overflow-x-hidden m-2 ml-0 w-[150px] h-[35px]"
-        key={idx}
-      >
-        <CircleIcon className="h-[10px] text-green-700" />
-        {item}
+  const generateId = () => {
+    var body = {
+      value: data.id,
+    };
+    Axios.post("http://localhost:5048/api/Candidate/generate/tempId", body)
+      .then((res: AxiosResponse) => {
+        console.log(res.data);
+      })
+      .catch((err: AxiosError) => {
+        console.log(err.message);
+      });
+  };
+
+  const renderExp = () => {
+    return exp?.map((item: { [key: string]: string }, idx: number) => (
+      <div key={idx}>
+        <div className="flex flex-row gap-6">
+          <div>
+            <p className="text-[11px]">Employer</p>
+            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+              <WorkIcon className="text-green-700" />
+              {item?.employer}
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px]">Job Title</p>
+            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+              <BadgeIcon className="text-green-700" />
+              {item?.title}
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px]">Start Date</p>
+            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+              <CalendarToday className="text-green-700" />
+              {item?.startDate}
+            </div>
+          </div>
+          <div>
+            <p className="text-[11px]">End Date</p>
+            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+              <CalendarToday className="text-green-700" />
+              {item?.endDate}
+            </div>
+          </div>
+        </div>
+        <div className="mt-[20px]">
+          <p className="text-[11px]">Duties</p>
+          <div className="bg-white p-2 h-[100px] rounded-md overflow-y-scroll">
+            {item?.description}
+          </div>
+        </div>
       </div>
     ));
   };
 
+  const renderSkills = () => {
+    return skills?.map((item: string, idx: number) => (
+      <div
+        className="bg-white p-1 flex place-items-center flex-row justify-items-center rounded-md overflow-x-hidden m-2 w-auto h-[35px]"
+        key={idx}
+      >
+        <CircleIcon className="h-[10px] ml-[-7px] text-green-700" />
+        <p className="mt-[-3px] ml-[-5px]">{item}</p>
+      </div>
+    ));
+  };
+
+  const mailTemplates: string[] = ["notFit", "accepted", "none"];
+
+  const handleTemplateChange = (e: SelectChangeEvent) => {
+    setMailTemplate(e.target.value);
+    var body = {
+      template: e.target.value,
+      reciever: "odenadoma@gmail.com",
+    };
+    setMailLoading(true);
+    Axios.post("http://localhost:5048/api/Candidate/mail", body)
+      .then((res: AxiosResponse) => {
+        console.log(res.data);
+        setMailLoading(false);
+        if (res.data.code == 200) {
+          setMailTemplate("none");
+          alert("Candidate mailed successfully");
+        }
+      })
+      .catch((err: AxiosError) => {
+        console.log(err.message);
+        setMailTemplate("none");
+        setMailLoading(false);
+      });
+  };
+
   return (
     <div className="">
+      <Dialog open={showDialog}>
+        <div className="h-[170px] bg-white p-4">
+          <p className="font-semibold text-xl">Cancel Application?</p>
+          <p className="font-semibold mt-4">
+            Are you sure you want to cancel {data.firstName}'s Application?
+          </p>
+          <div className="flex justify-end">
+            <div className="flex flex-row justify-between w-[50%] mt-6">
+              <Button
+                onClick={() => setShowDialog(false)}
+                className="bg-green-700 text-white"
+              >
+                No
+              </Button>
+              <Button
+                onClick={cancelApplication}
+                className="bg-gray-400 text-white"
+              >
+                Yes
+              </Button>
+            </div>
+          </div>
+        </div>
+      </Dialog>
       <div className="flex justify-between">
-        <p className="text-xl font-bold text-green-700">
+        <p className="text-2xl font-bold text-green-700">
           Applicant Information
         </p>
         <IconButton onClick={close}>
@@ -275,7 +459,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
               file={`http://localhost:5048/resume/${data.id}`}
               onLoadSuccess={onDocumentLoadSuccess}
             >
-              <Page pageNumber={page} height={200} />
+              <Page ref={printerRef} pageNumber={page} height={200} />
             </Document>
           </div>
 
@@ -291,7 +475,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
 
               <IconButton
                 className="bg-green-700 rounded-md h-[30px] w-[60px]"
-                onClick={printResume}
+                onClick={handlePrint}
               >
                 <PrintIcon className="text-white" />
                 <p className="text-[12px] text-white">Print</p>
@@ -303,20 +487,71 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       <Divider variant="fullWidth" className="bg-green-700 h-[2px] mt-1" />
       {/* skills */}
       <div className="mt-[20px]">
-        <p className="text-xl font-semibold">Skills</p>
+        <p className="text-xl font-semibold mb-4">Skills</p>
         <div className="flex flex-row">{renderSkills()}</div>
       </div>
       <Divider variant="fullWidth" className="bg-green-700 h-[2px] mt-1" />
       {/* education */}
-      <div className="py-6">
-        {renderEducation()}
+      <div className="mt-[20px]">
+        <p className="text-xl font-semibold mb-6">Work History</p>
+        <div>{renderExp()}</div>
       </div>
       <Divider variant="fullWidth" className="bg-green-700 h-[2px] mt-1" />
-
-      
-
+      {/* experience */}
+      <div className="pt-6 pb-2">
+        <p className="text-xl font-semibold">Education</p>
+        {renderEducation()}
+      </div>
+      <Divider variant="fullWidth" className="bg-green-700 h-[2px] mt-4" />
       <div className="flex flex-row mt-4 justify-end gap-4">
-        <Button className="bg-gray-400 text-white w-[200px]">
+        <FormControl className="">
+          <InputLabel className="text-sm">Flag Candidate</InputLabel>
+          <Select
+            value={flag}
+            onChange={handleFlag}
+            className="w-[120px] text-black bg-white h-[50px]"
+            label="Experience"
+            placeholder="Flag"
+            size="small"
+          >
+            {flags.map((item: { [key: string]: string }, idx: number) => (
+              <MenuItem key={idx} value={item.value}>
+                {item.name}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl>
+        {flagLoading && (
+          <div>
+            <CircularProgress />
+          </div>
+        )}
+        {/* <FormControl className="">
+          <InputLabel className="text-sm">Send Mail</InputLabel>
+          <Select
+            value={mailTemplate}
+            onChange={handleTemplateChange}
+            className="w-[120px] text-black bg-white h-[50px]"
+            label="Experience"
+            placeholder="Flag"
+            size="small"
+          >
+            {mailTemplates.map((item: string, idx: number) => (
+              <MenuItem key={idx} value={item}>
+                {item}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl> */}
+        {mailLoading && (
+          <div>
+            <CircularProgress thickness={5} className="text-green-700" />
+          </div>
+        )}
+        <Button
+          onClick={generateId}
+          className="bg-gray-400 text-white w-[200px]"
+        >
           {loading ? (
             <CircularProgress
               thickness={7}
@@ -326,9 +561,10 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             <p>Cancel Application</p>
           )}
         </Button>
+
         <Button
           className="bg-green-700 text-white w-[200px]"
-          onClick={moveToNextStage}
+          onClick={() => setInterview(true)}
         >
           {loading ? (
             <CircularProgress
@@ -336,9 +572,32 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
               className="text-white w-[10px] h-[10px] p-1"
             />
           ) : (
-            <p>Move to next Stage</p>
+            <p>Schedule Interview</p>
           )}
         </Button>
+        {/* <FormControl className="">
+          <InputLabel className="text-sm">Move to stage</InputLabel>
+          <Select
+            value={stage}
+            onChange={moveToNextStage}
+            className="w-[140px] text-black bg-white h-[50px]"
+            label="Experience"
+            placeholder="Flag"
+            size="small"
+          >
+            {stages.map((item: string, idx: number) => (
+              <MenuItem key={idx} value={item}>
+                {item}
+              </MenuItem>
+            ))}
+          </Select>
+        </FormControl> */}
+
+        {loading && (
+          <div>
+            <CircularProgress thickness={5} className="text-green-700" />
+          </div>
+        )}
       </div>
       <Modal
         open={modalOpen}
@@ -356,6 +615,9 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             <Page pageNumber={page} height={800} />
           </Document>
         </div>
+      </Modal>
+      <Modal onClose={() => setInterview(false)} open={interview} className="flex justify-center">
+        <ScheduleInterview candidate={data} role={role} />
       </Modal>
     </div>
   );

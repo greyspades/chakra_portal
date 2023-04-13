@@ -18,7 +18,7 @@ import { Formik } from "formik";
 // import { Editor } from "react-draft-wysiwyg";
 import { EditorState, ContentState, convertToRaw, convertFromRaw} from "draft-js";
 import "../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
-import Axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import dynamic from "next/dynamic";
 import { EditProps } from "../types/roles";
 import { MainContext } from "../context";
@@ -52,6 +52,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
 
   useEffect(() => {
     if(editableRole && editing) {
+      console.log(editableRole)
       setEditorState(EditorState.createWithContent(ContentState.createFromText(editableRole?.description)))
       setSalary(editableRole.salary)
       setExperience(editableRole.experience.toString())
@@ -92,7 +93,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
             severity="success"
           >
             <AlertTitle>Success</AlertTitle>
-            {!editing ? 'Role Added Successfully' : 'Role Updated Successfully'}
+            {!editing ? 'Role Created Successfully' : 'Role Updated Successfully'}
           </Alert>
         );
       case 400:
@@ -110,6 +111,17 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
         return <div></div>;
     }
   };
+
+  const toolbarOptions = {
+    options: ['list', 'link'],
+    list: {
+      options: ['unordered', 'ordered'],
+    },
+    link: {
+      options: ['link'],
+    },
+  }
+
   return (
     <div>
       <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
@@ -120,7 +132,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
           {
             editing && (
               <div className="flex flex-row justify-between justify-items-center w-[100%]">
-                <p className="text-2xl h-[40px]">Edit Role</p>
+                <p className="text-2xl h-[40px]">Edit Job Role</p>
                 <IconButton onClick={cancel}>
           <ArrowBackIcon className='text-green-700' />
         </IconButton>
@@ -147,7 +159,8 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
               onSubmit={(value, { resetForm }) => {
                 setLoading(true);
                 var url = !editing ? "http://localhost:5048/roles/Role" : "http://localhost:5048/roles/Role/edit"
-                var body: Role = {
+
+                const body: Role = {
                   id: editing ? editableRole.id : null,
                   name: value.name,
                   experience: parseInt(experience),
@@ -155,10 +168,10 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
                   unit: value.unit,
                   description: editorState.getCurrentContent().getPlainText(),
                   deadline: value.deadline,
-                  status: ''
+                  status: "active"
                 };
                 console.log(body)
-                Axios.post(url, body, {
+                axios.post(url, body, {
                   headers: {
                     "Access-Control-Allow-Origin": "*",
                     "Content-Type": "application/json",
@@ -178,8 +191,10 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
                     }
                     handleStatusChange(res.data.code);
                   })
-                  .catch((err) => {
-                    console.log(err);
+                  .catch((err: AxiosError) => {
+                    console.log(err.message);
+                    console.log(err.request);
+                    console.log(err.request);
                     setLoading(false);
                   });
               }}
@@ -190,7 +205,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
                     <Input
                       value={values.name}
                       onChange={handleChange("name")}
-                      placeholder="Role Title"
+                      placeholder="Job Role Title"
                       className="bg-white h-[40px] w-[250px] p-2"
                     />
                     <Editor
@@ -198,11 +213,16 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
                       wrapperClassName="flex flex-col h-[300px] mt-4"
                       editorClassName="bg-white p-2"
                       onEditorStateChange={handleEditorChange}
-                      placeholder="Role Description"
+                      placeholder="Job Role Description"
+                      toolbar={{
+                        options: ['inline', 'blockType', 'list', 'textAlign', 'history'],
+                    }}
+
+                    
                     />
                     <div className=""></div>
                     <div className="flex flex-row mt-8 justify-between justify-items-center h-[50px]">
-                      <div className="flex flex-row justify-between w-[65%] justify-items-center">
+                      <div className="flex flex-row justify-between w-[55%] justify-items-center">
                         <input
                           value={values.unit}
                           onChange={handleChange("unit")}
@@ -225,13 +245,13 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
                             placeholder="Experience"
                             size="small"
                           >
-                            {years.map((item: string) => (
-                              <MenuItem value={parseInt(item)}>{item}</MenuItem>
+                            {years.map((item: string, idx: number) => (
+                              <MenuItem key={idx} value={parseInt(item)}>{item}</MenuItem>
                             ))}
                           </Select>
                         </FormControl>
 
-                        <input
+                        {/* <input
                           value={salary}
                           onChange={handleSalChange}
                           placeholder="Salary"
@@ -239,7 +259,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
                           type="text"
                           name="salary"
                           id="salary"
-                        />
+                        /> */}
 
                         <input
                           value={values.deadline}

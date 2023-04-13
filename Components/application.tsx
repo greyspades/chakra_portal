@@ -1,6 +1,6 @@
 import React, { useState, useEffect, FC, useContext } from "react";
 import Axios, { AxiosError, AxiosResponse } from "axios";
-import { Formik } from "formik";
+import { Formik, ErrorMessage } from "formik";
 import {
   Button,
   Input,
@@ -32,6 +32,8 @@ import SchoolIcon from "@mui/icons-material/School";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
 import BookIcon from "@mui/icons-material/Book";
 import CloseIcon from '@mui/icons-material/Close';
+import { CandidateValidation } from "../helpers/validation";
+import { Candidate } from "../types/candidate";
 
 export const Application: FC<Role> = (
   { deadline, experience, unit, salary, name, id }: Role,
@@ -60,6 +62,8 @@ export const Application: FC<Role> = (
 
   const [gender, setGender] = useState<string>("Male");
 
+  const [fileError, setFileError] = useState<boolean>(false);
+
   const { candidate, setCandidate, role, setRole } = useContext(
     MainContext
   ) as any;
@@ -69,7 +73,6 @@ export const Application: FC<Role> = (
   const genders = [
     "Male",
     "Female",
-    "Non Binary"
   ]
 
   const fields: Fields[] = [
@@ -103,7 +106,16 @@ export const Application: FC<Role> = (
   const degrees = ["Bsc", "Msc", "Mba", "Phd", "Hnd", "Ond"];
 
   const handleFileChange = (e: any) => {
-    setFile(e.target.files[0]);
+    let extensions = ["pdf", "txt", "docx"];
+    let file = e.target.files[0];
+    console.log(file.type);
+    if(extensions.includes(file.type)) {
+      setFile(e.target.files[0]);
+      setFileError(false);
+    }
+    else {
+      setFileError(true);
+    }
   };
 
   const handleExpChange = (type: string, index: number, e: any) => {
@@ -148,7 +160,12 @@ export const Application: FC<Role> = (
           </div>
           <div className="flex flex-row gap-2">
             <FormControl>
-              <InputLabel className="">Employer</InputLabel>
+              <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                Employer
+              </InputLabel>
               <Input
                 placeholder="Employer"
                 value={item.employer}
@@ -162,7 +179,12 @@ export const Application: FC<Role> = (
               />
             </FormControl>
             <FormControl>
-              <InputLabel className="">Title</InputLabel>
+            <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                Title
+              </InputLabel>
               <Input
                 placeholder="Title"
                 value={item.title}
@@ -176,7 +198,12 @@ export const Application: FC<Role> = (
               />
             </FormControl>
             <FormControl>
-              <InputLabel>Start Date</InputLabel>
+            <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                Start Date
+              </InputLabel>
               <Input
                 placeholder="Start Date"
                 value={item.startDate}
@@ -191,7 +218,12 @@ export const Application: FC<Role> = (
               />
             </FormControl>
             <FormControl>
-              <InputLabel>End Date</InputLabel>
+            <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                End Date
+              </InputLabel>
               <Input
                 placeholder="End Date"
                 value={item.endDate}
@@ -230,8 +262,8 @@ export const Application: FC<Role> = (
   };
 
   const renderEducation = () => {
-    return eduField.map((item: any, idx) => (
-      <div>
+    return eduField.map((item: {[key: string]: string}, idx: number) => (
+      <div key={idx}>
         <div className="grid justify-end">
       <IconButton onClick={() => removeEdu(idx)}>
         <CloseIcon />
@@ -239,7 +271,12 @@ export const Application: FC<Role> = (
     </div>
       <div className="grid grid-cols-2 mt-[-10px]">
         <FormControl>
-          <InputLabel>School Attended</InputLabel>
+        <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                School Attended
+              </InputLabel>
           <Input
             value={item.school}
             placeholder="School Attended"
@@ -253,7 +290,12 @@ export const Application: FC<Role> = (
           />
         </FormControl>
         <FormControl>
-          <InputLabel>Course of Study</InputLabel>
+        <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                Course of Study
+              </InputLabel>
           <Input
             value={item.course}
             placeholder="Course of Study"
@@ -267,7 +309,12 @@ export const Application: FC<Role> = (
           />
         </FormControl>
         <FormControl>
-          <InputLabel>Graduation Date</InputLabel>
+        <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                Graduation Date
+              </InputLabel>
           <Input
             value={item.graduationDate}
             placeholder="Graduation Date"
@@ -282,7 +329,12 @@ export const Application: FC<Role> = (
           />
         </FormControl>
         <FormControl className="md:ml-[-190px]">
-          <InputLabel>Degree</InputLabel>
+        <InputLabel className="flex flex-row ml-[-10px]">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                Degree
+              </InputLabel>
           <Select
             value={item.degree}
             onChange={(e) => addEdu("degree", e, idx)}
@@ -343,7 +395,7 @@ export const Application: FC<Role> = (
 
   const renderSkills = () => {
     return skillForm?.map((item, idx) => (
-      <div className="flex flex-row align-middle">
+      <div key={idx} className="flex flex-row align-middle">
         <Input
           value={item}
           className="bg-white w-[200px] h-[40px] px-2 mb-4"
@@ -364,9 +416,13 @@ export const Application: FC<Role> = (
       </p>
       <form>
         <Formik
+          validateOnChange={true}
+          validateOnBlur={false}
+          validationSchema={CandidateValidation}
           initialValues={{
             firstName: "",
             lastName: "",
+            otherName: "",
             email: "",
             phone: "",
             school: "",
@@ -376,11 +432,13 @@ export const Application: FC<Role> = (
             gender: "",
             password: ""
           }}
-          onSubmit={(value: any) => {
+          onSubmit={(value: any, { validateForm } ) => {
+            validateForm(value)
             setLoading(true);
             var body = {
               firstName: value.firstName,
               lastName: value.lastName,
+              otherName: value.otherName,
               email: value.email,
               phone: value.phone.toString(),
               education: JSON.stringify(eduField),
@@ -390,8 +448,20 @@ export const Application: FC<Role> = (
               roleId: id,
               cv: file,
               gender: gender,
-              password: value.password
+              password: value.password,
+              jobName: name
             };
+            const candidateObj: Candidate = {
+              firstName: value.firstName,
+              lastName: value.lastName,
+              email: value.email,
+              phone: value.phone.toString(),
+              dob: value.dob.toString(),
+              roleId: id as string,
+            }
+            const roleObj: Role = {
+              name: name
+            }
             
             Axios.post("http://localhost:5048/api/Candidate", body, {
               headers: {
@@ -402,6 +472,14 @@ export const Application: FC<Role> = (
               .then((res: AxiosResponse) => {
                 setLoading(false);
                 console.log(res.data);
+                if(res.data.code == 200) {
+                  setCandidate(candidateObj);
+                  setRole(roleObj)
+                  router.push('/confirmation');
+                }
+                else {
+                  alert(res.data.message);
+                }
               })
               .catch((err: AxiosError) => {
                 console.log(err.message);
@@ -409,87 +487,162 @@ export const Application: FC<Role> = (
               });
           }}
         >
-          {({ handleSubmit, handleChange, values }) => (
+          {({ handleSubmit, handleChange, values, errors }) => (
             <div className="grid justify-items-center">
-              <div className="flex flex-row gap-6">
+              <div className="flex flex-row gap-3">
+                <FormControl>
+                <InputLabel className="w-[100%] flex flex-row">
+                  <p className="mr-2 text-red-700 text-[20px]">
+                    *
+                  </p>
+                  First Name
+                </InputLabel>
                 <Input
                   placeholder="First name"
                   required
                   value={values.firstName}
                   onChange={handleChange("firstName")}
-                  className="bg-white rounded-md h-[40px] w-[400px] p-4 m-3"
+                  className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
                   startAdornment={
                     <InputAdornment position="start">
                       <PersonIcon className="text-green-700" />
                     </InputAdornment>
                   }
                 />
-                <Input
+                <div className="text-red-600 text-[10px] ml-4">
+                  {errors.firstName as any}
+                </div>
+                </FormControl>
+
+                <FormControl>
+                <InputLabel className="w-[100%] flex flex-row">
+                  Other Name
+                </InputLabel>
+                  <Input
+                  placeholder="Other Name"
+                  required
+                  value={values.otherName}
+                  onChange={handleChange("otherName")}
+                  className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
+                  startAdornment={
+                    <InputAdornment position="start">
+                      <PersonIcon className="text-green-700" />
+                    </InputAdornment>
+                  }
+                />
+                <div className="text-red-600 text-[10px] ml-4">
+                  {errors.otherName as any}
+                </div>
+                </FormControl>
+
+                <FormControl>
+                <InputLabel className="w-[100%] flex flex-row">
+                  <p className="mr-2 text-red-700 text-[20px]">
+                    *
+                  </p>
+                  Last Name
+                </InputLabel>
+                  <Input
                   placeholder="Last name"
                   required
                   value={values.lastName}
                   onChange={handleChange("lastName")}
-                  className="bg-white rounded-md h-[40px] w-[400px] p-4 m-3"
+                  className="bg-white rounded-md h-[40px] w-[270px] p-4 mb-0 m-1"
                   startAdornment={
                     <InputAdornment position="start">
                       <PersonIcon className="text-green-700" />
                     </InputAdornment>
                   }
                 />
+                <div className="text-red-600 text-[10px] ml-4">
+                  {errors.lastName as any}
+                </div>
+                </FormControl>
               </div>
-              <div className="flex flex-row gap-6">
+              <div className="flex flex-row gap-6 mt-4">
+                <FormControl>
+                <InputLabel className="w-[100%] flex flex-row">
+                  <p className="mr-2 text-red-700 text-[20px]">
+                    *
+                  </p>
+                  Email
+                </InputLabel>
                 <Input
                   placeholder="Email Address"
                   required
                   value={values.email}
                   onChange={handleChange("email")}
-                  className="bg-white rounded-md h-[40px] w-[400px] p-4 m-3"
+                  className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
                   startAdornment={
                     <InputAdornment position="start">
                       <EmailIcon className="text-green-700" />
                     </InputAdornment>
                   }
                 />
+                <div className="text-red-600 text-[10px] ml-4">
+                  {errors.email as any}
+                </div>
+                </FormControl>
+                <FormControl>
+                <InputLabel className="w-[100%] flex flex-row">
+                  <p className="mr-2 text-red-700 text-[20px]">
+                    *
+                  </p>
+                  Phone Number
+                </InputLabel>
                 <Input
                   placeholder="Phone Number"
                   required
                   value={values.phone}
                   onChange={handleChange("phone")}
-                  className="bg-white rounded-md h-[40px] w-[400px] p-4 m-3"
+                  className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
                   startAdornment={
                     <InputAdornment position="start">
                       <PhoneIcon className="text-green-700" />
                     </InputAdornment>
                   }
                 />
+                <div className="text-red-600 text-[10px] ml-4">
+                  {errors.phone as any}
+                </div>
+                </FormControl>
               </div>
               <div className="flex flex-row gap-2 mt-4">
                 <FormControl>
-                  <InputLabel>
+                <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
+                  <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
                   Date of Birth
-                  </InputLabel>
+                </div>
                   <Input
                   placeholder="Date of Birth"
                   required
                   value={values.dob}
                   type="date"
                   onChange={handleChange("dob")}
-                  className="bg-white rounded-md h-[40px] w-[200px] p-4 m-3"
+                  className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 mb-0 m-3"
                   startAdornment={
                     <InputAdornment position="start">
                       <CalendarTodayIcon className="text-green-700" />
                     </InputAdornment>
                   }
                 />
+                <div className="text-red-600 text-[10px] ml-4">
+                  {errors.dob as any}
+                </div>
                 </FormControl>
                 <FormControl>
-                  <InputLabel>
-                    Gender
-                  </InputLabel>
+                <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
+                  <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                  Gender
+                </div>
                   <Select
             value={gender}
             onChange={(e) => setGender(e.target.value)}
-            className="w-[100px] text-black bg-white h-[40px] mt-4"
+            className="w-[100px] text-black bg-white h-[40px] mt-1"
             label="Experience"
             placeholder="Gender"
             size="small"
@@ -501,29 +654,35 @@ export const Application: FC<Role> = (
             ))}
           </Select>
                 </FormControl>
-                <FormControl>
-                  <InputLabel className="">
-                    Resume
-                  </InputLabel>
+                <FormControl className="">
+                <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
+                  <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                  Resume
+                </div>
                   <Input
                   placeholder="Resume"
                   required
                   type="file"
                   onChange={handleFileChange}
-                  className="bg-white rounded-md h-[40px] w-[200px] p-4 m-3"
+                  className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 m-3"
                 />
                 </FormControl>
 
-<FormControl>
-                  <InputLabel>
-                    Password
-                  </InputLabel>
+                  <FormControl className="">
+                  <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
+                  <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                  Password
+                </div>
                   <Input
                       placeholder="Password"
                       value={values.password}
                       type={visible ? "text" : "password"}
                       onChange={handleChange("password")}
-                      className="bg-white rounded-md h-[40px] w-[280px] p-1 pr-0 m-3"
+                      className="bg-white rounded-md h-[40px] w-[280px] p-1 pr-0 mt-1 mb-0 m-3"
                       endAdornment={
                         <InputAdornment position="end">
                           <IconButton onClick={() => setVisible(!visible)}>
@@ -536,6 +695,9 @@ export const Application: FC<Role> = (
                         </InputAdornment>
                       }
                     />
+                    <div className="text-red-600 text-[10px] ml-4">
+                  {errors.password as any}
+                </div>
                 </FormControl>
               </div>
 
@@ -547,7 +709,7 @@ export const Application: FC<Role> = (
                   onClick={addField}
                   className="flex flex-row text-green-700 align-middle pl-6"
                 >
-                  <p>Add Experience</p>
+                  <p>Add Work Experience</p>
                   <AddIcon />
                 </Button>
               </div>
@@ -566,7 +728,7 @@ export const Application: FC<Role> = (
               </div>
               <div className="w-[100%]">
                 <Divider className="bg-green-700 h-[2px] mx-6" />
-                <p className="mb-6 font-bold pl-7 mt-4">Education</p>
+                <p className=" font-bold pl-7 mt-4">Education</p>
                 <div className="mx-6">{renderEducation()}</div>
                 <Button
                   onClick={addEduField}

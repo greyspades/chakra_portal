@@ -10,6 +10,8 @@ import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutli
 import PersonAddIcon from '@mui/icons-material/PersonAdd';
 import { Applications } from "../Components/Applications";
 import { Staged } from "../Components/staged";
+import { ScheduleInterview } from "../Components/interviews/add";
+import { Schedule } from "../Components/interviews/schedule";
 
 const Admin = () => {
 
@@ -17,12 +19,12 @@ const Admin = () => {
 
   const options: AdminOptions[] = [
     {
-      name: "Add Role",
+      name: "Add Job Role",
       index: 0,
       icon: <PostAddIcon />
     },
     {
-      name: "Update Role",
+      name: "Update Job Role",
       index: 1,
       icon: <DriveFileRenameOutlineIcon />
     },
@@ -32,8 +34,8 @@ const Admin = () => {
       icon: <ContactsIcon />
     },
     {
-      name: "Add Team Member",
-      index: 4,
+      name: "Interviews",
+      index: 3,
       icon: <PersonAddIcon />
     },
   ];
@@ -48,6 +50,9 @@ const Admin = () => {
 
       case 2 :
         return <Applications />
+
+      case 3 :
+        return <Schedule />
 
       default:
         return <div>

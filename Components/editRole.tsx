@@ -61,9 +61,9 @@ export const EditRole = () => {
         <IconButton className='mr-4' onClick={() => toggleEditMode(role)}>
             <DriveFileRenameOutlineIcon className='text-green-700' />
           </IconButton>
-        <IconButton>
+        {/* <IconButton>
             <DeleteOutlineIcon className='text-green-700' />
-          </IconButton>
+          </IconButton> */}
         </div>
       </div>
     ))
