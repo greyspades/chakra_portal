@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import Axios from "axios";
 import { Formik } from "formik";
 import {
@@ -11,6 +11,7 @@ import {
   Select,
   SelectChangeEvent,
   MenuItem,
+  Modal,
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
@@ -20,6 +21,10 @@ import { Search } from "../Components/search";
 import { Role } from "../types/roles";
 import LensIcon from "@mui/icons-material/Lens";
 import { Application } from "../Components/application";
+import { Signup } from "../Components/applicationStages/signup";
+import { Navbar } from "../Components/navbar";
+import { MainContext } from "../context";
+import { Notifier } from "../Components/notifier";
 
 const Listings = ({ data }: any) => {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -27,6 +32,14 @@ const Listings = ({ data }: any) => {
   const [activeRole, setActiveRole] = useState<Role>();
   const [step, setStep] = useState<number>(1);
   const [unit, setUnit] = useState<string | null>();
+  const [applying, setApplying] = useState<{[key: string]: any}>({});
+  const [nav, setNav] = useState<string>("")
+  const [status, setStatus] = useState<{[key: string]: any}>({
+    open: false
+  })
+
+  const { loggedIn, setLoggedIn } = useContext(MainContext) as any
+
 
   const getAllRoles = () => {
     Axios.get("http://localhost:5048/roles/Role").then((res) => {
@@ -84,30 +97,70 @@ const Listings = ({ data }: any) => {
     setStep(0);
   };
 
+  const handleApply = () => {
+    var user = sessionStorage.getItem("cred")
+    if(user) {
+      setStep(2)
+    }
+    else {
+      setApplying({
+        value: true,
+        source: "main"
+      })
+    }
+  }
+
+  const login = () => {
+    var user = sessionStorage.getItem("cred")
+    if(!user) {
+      setApplying({
+        value: true,
+        source: "nav"
+      })
+    }
+  }
+
+  const logout = () => {
+    sessionStorage.clear()
+    setLoggedIn(false)
+    setStep(1)
+    clearStatus()
+    // setStatus({
+    //   open: true,
+    //   topic: "Successful",
+    //   content: "Logged Out Successfully"
+    // })
+  }
+  
+  const showLogout = () => {
+    setStatus({
+      open: true,
+      topic: "Confirmation",
+      content: "Are you sure you want to sign out",
+      hasNext: true
+    })
+  }
+
+  const handleNav = (item: string) => {
+    setNav(item)
+    setApplying({value: true})
+  }
+
+  const clearStatus = () => setStatus({open: false})
+
   return (
-    <div className="md:w-[65%] mt-[80px] grid grid-cols-3 gap-8 fixed">
+    <div>
+      <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
+        <Notifier hasNext={status.hasNext} topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus} />
+      </Modal>
+      
+      <Modal onClose={() => setApplying({value: false})} open={applying.value} className="flex justify-center">
+          <Signup login={true} exit={() => setApplying({value: false})} next={() => applying.source != "main" ? setStep(1) : setStep(2)} nextPage={nav == "status" ? "applicant" : ""} />
+      </Modal>
+      <Navbar handleNav={handleNav} next={() => setStep(1)} />
+      <div className="md:w-[65%] mt-[80px] grid grid-cols-3 gap-8 fixed capitalize">
       <div className="">
-        {/* <p className="text-2xl font-semibold ml-4 mt-[-15px]">
-          Available Job Roles
-        </p> */}
         <div className="flex flex-col justify-center bg-green-700 h-[120px] p-3">
-          <FormControl className="">
-            <InputLabel className="text-sm" id="demo-simple-select-label">
-              Unit
-            </InputLabel>
-            <Select
-              value={unit as string}
-              onChange={handleUnitChange}
-              className="w-[100%] text-black bg-white h-[40px]"
-              label="Experience"
-              placeholder="Experience"
-              size="small"
-            >
-              {units.map((item: string) => (
-                <MenuItem value={item}>{item}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
           <Input
             placeholder="Search for a job role"
             className="md:w-[100%] h-[40px] bg-slate-100 rounded-md p-2 md:mt-[10px]"
@@ -123,7 +176,7 @@ const Listings = ({ data }: any) => {
             .map((role: Role, index) => (
               <li key={index} className="flex justify-center">
                 <button onClick={() => handleRoleSelect(role)} className="mt-2">
-                  <Paper className="p-2 w-[200px]">{role.name}</Paper>
+                  <Paper className={activeRole != role ? "p-2 w-[200px]" : "p-2 w-[200px] bg-green-700 text-white"}>{role.name}</Paper>
                 </button>
               </li>
             ))}
@@ -175,7 +228,7 @@ const Listings = ({ data }: any) => {
             </div>
             <div className="flex flex-row justify-between mt-[-40px] mb-[-20px]">
               <Button
-                onClick={() => setStep(2)}
+                onClick={handleApply}
                 className="text-white bg-green-700 w-[100px] h-[40px]"
               >
                 Apply
@@ -186,6 +239,7 @@ const Listings = ({ data }: any) => {
         )}
         {activeRole && step == 2 && <Application {...activeRole} />}
       </div>
+    </div>
     </div>
   );
 };

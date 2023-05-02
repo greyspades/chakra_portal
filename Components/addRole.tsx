@@ -33,7 +33,13 @@ const Editor = dynamic(
   }
 );
 
-export const AddRole = ({editing,  cancel}: EditProps) => {
+interface Props {
+  name: string,
+  code: string,
+  cancel: () => void
+}
+
+export const AddRole = ({name, code, cancel}: Props) => {
   const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const [experience, setExperience] = useState("");
@@ -44,19 +50,19 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
 
   const [loaded, setLoaded] = useState(false);
 
-  const [statusCode, setStatusCode] = useState<number>();
+  const [statusCode, setStatusCode] = useState<number | null>();
 
   const [contentState, setContentState] = useState()
 
   const { editableRole } = useContext(MainContext) as any
 
   useEffect(() => {
-    if(editableRole && editing) {
-      console.log(editableRole)
-      setEditorState(EditorState.createWithContent(ContentState.createFromText(editableRole?.description)))
-      setSalary(editableRole.salary)
-      setExperience(editableRole.experience.toString())
-    }
+    // if(editableRole && editing) {
+    //   console.log(editableRole)
+    //   setEditorState(EditorState.createWithContent(ContentState.createFromText(editableRole?.description)))
+    //   setSalary(editableRole.salary)
+    //   setExperience(editableRole.experience.toString())
+    // }
   },[])
 
   const handleEditorChange = (state: EditorState) => {
@@ -80,7 +86,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
 
   const handleStatusChange = (code: number) => {
     setStatusCode(code);
-    setTimeout(() => setStatusCode(0), 4000);
+    setTimeout(() => setStatusCode(null), 4000);
   };
 
   const displayMessage = (code: number) => {
@@ -93,7 +99,7 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
             severity="success"
           >
             <AlertTitle>Success</AlertTitle>
-            {!editing ? 'Role Created Successfully' : 'Role Updated Successfully'}
+            Job Listing Created Successfully'
           </Alert>
         );
       case 400:
@@ -107,10 +113,26 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
             An Error Occured Processing your Request
           </Alert>
         );
+        case 501:
+          return (
+            <Alert
+              className="h-[70px] p-1 pb-0 w-[350px]"
+              variant="outlined"
+              severity="error"
+            >
+              <AlertTitle>Error</AlertTitle>
+              This job is already active
+            </Alert>
+          );
+
       default:
         return <div></div>;
     }
   };
+
+  const profileRole = () => {
+
+  }
 
   const toolbarOptions = {
     options: ['list', 'link'],
@@ -126,10 +148,8 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
     <div>
       <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
         <div className="flex flex-row justify-between">
-          {!editing && (
-            <p className="text-2xl h-[40px]">Add New Job Role</p>
-          )}
-          {
+            <p className="text-2xl h-[40px]">Add New Job Listing</p>
+          {/* {
             editing && (
               <div className="flex flex-row justify-between justify-items-center w-[100%]">
                 <p className="text-2xl h-[40px]">Edit Job Role</p>
@@ -138,10 +158,15 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
         </IconButton>
               </div>
             )
-          }
-          <div className="">
+          } */}
+          <IconButton onClick={cancel}>
+          <ArrowBackIcon className='text-green-700' />
+        </IconButton>
+          {statusCode && (
+            <div className="">
             {displayMessage(statusCode as number)}
           </div>
+          )}
         </div>
 
         <div className="mt-2">
@@ -149,28 +174,27 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
             <Formik
               enableReinitialize
               initialValues={{
-                name: editing ? editableRole?.name : '',
+                name: name,
                 experience: "",
-                unit: editing ? editableRole?.unit : '',
-                salary: editing ? editableRole?.salary : '',
+                unit: "",
+                salary: "",
                 description: "",
-                deadline: editing ? editableRole?.deadline.split('T')[0] : '',
+                deadline: "",
               }}
               onSubmit={(value, { resetForm }) => {
                 setLoading(true);
-                var url = !editing ? "http://localhost:5048/roles/Role" : "http://localhost:5048/roles/Role/edit"
+                var url = "http://localhost:5048/roles/Role"
 
                 const body: Role = {
-                  id: editing ? editableRole.id : null,
                   name: value.name,
                   experience: parseInt(experience),
                   salary: salary,
                   unit: value.unit,
                   description: editorState.getCurrentContent().getPlainText(),
                   deadline: value.deadline,
-                  status: "active"
+                  status: "active",
+                  code: code
                 };
-                console.log(body)
                 axios.post(url, body, {
                   headers: {
                     "Access-Control-Allow-Origin": "*",
@@ -182,12 +206,10 @@ export const AddRole = ({editing,  cancel}: EditProps) => {
                     setLoading(false);
                     console.log(res.data)
                     if(res.data.code == 200) {
-                      if(!editing) {
                         resetForm();
                         setSalary("");
                         setExperience("");
                         setEditorState(EditorState.createEmpty());
-                        }
                     }
                     handleStatusChange(res.data.code);
                   })

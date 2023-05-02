@@ -16,5 +16,7 @@ export type Candidate = {
   experience?: string,
   flag?: string,
   otherName?: string,
-  jobName?: string
+  jobName?: string,
+  tempId?: string,
+  coverLetter?: string
 }

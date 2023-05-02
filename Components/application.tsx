@@ -13,6 +13,8 @@ import {
   InputLabel,
   Select,
   MenuItem,
+  Modal,
+  Radio
 } from "@mui/material";
 import PersonIcon from "@mui/icons-material/Person";
 import EmailIcon from "@mui/icons-material/Email";
@@ -32,8 +34,12 @@ import SchoolIcon from "@mui/icons-material/School";
 import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
 import BookIcon from "@mui/icons-material/Book";
 import CloseIcon from '@mui/icons-material/Close';
-import { CandidateValidation } from "../helpers/validation";
+import { ApplicationValidation, CandidateValidation } from "../helpers/validation";
 import { Candidate } from "../types/candidate";
+import { Notifier } from "./notifier";
+import ArticleIcon from '@mui/icons-material/Article';
+
+
 
 export const Application: FC<Role> = (
   { deadline, experience, unit, salary, name, id }: Role,
@@ -62,7 +68,19 @@ export const Application: FC<Role> = (
 
   const [gender, setGender] = useState<string>("Male");
 
-  const [fileError, setFileError] = useState<boolean>(false);
+  const [fileError, setFileError] = useState<string>("");
+
+  const [hasCert, setHasCert] = useState<boolean>();
+
+  const [coverLetter, setCoverLetter] = useState<string>();
+
+  const [addLetter, setAddLetter] = useState<boolean>();
+
+  const [basicInfo, setBasicInfo] = useState<{[key: string]: string}>()
+
+  const [status, setStatus] = useState<{[key: string]: any}>({
+    open: false
+  })
 
   const { candidate, setCandidate, role, setRole } = useContext(
     MainContext
@@ -74,6 +92,14 @@ export const Application: FC<Role> = (
     "Male",
     "Female",
   ]
+
+  useEffect(() => {
+    let data = JSON.parse(sessionStorage.getItem("cred") ?? "")
+    if(data) {
+      setBasicInfo(data)
+      setGender(data?.gender)
+    }
+  }, [])
 
   const fields: Fields[] = [
     {
@@ -103,29 +129,45 @@ export const Application: FC<Role> = (
     },
   ];
 
-  const degrees = ["Bsc", "Msc", "Mba", "Phd", "Hnd", "Ond"];
+  const degrees = ["Bsc", "Msc", "Mba", "Phd", "Hnd", "Ond", "Other"];
 
   const handleFileChange = (e: any) => {
-    let extensions = ["pdf", "txt", "docx"];
-    let file = e.target.files[0];
-    console.log(file.type);
-    if(extensions.includes(file.type)) {
+    let extensions = ["pdf"];
+    let file: File = e.target.files[0];
+    let type = file.name.split(".")
+
+    if(extensions.includes(type[type.length -1]) && file.size < 3000000) {
       setFile(e.target.files[0]);
-      setFileError(false);
+      setFileError("");
     }
-    else {
-      setFileError(true);
+    else if(!extensions.includes(type[type.length -1])) {
+      setFileError("please select a pdf");
+    }
+    else if(!(file.size < 3000000)) {
+      setFileError("please select a file less than 3mb");
     }
   };
 
   const handleExpChange = (type: string, index: number, e: any) => {
-    var update = expForm?.map((item: any, idx) => {
-      if (idx == index) {
-        item[type] = e.target.value;
-      }
-      return item;
-    });
-    setExpForm(update);
+    console.log(e.target.value)
+    if(type != "isCurrent") {
+      var update = expForm?.map((item: any, idx) => {
+        if (idx == index) {
+          item[type] = e.target.value;
+        }
+        return item;
+      });
+      setExpForm(update);
+    } else {
+      var update = expForm?.map((item: any, idx) => {
+        if (idx == index) {
+          item.isCurrent = !item.isCurrent;
+        }
+        return item;
+      });
+      console.log(update)
+      setExpForm(update);
+    }
   };
 
   const removeExp = (id: number) => {
@@ -138,24 +180,13 @@ export const Application: FC<Role> = (
     setEdufield(update);
   }
 
-  const removeSkill = (index: number) => {
-    const update = skillForm?.filter((item) => skillForm.indexOf(item) != index);
-    // const update = skillForm?.map((item, idx) => {
-    //   if(idx != index) {
-    //     return item
-    //   }
-    //   return null
-    // })
-    setSkillForm(update);
-  }
-
   const renderExperience = () => {
     return expForm?.map((item: any, idx: number) => {
       return (
-        <div key={idx} className="grid justify-center mt-[-20px]">
+        <div key={idx} className="grid justify-center ">
           <div className="grid justify-end">
-            <IconButton onClick={() => removeExp(idx)}>
-              <CloseIcon />
+            <IconButton className="bg-white h-[35px] w-[35px] mt-[-20px] mb-[20px]" onClick={() => removeExp(idx)}>
+              <CloseIcon className="w-[15px] h-[15px]" />
             </IconButton>
           </div>
           <div className="flex flex-row gap-2">
@@ -225,6 +256,7 @@ export const Application: FC<Role> = (
                 End Date
               </InputLabel>
               <Input
+                disabled = {item?.isCurrent ? true : false}
                 placeholder="End Date"
                 value={item.endDate}
                 type="date"
@@ -236,6 +268,13 @@ export const Application: FC<Role> = (
                   </InputAdornment>
                 }
               />
+            </FormControl>
+            <FormControl className="flex flex-col">
+              <p className="text-[11px] mt-[-10px] ml-[-5px]">
+              Is current
+              </p>
+              {/* <Input type="radio" value={item?.isCurrent} onChange={(e) => console.log(e.target.value)} /> */}
+              <Radio name="isCurrent" className="text-green-700" checked={item?.isCurrent === true} value={item?.isCurrent} onClick={(e) => handleExpChange("isCurrent", idx, e)} />
             </FormControl>
           </div>
           <TextField
@@ -252,6 +291,12 @@ export const Application: FC<Role> = (
   };
 
   const addEdu = (type: string, e: any, index: number) => {
+    if(type == "degree" && e.target.value == "Other") {
+      setHasCert(true);
+    }
+    // else {
+    //   setHasCert(false)
+    // }
     let update = eduField?.map((item: { [key: string]: string }, idx) => {
       if (idx == index) {
         item[type] = e.target.value;
@@ -261,12 +306,16 @@ export const Application: FC<Role> = (
     setEdufield(update);
   };
 
+  const removeCert = () => {
+    setHasCert(false)
+  }
+
   const renderEducation = () => {
     return eduField.map((item: {[key: string]: string}, idx: number) => (
       <div key={idx}>
         <div className="grid justify-end">
-      <IconButton onClick={() => removeEdu(idx)}>
-        <CloseIcon />
+      <IconButton className="bg-white h-[35px] w-[35px]" onClick={() => removeEdu(idx)}>
+        <CloseIcon className="w-[15px] h-[15px]" />
       </IconButton>
     </div>
       <div className="grid grid-cols-2 mt-[-10px]">
@@ -333,23 +382,47 @@ export const Application: FC<Role> = (
               <p className="mr-2 text-red-700 text-[13px]">
                     *
                   </p>
-                Degree
+                Qualification
               </InputLabel>
           <Select
             value={item.degree}
             onChange={(e) => addEdu("degree", e, idx)}
-            className="w-[100px] text-black bg-white h-[40px] mt-4"
+            className="w-[150px] text-black bg-white h-[40px] mt-4"
             label="Experience"
             placeholder="Experience"
             size="small"
           >
-            {degrees.map((item: string) => (
-              <MenuItem className="text-black" value={item}>
+            {degrees.map((item: string, idx: number) => (
+              <MenuItem key={idx} className="text-black" value={item}>
                 {item}
               </MenuItem>
             ))}
           </Select>
         </FormControl>
+        {hasCert && (
+          <div>
+            <FormControl>
+          <InputLabel className="">
+              Certification
+          </InputLabel>
+          <Input
+            value={item.certification}
+            placeholder="Certification"
+            type="text"
+            onChange={(e) => addEdu("certification", e, idx)}
+            className="bg-white w-[180px] h-[40px] px-2 mb-4"
+            startAdornment={
+              <InputAdornment position="start">
+                <ArticleIcon className="text-green-700" />
+              </InputAdornment>
+            }
+          />
+        </FormControl>
+          <IconButton className="bg-white h-[25px] w-[25px] ml-[15px]" onClick={removeCert}>
+            <CloseIcon className="h-[15px] w-[15px]" />
+          </IconButton>
+          </div>
+        )}
       </div>
       </div>
     ));
@@ -361,6 +434,7 @@ export const Application: FC<Role> = (
       title: "",
       startDate: "",
       endDate: "",
+      isCurrent: false,
     };
     var update = [...expForm, newField];
     setExpForm(update);
@@ -372,15 +446,20 @@ export const Application: FC<Role> = (
       course: "",
       graduationDate: "",
       degree: "",
+      certification: ""
     };
     var update = [...eduField, newField];
     setEdufield(update);
   };
 
   const addSkillField = () => {
-    let newSkill = "";
+    console.log(skillForm[skillForm.length -1])
+    console.log(skillForm)
+    if(skillForm[skillForm.length -1] != "") {
+      let newSkill = "";
     var update = [...skillForm, newSkill];
     setSkillForm(update);
+    }
   };
 
   const addKill = (e: any, index: number) => {
@@ -393,48 +472,66 @@ export const Application: FC<Role> = (
     setSkillForm(update);
   };
 
+  const removeSkill = (index: number) => {
+    const update = skillForm?.filter((item) => skillForm.indexOf(item) != index);
+    // const update = skillForm?.map((item, idx) => {
+    //   if(idx != index) {
+    //     return item
+    //   }
+    //   return null
+    // }) as any
+    setSkillForm(update);
+  }
+
   const renderSkills = () => {
-    return skillForm?.map((item, idx) => (
+    return skillForm?.map((item: any, idx) => (
       <div key={idx} className="flex flex-row align-middle">
-        <Input
+        <input
           value={item}
-          className="bg-white w-[200px] h-[40px] px-2 mb-4"
+          className="bg-white w-[200px] h-[40px] px-2 mb-4 rounded-md border-b-transparent"
           onChange={(e) => addKill(e, idx)}
           placeholder="skill"
         />
-        <IconButton className="mt-[-11px] ml-[-7px]" onClick={() => removeSkill(idx)}>
-        <CloseIcon />
+        <IconButton className="mt-[-11px] ml-[-7px] mr-[35px] bg-white h-[10px] w-[10px]" onClick={() => removeSkill(idx)}>
+        <CloseIcon className="w-[13px] h-[13px]" />
       </IconButton>
       </div>
     ));
   };
 
+  const clearStatus = () => setStatus({open: false})
+
   return (
-    <Paper className="flex flex-col w-[100%] justify-items-center md:h-[500px] bg-slate-100 overflow-y-scroll pb-10">
+    <div>
+      <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
+        <Notifier topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus}  />
+      </Modal>
+      <Paper className="flex flex-col w-[100%] justify-items-center md:h-[500px] bg-slate-100 overflow-y-scroll pb-10">
       <p className="text-center font-bold text-xl mt-4 mb-4">
         Personal Information
       </p>
-      <form>
+      {basicInfo && (
+        <form>
         <Formik
-          validateOnChange={true}
-          validateOnBlur={false}
-          validationSchema={CandidateValidation}
+          // validateOnChange={true}
+          // validateOnBlur={false}
+          validationSchema={ApplicationValidation}
           initialValues={{
-            firstName: "",
-            lastName: "",
-            otherName: "",
-            email: "",
-            phone: "",
+            firstName: basicInfo?.firstName,
+            lastName: basicInfo?.lastName,
+            otherName: basicInfo?.otherName,
+            email: basicInfo?.email,
+            phone: basicInfo?.phone,
             school: "",
             degree: "",
             field: "",
-            dob: "",
-            gender: "",
-            password: ""
+            dob: basicInfo?.dob.split("T")[0],
+            gender: basicInfo?.gender,
+            password: "",
+            coverLetter: ""
           }}
           onSubmit={(value: any, { validateForm } ) => {
             validateForm(value)
-            setLoading(true);
             var body = {
               firstName: value.firstName,
               lastName: value.lastName,
@@ -449,8 +546,10 @@ export const Application: FC<Role> = (
               cv: file,
               gender: gender,
               password: value.password,
-              jobName: name
+              jobName: name,
+              coverLetter: value.coverLetter
             };
+            console.log(expForm)
             const candidateObj: Candidate = {
               firstName: value.firstName,
               lastName: value.lastName,
@@ -462,8 +561,13 @@ export const Application: FC<Role> = (
             const roleObj: Role = {
               name: name
             }
-            
-            Axios.post("http://localhost:5048/api/Candidate", body, {
+
+            let typeArr = file?.name.split(".")
+            let type = typeArr?.[typeArr?.length -1]
+        
+            if(type == "pdf") {
+              setLoading(true);
+              Axios.post("http://localhost:5048/api/Candidate", body, {
               headers: {
                 "Access-Control-Allow-Origin": "*",
                 "Content-Type": "multipart/form-data",
@@ -478,13 +582,21 @@ export const Application: FC<Role> = (
                   router.push('/confirmation');
                 }
                 else {
-                  alert(res.data.message);
+                  setStatus({
+                    open: true,
+                    topic: "Unsuccessful",
+                    content: res.data.message
+                  })
                 }
               })
               .catch((err: AxiosError) => {
                 console.log(err.message);
                 setLoading(false);
               });
+            }
+            else {
+              setFileError("Please Select a pdf file for your resume")
+            }
           }}
         >
           {({ handleSubmit, handleChange, values, errors }) => (
@@ -492,14 +604,12 @@ export const Application: FC<Role> = (
               <div className="flex flex-row gap-3">
                 <FormControl>
                 <InputLabel className="w-[100%] flex flex-row">
-                  <p className="mr-2 text-red-700 text-[20px]">
-                    *
-                  </p>
+                  
                   First Name
                 </InputLabel>
                 <Input
                   placeholder="First name"
-                  required
+                  readOnly
                   value={values.firstName}
                   onChange={handleChange("firstName")}
                   className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
@@ -520,7 +630,7 @@ export const Application: FC<Role> = (
                 </InputLabel>
                   <Input
                   placeholder="Other Name"
-                  required
+                  readOnly
                   value={values.otherName}
                   onChange={handleChange("otherName")}
                   className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
@@ -537,14 +647,12 @@ export const Application: FC<Role> = (
 
                 <FormControl>
                 <InputLabel className="w-[100%] flex flex-row">
-                  <p className="mr-2 text-red-700 text-[20px]">
-                    *
-                  </p>
+                  
                   Last Name
                 </InputLabel>
                   <Input
                   placeholder="Last name"
-                  required
+                  readOnly
                   value={values.lastName}
                   onChange={handleChange("lastName")}
                   className="bg-white rounded-md h-[40px] w-[270px] p-4 mb-0 m-1"
@@ -562,14 +670,12 @@ export const Application: FC<Role> = (
               <div className="flex flex-row gap-6 mt-4">
                 <FormControl>
                 <InputLabel className="w-[100%] flex flex-row">
-                  <p className="mr-2 text-red-700 text-[20px]">
-                    *
-                  </p>
+                  
                   Email
                 </InputLabel>
                 <Input
                   placeholder="Email Address"
-                  required
+                  readOnly
                   value={values.email}
                   onChange={handleChange("email")}
                   className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
@@ -585,14 +691,12 @@ export const Application: FC<Role> = (
                 </FormControl>
                 <FormControl>
                 <InputLabel className="w-[100%] flex flex-row">
-                  <p className="mr-2 text-red-700 text-[20px]">
-                    *
-                  </p>
+             
                   Phone Number
                 </InputLabel>
                 <Input
                   placeholder="Phone Number"
-                  required
+                  readOnly
                   value={values.phone}
                   onChange={handleChange("phone")}
                   className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
@@ -610,14 +714,12 @@ export const Application: FC<Role> = (
               <div className="flex flex-row gap-2 mt-4">
                 <FormControl>
                 <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                  <p className="mr-2 text-red-700 text-[13px]">
-                    *
-                  </p>
+                 
                   Date of Birth
                 </div>
                   <Input
                   placeholder="Date of Birth"
-                  required
+                  readOnly
                   value={values.dob}
                   type="date"
                   onChange={handleChange("dob")}
@@ -634,9 +736,7 @@ export const Application: FC<Role> = (
                 </FormControl>
                 <FormControl>
                 <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                  <p className="mr-2 text-red-700 text-[13px]">
-                    *
-                  </p>
+       
                   Gender
                 </div>
                   <Select
@@ -646,9 +746,10 @@ export const Application: FC<Role> = (
             label="Experience"
             placeholder="Gender"
             size="small"
+            readOnly
           >
-            {genders.map((item: string) => (
-              <MenuItem className="text-black" value={item}>
+            {genders.map((item: string, idx: number) => (
+              <MenuItem key={idx} className="text-black" value={item}>
                 {item}
               </MenuItem>
             ))}
@@ -656,7 +757,7 @@ export const Application: FC<Role> = (
                 </FormControl>
                 <FormControl className="">
                 <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                  <p className="mr-2 text-red-700 text-[13px]">
+                <p className="mr-2 text-red-700 text-[13px]">
                     *
                   </p>
                   Resume
@@ -668,13 +769,18 @@ export const Application: FC<Role> = (
                   onChange={handleFileChange}
                   className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 m-3"
                 />
+                {
+                  fileError && (
+                    <div>
+                      <p className="text-red-600 text-[10px] mt-[-10px] ml-[10px]">{fileError}</p>
+                    </div>
+                  )
+                }
                 </FormControl>
 
-                  <FormControl className="">
+                  {/* <FormControl className="">
                   <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                  <p className="mr-2 text-red-700 text-[13px]">
-                    *
-                  </p>
+     
                   Password
                 </div>
                   <Input
@@ -698,13 +804,33 @@ export const Application: FC<Role> = (
                     <div className="text-red-600 text-[10px] ml-4">
                   {errors.password as any}
                 </div>
-                </FormControl>
+                </FormControl> */}
               </div>
+
+              <FormControl className="w-[93%] my-[20px]">
+              <div className="flex flex-row ml-[-10px] text-[13px] mb-1">
+              <p className="mr-2 text-red-700 text-[13px]">
+                    *
+                  </p>
+                <p className="text-gray-600">Cover Letter</p>
+              </div>
+                  <TextField
+                    value={values.coverLetter}
+                    onChange={handleChange("coverLetter")}
+                    multiline
+                    rows={4}
+                    className="bg-white w-[100%]"
+                    placeholder="Cover Letter"
+                  />
+                  <div className="text-red-600 text-[10px] ml-4">
+                  {errors.coverLetter as any}
+                </div>
+              </FormControl>
 
               <div className="w-[100%]">
                 <Divider className="bg-green-700 h-[2px] mx-6" />
-                <p className="font-bold pl-7 mb-6 mt-4">Work Experience</p>
-                <div className="grid">{renderExperience()}</div>
+                <p className="font-bold pl-7 mb-2 mt-2">Work Experience</p>
+                <div className="p-4">{renderExperience()}</div>
                 <Button
                   onClick={addField}
                   className="flex flex-row text-green-700 align-middle pl-6"
@@ -728,7 +854,7 @@ export const Application: FC<Role> = (
               </div>
               <div className="w-[100%]">
                 <Divider className="bg-green-700 h-[2px] mx-6" />
-                <p className=" font-bold pl-7 mt-4">Education</p>
+                <p className=" font-bold pl-7 mt-4">Education/Certifications</p>
                 <div className="mx-6">{renderEducation()}</div>
                 <Button
                   onClick={addEduField}
@@ -755,6 +881,8 @@ export const Application: FC<Role> = (
           )}
         </Formik>
       </form>
+      )}
     </Paper>
+    </div>
   );
 };

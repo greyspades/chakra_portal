@@ -13,7 +13,7 @@ import {
   Select,
   SelectChangeEvent,
   MenuItem,
-  Paper
+  Paper,
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Axios, { AxiosError, AxiosResponse } from "axios";
@@ -33,6 +33,7 @@ import BadgeIcon from "@mui/icons-material/Badge";
 import { Role } from "../types/roles";
 import { useReactToPrint } from "react-to-print";
 import { ScheduleInterview } from "./interviews/add";
+import { Notifier } from "./notifier";
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -42,7 +43,7 @@ type ApplicantProps = {
   role: Role;
 };
 
-export const Applicant = ({ data, close, role}: ApplicantProps) => {
+export const Applicant = ({ data, close, role }: ApplicantProps) => {
   const [loading, setLoading] = useState(false);
   const [statusCode, setStatusCode] = useState<number>(0);
   const [cvData, setCvData] = useState();
@@ -60,6 +61,9 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
   const [mailLoading, setMailLoading] = useState<boolean>(false);
   const [stage, setStage] = useState<string>();
   const [interview, setInterview] = useState<boolean>(false);
+  const [status, setStatus] = useState<{[key: string]: any}>({
+    open: false
+  })
 
   const printerRef = useRef(null);
 
@@ -177,13 +181,17 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
     const body = {
       id: data.id,
       flag: e.target.value,
-      roleName: role.name
+      roleName: role.name,
     };
     Axios.post("http://localhost:5048/api/Candidate/flag", body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200) {
           setFlagLoading(false);
-          alert(`Applicant successfully flagged as`);
+          setStatus({
+            open: true,
+            topic: "Successful",
+            content: `Candidate successfully flagged as ${e.target.value}`
+          })
         }
       })
       .catch((e: AxiosError) => {
@@ -199,7 +207,11 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
     Axios.post("http://localhost:5048/api/Candidate/cancel", body)
       .then((res) => {
         if (res.data.code == 200) {
-          alert("Application cancelled successfully");
+          setStatus({
+            open: true,
+            topic: "Successful",
+            content: "Application Cancelled Successfully"
+          })
           setShowDialog(false);
         }
       })
@@ -211,15 +223,15 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
   const fields: { [key: string]: any }[] = [
     {
       name: "First Name",
-      value: data.firstName,
+      value: data.firstName?.charAt(0).toUpperCase() + data.firstName?.slice(1),
     },
     {
       name: "Other Name",
-      value: data.otherName,
+      value: data.otherName?.charAt(0).toUpperCase() + (data.otherName?.slice(1) ?? ""),
     },
     {
       name: "Last Name",
-      value: data.lastName,
+      value: data.lastName?.charAt(0).toUpperCase() + data.lastName?.slice(1),
     },
     {
       name: "Gender",
@@ -253,6 +265,10 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
       name: "Flag",
       value: data.flag ?? "Not yet Flagged",
     },
+    {
+      name: "Temporary Id",
+      value: data.tempId ?? "Not hired",
+    },
   ];
 
   const printResume = () => {
@@ -275,30 +291,39 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
           <p className="text-[11px]">School Attended</p>
           <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
             <SchoolIcon className="text-green-700" />
-            <p className="mx-2">{item.school}</p>
+            <p className="mx-2 capitalize">{item.school}</p>
           </div>
         </div>
         <div>
           <p className="text-[11px]">Course of Study</p>
           <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
             <SchoolIcon className="text-green-700" />
-            <p className="mx-2">{item.course}</p>
+            <p className="mx-2 capitalize">{item.course}</p>
           </div>
         </div>
         <div>
           <p className="text-[11px]">Certificate</p>
           <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
             <SchoolIcon className="text-green-700" />
-            <p className="mx-2">{item.degree}</p>
+            <p className="mx-2 capitalize">{item.degree}</p>
           </div>
         </div>
         <div>
           <p className="text-[11px]">Graduation Date</p>
           <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
             <CalendarToday className="text-green-700" />
-            <p className="mx-2">{item.graduationDate}</p>
+            <p className="mx-2 capitalize">{item.graduationDate}</p>
           </div>
         </div>
+        {item?.certification && (
+          <div>
+            <p className="text-[11px]">Certification</p>
+            <div className="flex flex-row bg-white p-1 rounded-md place-items-center">
+              <CalendarToday className="text-green-700" />
+              <p className="mx-2 capitalize">{item?.certification}</p>
+            </div>
+          </div>
+        )}
       </div>
     ));
   };
@@ -334,36 +359,36 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
         <div className="flex flex-row gap-6">
           <div>
             <p className="text-[11px]">Employer</p>
-            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+            <div className="bg-white capitalize p-2 rounded-md flex flex-row gap-4">
               <WorkIcon className="text-green-700" />
               {item?.employer}
             </div>
           </div>
           <div>
             <p className="text-[11px]">Job Title</p>
-            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+            <div className="bg-white capitalize p-2 rounded-md flex flex-row gap-4">
               <BadgeIcon className="text-green-700" />
               {item?.title}
             </div>
           </div>
           <div>
             <p className="text-[11px]">Start Date</p>
-            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+            <div className="bg-white capitalize p-2 rounded-md flex flex-row gap-4">
               <CalendarToday className="text-green-700" />
               {item?.startDate}
             </div>
           </div>
           <div>
             <p className="text-[11px]">End Date</p>
-            <div className="bg-white p-2 rounded-md flex flex-row gap-4">
+            <div className="bg-white capitalize p-2 rounded-md flex flex-row gap-4">
               <CalendarToday className="text-green-700" />
-              {item?.endDate}
+              {item?.isCurrent ? "Current Position" : item?.endDate}
             </div>
           </div>
         </div>
         <div className="mt-[20px]">
           <p className="text-[11px]">Duties</p>
-          <div className="bg-white p-2 h-[100px] rounded-md overflow-y-scroll">
+          <div className="bg-white capitalize p-2 h-[100px] rounded-md overflow-y-scroll">
             {item?.description}
           </div>
         </div>
@@ -378,38 +403,18 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
         key={idx}
       >
         <CircleIcon className="h-[10px] ml-[-7px] text-green-700" />
-        <p className="mt-[-3px] ml-[-5px]">{item}</p>
+        <p className="mt-[-3px] ml-[-5px] capitalize">{item}</p>
       </div>
     ));
   };
 
-  const mailTemplates: string[] = ["notFit", "accepted", "none"];
-
-  const handleTemplateChange = (e: SelectChangeEvent) => {
-    setMailTemplate(e.target.value);
-    var body = {
-      template: e.target.value,
-      reciever: "odenadoma@gmail.com",
-    };
-    setMailLoading(true);
-    Axios.post("http://localhost:5048/api/Candidate/mail", body)
-      .then((res: AxiosResponse) => {
-        console.log(res.data);
-        setMailLoading(false);
-        if (res.data.code == 200) {
-          setMailTemplate("none");
-          alert("Candidate mailed successfully");
-        }
-      })
-      .catch((err: AxiosError) => {
-        console.log(err.message);
-        setMailTemplate("none");
-        setMailLoading(false);
-      });
-  };
+  const clearStatus = () => setStatus({open: false})
 
   return (
     <div className="">
+      <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
+        <Notifier topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus}  />
+      </Modal>
       <Dialog open={showDialog}>
         <div className="h-[170px] bg-white p-4">
           <p className="font-semibold text-xl">Cancel Application?</p>
@@ -446,7 +451,7 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
       <div className="grid grid-cols-5 gap-4 mt-4">
         <div className="grid col-span-4">
           <div className="">
-            <p className="text-xl font-semibold">Personal Info</p>
+            <p className="text-xl font-semibold mb-4">Personal Info</p>
           </div>
           <div className="grid grid-cols-2 h-[70%] gap-2">{renderInfo()}</div>
         </div>
@@ -485,6 +490,14 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
         </div>
       </div>
       <Divider variant="fullWidth" className="bg-green-700 h-[2px] mt-1" />
+      <div className="mt-4">
+        <div>
+          <p className="text-xl font-semibold mb-4">Cover Letter</p>
+        </div>
+        <div className="flex rounded-md bg-white p-4 w-[100%] h-auto overflow-y-scroll">
+          <p>{data?.coverLetter}</p>
+        </div>
+      </div>
       {/* skills */}
       <div className="mt-[20px]">
         <p className="text-xl font-semibold mb-4">Skills</p>
@@ -548,7 +561,7 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
             <CircularProgress thickness={5} className="text-green-700" />
           </div>
         )}
-        <Button
+        {/* <Button
           onClick={generateId}
           className="bg-gray-400 text-white w-[200px]"
         >
@@ -560,7 +573,7 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
           ) : (
             <p>Cancel Application</p>
           )}
-        </Button>
+        </Button> */}
 
         <Button
           className="bg-green-700 text-white w-[200px]"
@@ -616,7 +629,11 @@ export const Applicant = ({ data, close, role}: ApplicantProps) => {
           </Document>
         </div>
       </Modal>
-      <Modal onClose={() => setInterview(false)} open={interview} className="flex justify-center">
+      <Modal
+        onClose={() => setInterview(false)}
+        open={interview}
+        className="flex justify-center"
+      >
         <ScheduleInterview candidate={data} role={role} />
       </Modal>
     </div>

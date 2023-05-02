@@ -5,7 +5,8 @@ import {
   InputAdornment,
   Paper,
   FormControl,
-  Button
+  Button,
+  Modal
 } from "@mui/material";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { Formik } from "formik";
@@ -13,16 +14,26 @@ import { Navbar } from "../Components/navbar";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useRouter } from "next/router";
+import { AdminForm } from "../helpers/validation";
+import { Notifier } from "../Components/notifier";
 
 
 const Signin = () => {
   const [visible, setVisible] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [status, setStatus] = useState<{[key: string]: any}>({
+    open: false
+  })
 
   const router = useRouter();
 
+  const clearStatus = () => setStatus({open: false})
+
   return (
     <div>
+      <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
+        <Notifier topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus}  />
+      </Modal>
       <Navbar />
       <div className="flex justify-center">
         <Paper className="flex flex-col w-[40%] mt-[70px] justify-items-center md:h-[300px] bg-slate-100 overflow-y-scroll p-4">
@@ -31,24 +42,33 @@ const Signin = () => {
           </div>
           <form className="w-[100%] flex justify-center">
             <Formik
+
+              validationSchema={AdminForm}
               initialValues={{
-                userName: "",
-                passWord: "",
+                userId: "",
+                password: "",
               }}
               onSubmit={(value: any, { validateForm }) => {
+                validateForm(value)
                 setLoading(true);
                 const body = {
-                    username: value.userName,
-                    password: value.passWord
+                    id: value.userId,
+                    password: value.password
                 }
-                axios.post("http://localhost:5048/api/Admin/Auth", body)
+                console.log(body)
+                axios.post("http://localhost:5048/api/Candidate/admin/auth", body)
                 .then((res: AxiosResponse) => {
                     setLoading(false);
+                    console.log(res.data)
                     if(res.data.code == 200) {
                         router.push('/admin')
                     }
                     else {
-                        alert('Your credentials are incorrect please check them and try again')
+                        setStatus({
+                          open: true,
+                          topic: "Unsuccessful",
+                          content: res.data.message
+                        })
                     }
                 }) 
                 .catch((e: AxiosError) => {
@@ -57,18 +77,24 @@ const Signin = () => {
                 })
               }}
             >
-              {({ handleSubmit, handleChange, values }) => (
+              {({ handleSubmit, handleChange, values, errors }) => (
                 <div className="mt-[20px] flex justify-center flex-col">
+                  <FormControl>
                   <Input
-                    value={values.userName}
-                    onChange={handleChange("userName")}
-                    placeholder="User name"
+                    value={values.userId}
+                    onChange={handleChange("userId")}
+                    placeholder="User Id"
                     className="px-2 bg-white h-[40px] w-[220px]"
                   />
+                  <div className="text-red-600 text-[10px] ml-4">
+                  {errors.userId as any}
+                </div>
+                  </FormControl>
 
+                  <FormControl>
                   <Input
-                    value={values.passWord}
-                    onChange={handleChange("passWord")}
+                    value={values.password}
+                    onChange={handleChange("password")}
                     placeholder="Password"
                     type={visible ? "text" : "password"}
                     className="px-2 bg-white mt-[20px] h-[40px] w-[220px]"
@@ -86,6 +112,10 @@ const Signin = () => {
                       </InputAdornment>
                     }
                   />
+                <div className="text-red-600 text-[10px] ml-4">
+                  {errors.password as any}
+                </div>
+                  </FormControl>
                   <div className="flex justify-center mt-6">
                     <Button onClick={() => handleSubmit()} className="bg-green-700 text-white">
                         Sign In

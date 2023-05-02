@@ -8,7 +8,8 @@ export type Role = {
     experience?: number,
     deadline?: string,
     unit?: string,
-    salary?: string
+    salary?: string,
+    code?: string
 }
 
 export type Fields = {

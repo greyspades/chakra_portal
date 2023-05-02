@@ -15,8 +15,10 @@ const Context = (props: any) => {
 
     const [candidates, setCandidates] = useState<Candidate[]>();
 
+    const [loggedIn, setLoggedIn] = useState<boolean>(false);
+
     return (
-        <MainContext.Provider value={{candidate: candidate, setCandidate: setCandidate, role: role, setRole: setRole, editableRole: editableRole, setEditableRole, activePage, setActivePage, candidates, setCandidates} as any}>
+        <MainContext.Provider value={{candidate: candidate, setCandidate: setCandidate, role: role, setRole: setRole, editableRole: editableRole, setEditableRole, activePage, setActivePage, candidates, setCandidates, loggedIn, setLoggedIn} as any}>
             {props.children}
         </MainContext.Provider>
     )

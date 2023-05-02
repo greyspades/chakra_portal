@@ -12,6 +12,7 @@
   align-items: center;
   padding: 6rem;
   min-height: 100vh;
+  font-family: var(--sans-serif);
 }
 
 .description {
@@ -43,7 +44,7 @@
 
 .code {
   font-weight: 700;
-  font-family: var(--font-mono);
+  font-family: var(--sans-serif);
 }
 
 .grid {

@@ -1,12 +1,17 @@
 import React, { useContext, useState, useEffect } from "react";
-import { Paper, Stepper, Step, StepLabel, Button, Dialog } from "@mui/material";
+import { Paper, Stepper, Step, StepLabel, Button, Dialog, Modal, IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, TableFooter, TablePagination } from "@mui/material";
 import { MainContext } from "../context";
-import axios, { AxiosResponse } from "axios";
+import axios, { AxiosError, AxiosResponse } from "axios";
 import { Role } from "../types/roles";
 import { Navbar } from "../Components/navbar";
 import { useRouter } from "next/router";
 import { Candidate } from "../types/candidate";
 import Router from 'next/router'
+import { Notifier } from "../Components/notifier";
+import AnalyticsIcon from '@mui/icons-material/Analytics';
+import ChromeReaderModeIcon from '@mui/icons-material/ChromeReaderMode';
+import GroupsIcon from '@mui/icons-material/Groups';
+import FlagIcon from '@mui/icons-material/Flag';
 
 const Applicant = () => {
   const { candidate, setCandidate, candidates, setCandidates } = useContext(MainContext) as any;
@@ -15,15 +20,56 @@ const Applicant = () => {
   const [roles, setRoles] = useState<Role[]>();
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
   const [cancelId, setCancelId] = useState<string>("");
+  const [view, setView] = useState<string>("table");
+  const [status, setStatus] = useState<{[key: string]: any}>({
+    open: false
+  })
 
-  // useEffect(() => {
-  //   axios
-  //     .get(`http://localhost:5048/roles/Role/byId/${candidate.roleId}`)
-  //     .then((res: AxiosResponse) => {
-  //       // console.log(res.data.data[0])
-  //       setRole(res.data.data[0]);
-  //     });
-  // }, []);
+  useEffect(() => {
+    router.beforePopState(({ as }) => {
+        if (as !== router.asPath) {
+            router.push("/")
+        }
+        return false;
+    });
+
+    return () => {
+        router.beforePopState(() => true);
+    };
+}, [router]);
+
+useEffect(() => {
+  let data
+  let cred = sessionStorage.getItem("cred")
+  if(cred) data = JSON?.parse(cred ?? "");
+
+  if(data) {
+    let body = {
+      email: data.email,
+      password: data.password
+    }
+    axios.post('http://localhost:5048/status', body)
+  .then((res: AxiosResponse) => {
+      if(res.data.code == 200 && res.data.data.length > 0) {
+            setCandidates(res.data.data)
+      }
+      else if(res.data.code != 200 && res.data.length < 1) {
+        setStatus({
+          open: true,
+          topic: "Unsuccessful",
+          content: res.data.message
+        })
+      }})
+      .catch((err: AxiosError) => {
+        console.log(err.message)
+        setStatus({
+          open: true,
+          topic: "Unsuccessful",
+          content: err.message
+        })
+      })
+  }
+}, [])
 
   useEffect(() => {
     // console.log(candidate)
@@ -44,12 +90,15 @@ const Applicant = () => {
     const body = {
         id:cancelId,
     }
-    console.log(body)
     axios.post('http://localhost:5048/api/Candidate/cancel', body)
     .then((res) => {
       console.log(res.data)
         if(res.data.code == 200) {
-            alert('Application cancelled successfully');
+          setStatus({
+            open: true,
+            topic: "Successful",
+            content: "Application Cancelled Successfully"
+          })
            var update = candidates?.map((item: Candidate) => {
             if(item.id == cancelId) {
               item.status = 'Cancelled'
@@ -67,7 +116,12 @@ const Applicant = () => {
 
   const cancelPrompt = (id: string) => {
     setCancelId(id)
-    setDialogOpen(true)
+    setStatus({
+      open: true,
+      topic: "Confirmation",
+      content: "Are you sure you want to cancel this application?",
+      hasNext: true
+    })
   }
 
   const renderApplications = () => {
@@ -142,41 +196,108 @@ const Applicant = () => {
     ))
   }
 
+  const clearStatus = () => setStatus({open: false})
+
+  const displayCandidates = () => {
+    return candidates?.map((candidate: Candidate, idx: number) => (
+        <TableRow
+          key={idx}
+          hover role="checkbox" tabIndex={-1}
+          className = ""
+          // onClick={() => handleViewChange(candidate)}
+          // className="bg-white w-[100%] h-[40px] mt-3 flex flex-row rounded-md p-2 justify-between justify-items-center"
+        >
+          <TableCell className = "">
+            {candidate?.jobName}
+          </TableCell>
+          <TableCell className = "">
+            {candidate?.lastName}
+          </TableCell>
+          <TableCell className = "">
+            {candidate.applDate?.split("T")[0]}
+          </TableCell>
+          <TableCell className = "">
+            {candidate.stage}
+          </TableCell>
+          <TableCell className = "">
+            {candidate.status}
+          </TableCell>
+          <TableCell className = "">
+            <IconButton onClick={() => cancelPrompt(candidate?.id as string)}>
+              <ChromeReaderModeIcon className="w-[30-px] h-[30px] text-green-700" />
+            </IconButton>
+          </TableCell>
+        </TableRow>
+      ));
+  };
 
   return (
-    <div className="flex justify-center align-middle">
-        <Dialog open={dialogOpen}>
-        <div className="h-[170px] bg-white p-4">
-          <p className="font-semibold text-xl">
-            Cancel Application?
-          </p>
-          <p className="font-semibold mt-4">
-            Are you sure you want to cancel this Application?
-          </p>
-          <div className="flex justify-end">
-          <div className="flex flex-row justify-between w-[50%] mt-6">
-            <Button onClick={() => setDialogOpen(false)} className="bg-green-700 text-white">
-                No
-            </Button>
-            <Button onClick={() => cancelApplication()} className="bg-gray-400 text-white">
-                Yes
-            </Button>
-          </div>
-          </div>
+<div>
+<Navbar />
+<div className="flex flex-row justify-between w-[100%] mt-[70px] px-6">
+          <Paper className="p-2 mb-4">
+            <p>
+              Check your Application status
+            </p>
+          </Paper>
+          <Paper className="md:h-[70px] bg-slate-100 p-1 w-[200px]">
+            <div className="flex flex-row justify-between">
+              <IconButton onClick={() => setView("table")} className="flex flex-col">
+                <AnalyticsIcon className="text-green-700 w-[30px] h-[30px]" />
+                <p className="text-[11px]">Table</p>
+              </IconButton>
+              <IconButton onClick={() => setView("grid")} className="flex flex-col">
+                <AnalyticsIcon className="text-green-700 w-[30px] h-[30px]" />
+                <p className="text-[11px]">Grid</p>
+              </IconButton>
+            </div>
+          </Paper>
         </div>
-      </Dialog>
-        <Navbar />
-        <div className="mt-[80px]">
-        {/* <div className="flex flex-row mt-[50px] mb-[20px]">
-          <p className="text-2xl font-bold">
-            Application Status
-          </p>
-        </div> */}
-        <div className={candidates?.length > 1 ? "grid grid-cols-2 gap-16 justify-between" : "flex justify-center"}>
+<div className="flex justify-center align-middle capitalize">
+      <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
+        <Notifier topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus} hasNext={status.hasNext}  other={cancelApplication}/>
+      </Modal>
+      {view == "table" ? <Paper className="md:h-[400px] bg-slate-100 m-6 p-4 w-[100%]">
+        <div className={"flex justify-center"}>
+          {/* {renderApplications()} */}
+          <TableContainer className="overflow-y-auto md:h-[350px]">
+              <Table stickyHeader className="">
+              <TableHead sx={{ display: "table-header-group" }}>
+            <TableRow>
+            <TableCell>
+              First Name
+            </TableCell>
+            <TableCell>
+              Last Name
+            </TableCell>
+            <TableCell>
+              Application Date
+            </TableCell>
+            <TableCell>
+              Stage
+            </TableCell>
+            <TableCell>
+              Status
+            </TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {displayCandidates()}
+              </TableBody>
+              <TableFooter>
+          <TableRow>
+            
+          </TableRow>
+        </TableFooter>
+              </Table>
+            </TableContainer>
+        </div>
+        </Paper> : view == "grid" ?
+        <div className={candidates.length > 1 ? "grid grid-cols-2 gap-10 justify-center" : "grid justify-center"}>
           {renderApplications()}
-        </div>
-        </div>
+          </div> : <div></div>}
     </div>
+</div>
   );
 };
 
