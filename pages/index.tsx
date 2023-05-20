@@ -10,15 +10,12 @@ import Listings from './listings';
 import { Search } from '../Components/search';
 
 const Home = () => {
-  const regex = /^[0-9\b]+$/;
 
   return (
     <div className='grid'>
       <div className='z-5 relative'>
       </div>
       <Listings />
-      {/* <div className=''>
-      </div> */}
     </div>
   )
 }

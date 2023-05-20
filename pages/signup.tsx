@@ -7,6 +7,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
 
 
+//* deprecated component will be taken out
 const Signup = () => {
 
   const regex = /^[0-9\b]+$/;

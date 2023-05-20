@@ -1,11 +1,5 @@
 import React, { useEffect, useContext } from "react";
-import { useSelector } from "react-redux";
-import { getCandidate } from "../store/slices/candidateSlice";
-import { getRole } from "../store/slices/roleSlice";
-import { Role } from "../types/roles";
-import { Candidate } from "../types/candidate";
 import { Navbar } from "../Components/navbar";
-import { Button } from "@mui/material";
 import { MainContext } from "../context";
 import { Paper } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";
@@ -14,12 +8,6 @@ const Confirmation = () => {
   const { candidate, setCandidate, role, setRole } = useContext(
     MainContext
   ) as any;
-  // const role = useSelector(getRole)
-  // const candidate = useSelector(getCandidate)
-
-  useEffect(() => {
-    console.log(candidate);
-  }, []);
 
   return (
     <div className="grid w-[100%]">

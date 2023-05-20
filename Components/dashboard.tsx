@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Paper } from "@mui/material";
 import axios, { AxiosError, AxiosResponse } from 'axios';
-import { Bar } from '../Components/dashboardItems/bar';
 
 interface Metrics {
     applications: number,

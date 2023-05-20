@@ -1,30 +1,19 @@
 import React from 'react'
 import * as Yup from "yup";
 
-function calculateAge(birthday: any) {
+//* calculates the candidates age and validates the birthday
+const calculateAge = (birthday: any) => {
   var ageDifMs = Date.now() - birthday;
-  var ageDate = new Date(ageDifMs); // miliseconds from epoch
+  var ageDate = new Date(ageDifMs);
   return Math.abs(ageDate.getUTCFullYear() - 1970);
 }
 
-export const validate = (body: {[key: string]: string}, type: string) => {
-  switch(type) {
-    case "status":
-      if(body["email"] && body["password"] && body["email"].includes("@") && body["email"].includes(".") ) {
-        return true;
-      }
-      else return false;
-
-    default :
-    return false;
-  }
-}
-
+//* validation schema for cover letter
 export const ApplicationValidation = Yup.object().shape({
   coverLetter: Yup.string().required("this field is fequired"),
 });
 
-
+//* validation information for a candidate
 export const CandidateValidation = Yup.object().shape({
   email: Yup.string()
     .email('The email is invalid')
@@ -42,13 +31,12 @@ export const CandidateValidation = Yup.object().shape({
     return calculateAge(new Date(val)) > 18;
 },
 ),
-  phone: Yup.string().required('this field is required').min(11, "Must be at least 11 digits").max(11, 'Must not be more than 11 digits'),
-  // coverLetter: Yup.string().required("this field is fequired"),
   validPassword: Yup.string().required('this field is required')
   .oneOf([Yup.ref('password')], 'Your passwords do not match.'),
   address: Yup.string().required("this field is fequired"),
 });
 
+//* validation for the sign in form
 export const SignInValidation = Yup.object().shape({
   email: Yup.string()
   .email('The email is invalid')
@@ -59,12 +47,23 @@ export const SignInValidation = Yup.object().shape({
   .oneOf([Yup.ref('password')], 'Your passwords do not match.'),
 })
 
+//* validation for creating a new job role
+export const CreateJobValidation = Yup.object().shape({
+  name: Yup.string()
+  .required('This field is required'),
+  unit: Yup.string()
+  .required('This field is required'),
+  deadline: Yup.date().required('this field is required').min(new Date(), "Please select a future date"),
+})
+
+//* validation for interview scheduling
 export const InterviewForm = Yup.object().shape({
   date: Yup.date().required('this field is required').min(new Date(), "Please select a future date"),
   time: Yup.string().required('this field is required'),
   topic: Yup.string().notRequired()
 })
 
+//* validation for admin login
 export const AdminForm = Yup.object().shape({
   userId: Yup.string().required('this field is required'),
   password: Yup.string()

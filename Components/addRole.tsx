@@ -1,7 +1,6 @@
-import React, { ChangeEvent, useEffect, useState, useContext } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Paper,
-  TextField,
   Input,
   Select,
   SelectChangeEvent,
@@ -12,83 +11,61 @@ import {
   CircularProgress,
   Alert,
   AlertTitle,
-  IconButton
+  IconButton,
+  Modal,
 } from "@mui/material";
 import { Formik } from "formik";
-// import { Editor } from "react-draft-wysiwyg";
-import { EditorState, ContentState, convertToRaw, convertFromRaw} from "draft-js";
 import "../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import dynamic from "next/dynamic";
-import { EditProps } from "../types/roles";
-import { MainContext } from "../context";
-import htmlToDraft from 'html-to-draftjs';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Role } from "../types/roles";
-
-const Editor = dynamic(
-  () => import("react-draft-wysiwyg").then((mod) => mod.Editor),
-  {
-    ssr: false,
-  }
-);
+import { Notifier } from "./notifier";
+import { CreateJobValidation } from "../helpers/validation";
 
 interface Props {
-  name: string,
-  code: string,
-  cancel: () => void
+  name: string;
+  code: string;
+  cancel: () => void;
 }
 
-export const AddRole = ({name, code, cancel}: Props) => {
-  const [editorState, setEditorState] = useState(EditorState.createEmpty());
-
+export const AddRole = ({ name, code, cancel }: Props) => {
   const [experience, setExperience] = useState("");
 
   const [salary, setSalary] = useState("");
 
   const [loading, setLoading] = useState(false);
 
-  const [loaded, setLoaded] = useState(false);
-
   const [statusCode, setStatusCode] = useState<number | null>();
 
-  const [contentState, setContentState] = useState()
+  const [desc, setDesc] = useState<{ [key: string]: string }[] | null>();
 
-  const { editableRole } = useContext(MainContext) as any
+  const [status, setStatus] = useState<{ [key: string]: any }>({
+    open: false,
+  });
 
+  //* gets the job description
   useEffect(() => {
-    // if(editableRole && editing) {
-    //   console.log(editableRole)
-    //   setEditorState(EditorState.createWithContent(ContentState.createFromText(editableRole?.description)))
-    //   setSalary(editableRole.salary)
-    //   setExperience(editableRole.experience.toString())
-    // }
-  },[])
+    axios
+      .get(`${process.env.NEXT_PUBLIC_GET_JOB_DESCRIPTION}/${code}`)
+      .then((res: AxiosResponse) => {
+        if (res.data.code == 200) {
+          setDesc(res.data.data);
+        }
+      })
+      .catch((err: AxiosError) => {
+        console.log(err.message);
+      });
+  }, []);
 
-  const handleEditorChange = (state: EditorState) => {
-    setEditorState(state);
-  };
-
+  //* array containing years of experience values
   const years = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
+  //* handles experience change
   const handleExpChange = (event: SelectChangeEvent) => {
     setExperience(event.target.value as string);
   };
 
-  const handleSalChange = (event: any) => {
-    var regex = /^[0-9]+$/;
-    var input = event.target.value;
-    if (input.match(regex) || input.includes('-')) {
-      setSalary(event.target.value);
-    }
-    setSalary(event.target.value);
-  };
-
-  const handleStatusChange = (code: number) => {
-    setStatusCode(code);
-    setTimeout(() => setStatusCode(null), 4000);
-  };
-
+  //* displays status message for operations
   const displayMessage = (code: number) => {
     switch (code) {
       case 200:
@@ -113,144 +90,152 @@ export const AddRole = ({name, code, cancel}: Props) => {
             An Error Occured Processing your Request
           </Alert>
         );
-        case 501:
-          return (
-            <Alert
-              className="h-[70px] p-1 pb-0 w-[350px]"
-              variant="outlined"
-              severity="error"
-            >
-              <AlertTitle>Error</AlertTitle>
-              This job is already active
-            </Alert>
-          );
+      case 501:
+        return (
+          <Alert
+            className="h-[70px] p-1 pb-0 w-[350px]"
+            variant="outlined"
+            severity="error"
+          >
+            <AlertTitle>Error</AlertTitle>
+            This job is already active
+          </Alert>
+        );
 
       default:
         return <div></div>;
     }
   };
 
-  const profileRole = () => {
+  //* renders the job description
+  const displayDesc = () => {
+    return desc?.map((item: { [key: string]: string }, idx: number) => (
+      <div key={idx} className="flex flex-row gap-4 mt-2">
+        <p>{item?.["RowNum~~Blnk"]}</p>
+        <p className="capitalize">
+          {item?.["Job responsibility~~Sentc"].toLowerCase()}
+        </p>
+      </div>
+    ));
+  };
 
-  }
-
-  const toolbarOptions = {
-    options: ['list', 'link'],
-    list: {
-      options: ['unordered', 'ordered'],
-    },
-    link: {
-      options: ['link'],
-    },
-  }
+  //* clears the notifier state and closes the notifier
+  const clearStatus = () => {
+    setStatus({ open: false });
+    cancel();
+  };
 
   return (
     <div>
+      <Modal
+        className="flex justify-center"
+        open={status?.open ? true : false}
+        onClose={clearStatus}
+      >
+        <Notifier
+          topic={status?.topic ?? ""}
+          content={status?.content ?? ""}
+          close={clearStatus}
+        />
+      </Modal>
       <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
         <div className="flex flex-row justify-between">
-            <p className="text-2xl h-[40px]">Add New Job Listing</p>
-          {/* {
-            editing && (
-              <div className="flex flex-row justify-between justify-items-center w-[100%]">
-                <p className="text-2xl h-[40px]">Edit Job Role</p>
-                <IconButton onClick={cancel}>
-          <ArrowBackIcon className='text-green-700' />
-        </IconButton>
-              </div>
-            )
-          } */}
+          <p className="text-2xl h-[40px]">Add New Job Listing</p>
           <IconButton onClick={cancel}>
-          <ArrowBackIcon className='text-green-700' />
-        </IconButton>
+            <ArrowBackIcon className="text-green-700" />
+          </IconButton>
           {statusCode && (
-            <div className="">
-            {displayMessage(statusCode as number)}
-          </div>
+            <div className="">{displayMessage(statusCode as number)}</div>
           )}
         </div>
-
         <div className="mt-2">
           <form>
             <Formik
               enableReinitialize
+              validationSchema={CreateJobValidation}
               initialValues={{
                 name: name,
                 experience: "",
                 unit: "",
-                salary: "",
-                description: "",
                 deadline: "",
               }}
               onSubmit={(value, { resetForm }) => {
                 setLoading(true);
-                var url = "http://localhost:5048/roles/Role"
 
+                //* add job role request payload
                 const body: Role = {
                   name: value.name,
                   experience: parseInt(experience),
                   salary: salary,
                   unit: value.unit,
-                  description: editorState.getCurrentContent().getPlainText(),
+                  description: JSON.stringify(desc),
                   deadline: value.deadline,
                   status: "active",
-                  code: code
+                  code: code,
                 };
-                axios.post(url, body, {
-                  headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Content-Type": "application/json",
-                  },
-                  withCredentials: false,
-                })
+
+                //* adds a new job role
+                axios
+                  .post(`${process.env.NEXT_PUBLIC_GET_JOB_ROLES}`, body, {
+                    headers: {
+                      "Access-Control-Allow-Origin": "*",
+                      "Content-Type": "application/json",
+                    },
+                    withCredentials: false,
+                  })
                   .then((res: AxiosResponse) => {
                     setLoading(false);
-                    console.log(res.data)
-                    if(res.data.code == 200) {
-                        resetForm();
-                        setSalary("");
-                        setExperience("");
-                        setEditorState(EditorState.createEmpty());
+                    if (res.data.code == 200) {
+                      resetForm();
+                      setSalary("");
+                      setExperience("");
+                      setStatus({
+                        open: true,
+                        topic: "Successful",
+                        content: `Successfully created job role ${name}`,
+                      });
                     }
-                    handleStatusChange(res.data.code);
                   })
                   .catch((err: AxiosError) => {
                     console.log(err.message);
-                    console.log(err.request);
-                    console.log(err.request);
                     setLoading(false);
                   });
               }}
             >
-              {({ handleChange, handleSubmit, values }) => (
+              {({ handleChange, handleSubmit, values, errors }) => (
                 <div>
                   <div className="flex flex-col">
-                    <Input
-                      value={values.name}
-                      onChange={handleChange("name")}
-                      placeholder="Job Role Title"
-                      className="bg-white h-[40px] w-[250px] p-2"
-                    />
-                    <Editor
-                      editorState={editorState}
-                      wrapperClassName="flex flex-col h-[300px] mt-4"
-                      editorClassName="bg-white p-2"
-                      onEditorStateChange={handleEditorChange}
-                      placeholder="Job Role Description"
-                      toolbar={{
-                        options: ['inline', 'blockType', 'list', 'textAlign', 'history'],
-                    }}
-
-                    
-                    />
+                    <FormControl>
+                      <Input
+                        value={values.name}
+                        onChange={handleChange("name")}
+                        placeholder="Job Role Title"
+                        className="bg-white h-[40px] w-[250px] p-2"
+                      />
+                      <div className="text-red-600 text-[10px] ml-4">
+                        {errors.name as any}
+                      </div>
+                    </FormControl>
+                    <div className="">
+                      <p className="text-[16px] mt-4 mb-1">Responsibilities</p>
+                    </div>
+                    <div className="h-[300px] bg-white p-4">
+                      {displayDesc()}
+                    </div>
                     <div className=""></div>
-                    <div className="flex flex-row mt-8 justify-between justify-items-center h-[50px]">
+                    <div className="flex flex-row mt-4 justify-between justify-items-center h-[50px]">
                       <div className="flex flex-row justify-between w-[55%] justify-items-center">
-                        <input
-                          value={values.unit}
-                          onChange={handleChange("unit")}
-                          placeholder="Unit"
-                          className="bg-white w-[200px] p-2"
-                        />
+                        <FormControl>
+                          <input
+                            value={values.unit}
+                            onChange={handleChange("unit")}
+                            placeholder="Unit"
+                            className="bg-white w-[200px] p-2"
+                          />
+                          <div className="text-red-600 text-[10px] ml-4">
+                            {errors.unit as any}
+                          </div>
+                        </FormControl>
 
                         <FormControl className="">
                           <InputLabel
@@ -268,32 +253,30 @@ export const AddRole = ({name, code, cancel}: Props) => {
                             size="small"
                           >
                             {years.map((item: string, idx: number) => (
-                              <MenuItem key={idx} value={parseInt(item)}>{item}</MenuItem>
+                              <MenuItem key={idx} value={parseInt(item)}>
+                                {item}
+                              </MenuItem>
                             ))}
                           </Select>
+                          <div className="text-red-600 text-[10px] ml-4">
+                            {errors.experience as any}
+                          </div>
                         </FormControl>
-
-                        {/* <input
-                          value={salary}
-                          onChange={handleSalChange}
-                          placeholder="Salary"
-                          className="bg-white p-2 w-[100px]"
-                          type="text"
-                          name="salary"
-                          id="salary"
-                        /> */}
-
-                        <input
-                          value={values.deadline}
-                          onChange={handleChange("deadline")}
-                          placeholder="Deadline"
-                          className="bg-white p-2"
-                          type="date"
-                          name="deadline"
-                          id="deadline"
-                        />
+                        <FormControl>
+                          <input
+                            value={values.deadline}
+                            onChange={handleChange("deadline")}
+                            placeholder="Deadline"
+                            className="bg-white p-2"
+                            type="date"
+                            name="deadline"
+                            id="deadline"
+                          />
+                          <div className="text-red-600 text-[10px] ml-4">
+                            {errors.deadline as any}
+                          </div>
+                        </FormControl>
                       </div>
-
                       <Button
                         className="bg-green-700 text-white w-[150px]"
                         onClick={handleSubmit as any}

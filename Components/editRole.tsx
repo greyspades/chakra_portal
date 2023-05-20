@@ -11,6 +11,7 @@ import { AppContext } from 'next/app';
 import { AddRole } from './addRole';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
+//* deprecated component may be taken out
 export const EditRole = () => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [searchVal, setSearchVal] = useState<string>("");
@@ -110,9 +111,9 @@ export const EditRole = () => {
         </Button> */}
       </Paper>
       )}
-      {editing && (
+      {/* {editing && (
         <AddRole cancel={cancel} editing={editing} role={role} />
-      )}
+      )} */}
     </div>
   )
 }

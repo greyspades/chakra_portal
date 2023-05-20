@@ -17,16 +17,14 @@ import {
   TableContainer,
   TablePagination,
   TableRow,
-  TableFooter
+  TableFooter,
 } from "@mui/material";
 import Axios, { AxiosError, AxiosResponse } from "axios";
 import { Candidate } from "../types/candidate";
 import { Role } from "../types/roles";
-import MenuIcon from "@mui/icons-material/Menu";
 import { Applicant } from "./applicant";
 import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
-import { getCandidate } from "../store/slices/candidateSlice";
 
 export const Applications = () => {
   const [id, setId] = useState<string>("");
@@ -34,14 +32,12 @@ export const Applications = () => {
   const [roles, setRoles] = useState<Role[]>();
   const [viewing, setViewing] = useState<boolean>(false);
   const [applicant, setApplicant] = useState<Candidate>();
-  const [roleName, setRoleName] = useState<{ [key: string]: string }>({});
   const [searchVal, setSearchVal] = useState<string>("");
-  const [searchOpen, setSearchOpen] = useState<boolean>(false);
   const [skillForms, setSkillForms] = useState<string[]>([]);
   const [filter, setFilter] = useState<string>("Date");
   const [flag, setFlag] = useState<string>("");
-  const [page, setPage] = useState<number>(0)
-  const [dataCount, setDataCount] = useState<number>(0)
+  const [page, setPage] = useState<number>(0);
+  const [dataCount, setDataCount] = useState<number>(0);
   const [take, setTake] = useState<number>(10);
   const [role, setRole] = useState<Role>({
     name: "",
@@ -54,11 +50,14 @@ export const Applications = () => {
     unit: "",
   });
 
+  //* fetches all applicants by job role
   const getApplicants = (nextPage?: number, take?: number) => {
     setFlag("");
     setFilter("");
     setSearchVal("");
-    Axios.get(`http://localhost:5048/api/Candidate/role/${id}/${nextPage}/${take}`)
+    Axios.get(
+      `http://localhost:5048/api/Candidate/role/${id}/${nextPage}/${take}`
+    )
       .then((res) => {
         setCandidates(res.data.data);
         setDataCount(res.data.count);
@@ -72,12 +71,14 @@ export const Applications = () => {
     getApplicants(page, take);
   }, [id]);
 
+  //* gets all active job roles
   useEffect(() => {
     Axios.get("http://localhost:5048/roles/Role").then((res) => {
       setRoles(res.data.data);
     });
   }, []);
 
+  //* deprecated code unit implementation not active
   const units: string[] = [
     "Finance",
     "Networking",
@@ -87,6 +88,7 @@ export const Applications = () => {
     "It",
   ];
 
+  //* changes the unit
   const handleUnitChange = (event: SelectChangeEvent) => {
     setId(event.target.value as string);
 
@@ -97,9 +99,9 @@ export const Applications = () => {
     setRole(item);
   };
 
+  //* filters the list based on conditions
   const handleFilterChange = (event: SelectChangeEvent) => {
     setFilter(event.target.value);
-
     if (event.target.value == "Status") {
       let update = candidates?.sort((a, b) => (a.status == "Pending" ? -1 : 1));
       setCandidates(update);
@@ -119,19 +121,23 @@ export const Applications = () => {
     }
   };
 
+  //* switches the view to the applicants information
   const handleViewChange = (candidate: Candidate) => {
     setApplicant(candidate);
     setViewing(true);
   };
 
+  //* exits the applicant information
   const exitView = () => {
     setViewing(false);
   };
 
+  //* search for a candidate
   const handleSearch = (e: any) => {
     setSearchVal(e.target.value);
   };
 
+  //* deprecated may remove
   const handleSkillFormChange = (e: any, index: number) => {
     const update = skillForms?.map((item, idx) => {
       if (idx == index) {
@@ -161,6 +167,7 @@ export const Applications = () => {
     setSkillForms([...skillForms, update]);
   };
 
+  //* renders the candidates
   const displayCandidates = () => {
     return candidates
       ?.filter((item: Candidate) =>
@@ -169,37 +176,36 @@ export const Applications = () => {
       .map((candidate: Candidate, idx) => (
         <TableRow
           key={idx}
-          hover role="checkbox" tabIndex={-1}
-          className = ""
+          hover
+          role="checkbox"
+          tabIndex={-1}
+          className=""
           onClick={() => handleViewChange(candidate)}
-          // className="bg-white w-[100%] h-[40px] mt-3 flex flex-row rounded-md p-2 justify-between justify-items-center"
         >
-          <TableCell className = "">
-            {candidate?.firstName}
-          </TableCell>
-          <TableCell className = "">
-            {candidate?.lastName}
-          </TableCell>
-          <TableCell className = "">
+          <TableCell className="">{candidate?.firstName}</TableCell>
+          <TableCell className="">{candidate?.lastName}</TableCell>
+          <TableCell className="">
             {candidate.applDate?.split("T")[0]}
           </TableCell>
-          <TableCell className = "">
-            {candidate.stage}
-          </TableCell>
-          <TableCell className = "">
-            {candidate.status}
-          </TableCell>
+          <TableCell className="">{candidate.stage}</TableCell>
+          <TableCell className="">{candidate.status}</TableCell>
         </TableRow>
       ));
   };
 
-  const handleChangePage = (event: React.MouseEvent<HTMLButtonElement> | null, value: number) => {
+  //* goes to the next page of candidates
+  const handleChangePage = (
+    event: React.MouseEvent<HTMLButtonElement> | null,
+    value: number
+  ) => {
     setPage(value);
-    getApplicants(value, take)
-  }
+    getApplicants(value, take);
+  };
 
+  //* fields for filtering candidates
   const filterFields = ["Status", "Stage", "Date"];
 
+  //* candidate application flags
   const flags: { [key: string]: string }[] = [
     {
       name: "Maybe",
@@ -215,6 +221,7 @@ export const Applications = () => {
     },
   ];
 
+  //* flags a candidate
   const handleFlagChange = (e: SelectChangeEvent) => {
     setFlag(e.target.value);
     var body = {
@@ -233,11 +240,12 @@ export const Applications = () => {
       });
   };
 
+  //* sets the take of candidates to show per page
   const handleTakeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    var takeVal = parseInt(e.target.value)
-    setTake(takeVal)
-    getApplicants(page, takeVal)
-  }
+    var takeVal = parseInt(e.target.value);
+    setTake(takeVal);
+    getApplicants(page, takeVal);
+  };
 
   return (
     <div>
@@ -346,48 +354,34 @@ export const Applications = () => {
             />
             <TableContainer className="overflow-y-auto md:h-[350px]">
               <Table stickyHeader className="">
-              <TableHead sx={{ display: "table-header-group" }}>
-            <TableRow>
-            <TableCell>
-              First Name
-            </TableCell>
-            <TableCell>
-              Last Name
-            </TableCell>
-            <TableCell>
-              Application Date
-            </TableCell>
-            <TableCell>
-              Stage
-            </TableCell>
-            <TableCell>
-              Status
-            </TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-              {displayCandidates()}
-              </TableBody>
-              <TableFooter>
-          <TableRow>
-            <TablePagination
-              // rowsPerPageOptions={[5, 10, 25, { label: 'All', value: -1 }]}
-              colSpan={6}
-              count={dataCount}
-              rowsPerPage={take}
-              page={page}
-              SelectProps={{
-                inputProps: {
-                  'aria-label': 'rows per page',
-                },
-                native: true,
-              }}
-              onPageChange={handleChangePage}
-              onRowsPerPageChange={handleTakeChange}
-              // ActionsComponent={TablePaginationActions}
-            />
-          </TableRow>
-        </TableFooter>
+                <TableHead sx={{ display: "table-header-group" }}>
+                  <TableRow>
+                    <TableCell>First Name</TableCell>
+                    <TableCell>Last Name</TableCell>
+                    <TableCell>Application Date</TableCell>
+                    <TableCell>Stage</TableCell>
+                    <TableCell>Status</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>{displayCandidates()}</TableBody>
+                <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      colSpan={6}
+                      count={dataCount}
+                      rowsPerPage={take}
+                      page={page}
+                      SelectProps={{
+                        inputProps: {
+                          "aria-label": "rows per page",
+                        },
+                        native: true,
+                      }}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleTakeChange}
+                    />
+                  </TableRow>
+                </TableFooter>
               </Table>
             </TableContainer>
           </div>

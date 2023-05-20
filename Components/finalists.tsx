@@ -3,7 +3,6 @@ import { Paper, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Di
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Candidate } from '../types/candidate';
 import { Role } from '../types/roles';
-import TodayIcon from '@mui/icons-material/Today';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Applicant } from './applicant';
 
@@ -19,18 +18,20 @@ export const Finalists = () => {
     const [loading, setLoading] = useState<boolean>(false);
     const [searchVal, setSearchVal] = useState<string>("");
 
+    //* gets all active roles
     useEffect(() => {
-        axios.get("http://localhost:5048/roles/Role").then((res: AxiosResponse) => {
+        axios.get(process.env.NEXT_PUBLIC_GET_ACTIVE_ROLES as string).then((res: AxiosResponse) => {
           setRoles(res.data.data);
         });
       }, []);
 
+    //* gets all candidates in the final stage
     const getCandidates = () => {
       let body = {
         stage: "3",
         roleId
     }
-    axios.post("http://localhost:5048/api/Candidate/stage", body)
+    axios.post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_STAGE as string, body)
     .then((res: AxiosResponse) => {
         console.log(res.data)
         if(res.data.code == 200) {
@@ -43,14 +44,13 @@ export const Finalists = () => {
         getCandidates()
     }, [roleId])
 
+    //* exits the candidate info view
     const exitView = () => {
       setViewing(false)
     }
 
-
-
+    //* deprecated may be taken out
       const handleUnitChange = (event: SelectChangeEvent) => {
-        console.log(event.target.value)
         setRoleId(event.target.value as string);
         var item: Role = roles?.find((item: Role) => item.id == event.target.value) as Role;
       };
@@ -60,13 +60,14 @@ export const Finalists = () => {
         setModalOpen(true);
       }
 
+      //* hires a candidate
       const hireCandidate = () => {
         if(selctCandidate?.status != "Hired") {
           setLoading(true);
           let body = {
             id:selctCandidate?.id
           }
-          axios.post("http://localhost:5048/api/Candidate/hire", body)
+          axios.post(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
           .then((res: AxiosResponse) => {
             if(res.data.code == 200) {
               setTempId(res.data.data);
@@ -80,6 +81,7 @@ export const Finalists = () => {
         }
       }
 
+      //* renders the candidates
       const displayCandidates = () => {
         return candidates?.filter((item: Candidate) => item.lastName.toLowerCase().includes(searchVal?.toLowerCase() as string))
         .map((item: Candidate, idx: number) => (
@@ -108,10 +110,13 @@ export const Finalists = () => {
         ))
       }
 
+      //* gets the selected candidate and switches the view to their personal information
       const handleViewChange = () => {
-        axios.get(`http://localhost:5048/api/Candidate/${selctCandidate?.id}`)
+        let body = {
+          id: selctCandidate?.id
+        }
+        axios.post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
         .then((res: AxiosResponse) => {
-          console.log(res.data)
           if(res.data.code == 200) {
             setSelctCandidate(res.data.data[0]);
             let role = roles?.find((item: Role) => item.id == res.data.data[0]?.roleId);
@@ -122,15 +127,18 @@ export const Finalists = () => {
         })
       }
 
+      //* closes the modal
     const closeModal = () => {
       setTempId(null);
       setModalOpen(false);
     }
 
+    //* searches for a candidate
     const handleSearch = (e: any) => {
       setSearchVal(e.target.value)
     }
 
+    //* refreshes the list
     const refresh = () => {
       setRoleId("All");
       getCandidates();

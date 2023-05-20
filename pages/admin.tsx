@@ -13,7 +13,7 @@ import { Staged } from "../Components/staged";
 import { ScheduleInterview } from "../Components/interviews/add";
 import { Schedule } from "../Components/interviews/schedule";
 import { Finalists } from "../Components/finalists";
-import { Dashboard } from "./dashboard";
+import { Dashboard } from "../Components/dashboard";
 import { Jobs } from "../Components/jobs";
 import AnalyticsIcon from "@mui/icons-material/Analytics";
 import ChromeReaderModeIcon from "@mui/icons-material/ChromeReaderMode";
@@ -23,17 +23,8 @@ import FlagIcon from "@mui/icons-material/Flag";
 const Admin = () => {
   const [currentIdx, setCurrentIdx] = useState<number>(0);
 
+  //* admin tab names and icons
   const options: AdminOptions[] = [
-    // {
-    //   name: "Add Job Role",
-    //   index: 0,
-    //   icon: <PostAddIcon />
-    // },
-    // {
-    //   name: "Update Job Role",
-    //   index: 1,
-    //   icon: <DriveFileRenameOutlineIcon />
-    // },
     {
       name: "Dashboard",
       index: 0,
@@ -63,13 +54,9 @@ const Admin = () => {
     },
   ];
 
+  //* displays the view based on the selected index
   const displayItem = () => {
     switch (currentIdx) {
-      // case 0 :
-      //   return <AddRole />
-
-      // case 1 :
-      //   return <EditRole />
       case 0:
         return <Dashboard />;
 

@@ -1,5 +1,5 @@
 import React, { useEffect, useState, useRef } from "react";
-import { Candidate } from "../types/candidate";
+import { Candidate, Comment } from "../types/candidate";
 import {
   Divider,
   Button,
@@ -12,8 +12,7 @@ import {
   Dialog,
   Select,
   SelectChangeEvent,
-  MenuItem,
-  Paper,
+  MenuItem
 } from "@mui/material";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import Axios, { AxiosError, AxiosResponse } from "axios";
@@ -24,9 +23,6 @@ import Modal from "@mui/material/Modal";
 import CircleIcon from "@mui/icons-material/Circle";
 import PrintIcon from "@mui/icons-material/Print";
 import SchoolIcon from "@mui/icons-material/School";
-import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
-import BookIcon from "@mui/icons-material/Book";
-import CloseIcon from "@mui/icons-material/Close";
 import WorkIcon from "@mui/icons-material/Work";
 import CalendarToday from "@mui/icons-material/CalendarToday";
 import BadgeIcon from "@mui/icons-material/Badge";
@@ -45,10 +41,6 @@ type ApplicantProps = {
 
 export const Applicant = ({ data, close, role }: ApplicantProps) => {
   const [loading, setLoading] = useState(false);
-  const [statusCode, setStatusCode] = useState<number>(0);
-  const [cvData, setCvData] = useState();
-  const [numPages, setNumPages] = useState(null);
-  const [pageNumber, setPageNumber] = useState(1);
   const [modalOpen, setModalOpen] = useState<boolean>(false);
   const [page, setPage] = useState<number>(1);
   const [skills, setSkills] = useState<string[]>();
@@ -57,16 +49,18 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [flag, setFlag] = useState<string>("");
   const [flagLoading, setFlagLoading] = useState<boolean>(false);
-  const [mailTemplate, setMailTemplate] = useState<string>("");
-  const [mailLoading, setMailLoading] = useState<boolean>(false);
-  const [stage, setStage] = useState<string>();
   const [interview, setInterview] = useState<boolean>(false);
+  const [comments, setComments] = useState<Comment[]>()
+  const [numPages, setNumPages] = useState<number>(0)
+  const [statusCode, setStatusCode] = useState<number>();
   const [status, setStatus] = useState<{[key: string]: any}>({
     open: false
   })
 
+  //* ref for attaching unto the pdf div
   const printerRef = useRef(null);
 
+  //* prints the resume
   const handlePrint = useReactToPrint({
     content: () => printerRef.current,
     pageStyle: `@media print {
@@ -77,6 +71,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     }`,
   });
 
+  //* candidate flags
   const flags: { [key: string]: string }[] = [
     {
       name: "Maybe",
@@ -92,12 +87,13 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
   ];
 
-  const stages: string[] = ["2", "3", "4"];
-
+  //* opens the resume modal
   const openModal = () => setModalOpen(true);
 
+  //* closes the resume modal
   const closeModal = () => setModalOpen(false);
 
+  //* callback fired once the resume has loaded
   const onDocumentLoadSuccess = ({ numPages }: any) => {
     setNumPages(numPages);
     if (numPages > 1) {
@@ -107,6 +103,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     }
   };
 
+  //* parses the education and experience data from JSON
   useEffect(() => {
     const edu = JSON.parse(data?.education as string);
     const exp = JSON.parse(data?.experience as string);
@@ -114,76 +111,57 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     setExp(exp);
   }, []);
 
+  //* fired once the status has changed
   const handleStatusChange = (code: number) => {
     setStatusCode(code);
     setTimeout(() => setStatusCode(0), 4000);
   };
 
-  const moveToNextStage = (e: SelectChangeEvent) => {
-    setLoading(true);
-    const body = {
-      id: data.id,
-      stage: e.target.value,
-    };
-    Axios.post("http://localhost:5048/stage", body).then(
-      (res: AxiosResponse) => {
-        setLoading(false);
-        handleStatusChange(res.data.code);
-        if (res.data.code == 200) {
-          alert("Applicant moved to the next stage");
-        }
+  //* gets all candidate comments
+  const getComments = () => {
+    let body = {
+      id: data?.id
+    }
+    Axios.post(process.env.NEXT_PUBLIC_GET_COMMENTS_BY_ID as string, body)
+    .then((res: AxiosResponse) => {
+      console.log(res.data)
+      if(res.data.code == 200) {
+        setComments(res.data.data);
       }
-    );
-  };
+    })
+    .catch((err: AxiosError) => {
+      console.log(err.message)
+    })
+  }
 
   useEffect(() => {
-    Axios.get(`http://localhost:5048/api/Candidate/skills/${data.id}`).then(
+   //* fetches candidate skills
+   let body = {
+    id: data.id
+   }
+    Axios.post(process.env.NEXT_PUBLIC_GET_SKILLS as string, body).then(
       (res: AxiosResponse) => {
         setSkills(res.data);
       }
     );
 
+    //* call to fetch comments
+    getComments();
+
     return;
   }, []);
 
-  const displayMessage = (code: number) => {
-    switch (code) {
-      case 200:
-        return (
-          <Alert
-            className="h-[40px] p-1 pb-0 w-[350px]"
-            variant="filled"
-            severity="success"
-          >
-            <AlertTitle>Success</AlertTitle>
-            Successfull
-          </Alert>
-        );
-      case 400:
-        return (
-          <Alert
-            className="h-[70px] p-1 pb-0 w-[350px]"
-            variant="outlined"
-            severity="error"
-          >
-            <AlertTitle>Error</AlertTitle>
-            An Error Occured Processing your Request
-          </Alert>
-        );
-      default:
-        return <div></div>;
-    }
-  };
-
+  //* flags candidate
   const handleFlag = (e: SelectChangeEvent) => {
     setFlag(e.target.value);
     setFlagLoading(true);
+
     const body = {
       id: data.id,
       flag: e.target.value,
       roleName: role.name,
     };
-    Axios.post("http://localhost:5048/api/Candidate/flag", body)
+    Axios.post(`${process.env.NEXT_PUBLIC_FLAG_CANDIDATE}`, body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200) {
           setFlagLoading(false);
@@ -200,11 +178,12 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       });
   };
 
+  //* cancels candidates application
   const cancelApplication = () => {
     const body = {
       id: data?.id,
     };
-    Axios.post("http://localhost:5048/api/Candidate/cancel", body)
+    Axios.post(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
       .then((res) => {
         if (res.data.code == 200) {
           setStatus({
@@ -220,6 +199,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       });
   };
 
+  //* array containing personal information which is mapped and rendered to the screen
   const fields: { [key: string]: any }[] = [
     {
       name: "First Name",
@@ -230,7 +210,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       value: data.otherName?.charAt(0).toUpperCase() + (data.otherName?.slice(1) ?? ""),
     },
     {
-      name: "Last Name",
+    name: "Last Name",
       value: data.lastName?.charAt(0).toUpperCase() + data.lastName?.slice(1),
     },
     {
@@ -271,6 +251,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
   ];
 
+  //* starts the print operation for the resume
   const printResume = () => {
     if (document.getElementById("GFG")) {
       var divContents = document.getElementById("cv")?.innerHTML;
@@ -284,6 +265,20 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     }
   };
 
+  //* renders candidate comments
+  const renderComments = () => {
+    return comments?.map((item: Comment, idx: number) => (
+      <div key={idx} className="bg-white p-2 mt-4 rounded-md">
+        <div className="flex flex-row gap-10">
+        <p>Commented by: {item.firstName}</p>
+        <p>{item.lastName}</p>
+        </div>
+        <p className="capitalize mt-4">comment: {item.comment}</p>
+      </div>
+    ))
+  }
+
+  //* renders candidate education information
   const renderEducation = () => {
     return education?.map((item: { [key: string]: string }, idx) => (
       <div key={idx} className="flex flex-row gap-3 mt-6">
@@ -328,6 +323,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     ));
   };
 
+  //* renders candidates personal information
   const renderInfo = () => {
     return fields?.map((item: { [key: string]: string }, idx: number) => (
       <div
@@ -340,22 +336,10 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     ));
   };
 
-  const generateId = () => {
-    var body = {
-      value: data.id,
-    };
-    Axios.post("http://localhost:5048/api/Candidate/generate/tempId", body)
-      .then((res: AxiosResponse) => {
-        console.log(res.data);
-      })
-      .catch((err: AxiosError) => {
-        console.log(err.message);
-      });
-  };
-
+  //* renders candidates experience
   const renderExp = () => {
     return exp?.map((item: { [key: string]: string }, idx: number) => (
-      <div key={idx}>
+      <div key={idx} className="mt-6 mb-4">
         <div className="flex flex-row gap-6">
           <div>
             <p className="text-[11px]">Employer</p>
@@ -396,6 +380,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     ));
   };
 
+  //* renders candidate skills
   const renderSkills = () => {
     return skills?.map((item: string, idx: number) => (
       <div
@@ -408,13 +393,16 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     ));
   };
 
+  //* clears notifier state
   const clearStatus = () => setStatus({open: false})
 
   return (
     <div className="">
+      {/* notifier component */}
       <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
         <Notifier topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus}  />
       </Modal>
+      dialog for 
       <Dialog open={showDialog}>
         <div className="h-[170px] bg-white p-4">
           <p className="font-semibold text-xl">Cancel Application?</p>
@@ -458,16 +446,16 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
 
         <div className="grid grid-rows-4 h-[250px] col-span-1">
           <div id="cv" className="flex justify-end row-span-3">
+            {/* component that displays resume */}
             <Document
               className=""
               onLoadError={(e) => console.log(e)}
-              file={`http://localhost:5048/resume/${data.id}`}
+              file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data.id}`}
               onLoadSuccess={onDocumentLoadSuccess}
             >
               <Page ref={printerRef} pageNumber={page} height={200} />
             </Document>
           </div>
-
           <div className="grid justify-end row-span-1 mt-6">
             <div className="grid grid-cols-2 gap-8">
               <IconButton
@@ -477,7 +465,6 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
                 <FindInPageIcon className="text-white" />
                 <p className="text-[12px] text-white">View</p>
               </IconButton>
-
               <IconButton
                 className="bg-green-700 rounded-md h-[30px] w-[60px]"
                 onClick={handlePrint}
@@ -516,6 +503,11 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         {renderEducation()}
       </div>
       <Divider variant="fullWidth" className="bg-green-700 h-[2px] mt-4" />
+      <div  className="pt-6 pb-2">
+      <p className="text-xl font-semibold">Comments</p>
+        {renderComments()}
+      </div>
+      <Divider variant="fullWidth" className="bg-green-700 h-[2px] mt-4" />
       <div className="flex flex-row mt-4 justify-end gap-4">
         <FormControl className="">
           <InputLabel className="text-sm">Flag Candidate</InputLabel>
@@ -539,42 +531,6 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             <CircularProgress />
           </div>
         )}
-        {/* <FormControl className="">
-          <InputLabel className="text-sm">Send Mail</InputLabel>
-          <Select
-            value={mailTemplate}
-            onChange={handleTemplateChange}
-            className="w-[120px] text-black bg-white h-[50px]"
-            label="Experience"
-            placeholder="Flag"
-            size="small"
-          >
-            {mailTemplates.map((item: string, idx: number) => (
-              <MenuItem key={idx} value={item}>
-                {item}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
-        {mailLoading && (
-          <div>
-            <CircularProgress thickness={5} className="text-green-700" />
-          </div>
-        )}
-        {/* <Button
-          onClick={generateId}
-          className="bg-gray-400 text-white w-[200px]"
-        >
-          {loading ? (
-            <CircularProgress
-              thickness={7}
-              className="text-white w-[10px] h-[10px] p-1"
-            />
-          ) : (
-            <p>Cancel Application</p>
-          )}
-        </Button> */}
-
         <Button
           className="bg-green-700 text-white w-[200px]"
           onClick={() => setInterview(true)}
@@ -588,30 +544,13 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             <p>Schedule Interview</p>
           )}
         </Button>
-        {/* <FormControl className="">
-          <InputLabel className="text-sm">Move to stage</InputLabel>
-          <Select
-            value={stage}
-            onChange={moveToNextStage}
-            className="w-[140px] text-black bg-white h-[50px]"
-            label="Experience"
-            placeholder="Flag"
-            size="small"
-          >
-            {stages.map((item: string, idx: number) => (
-              <MenuItem key={idx} value={item}>
-                {item}
-              </MenuItem>
-            ))}
-          </Select>
-        </FormControl> */}
-
         {loading && (
           <div>
             <CircularProgress thickness={5} className="text-green-700" />
           </div>
         )}
       </div>
+      {/* modal tht displays the resume in a larger size */}
       <Modal
         open={modalOpen}
         onClose={closeModal}
@@ -622,18 +561,20 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             className="h-[200px]"
             onLoadError={(e) => console.log(e)}
             onSourceError={(e) => console.log(e)}
-            file={`http://localhost:5048/resume/${data.id}`}
+            file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data.id}`}
             onLoadSuccess={onDocumentLoadSuccess}
           >
             <Page pageNumber={page} height={800} />
           </Document>
         </div>
       </Modal>
+      {/* modal for scheduling interviews */}
       <Modal
         onClose={() => setInterview(false)}
         open={interview}
         className="flex justify-center"
       >
+        {/* component for adding new schedules */}
         <ScheduleInterview candidate={data} role={role} />
       </Modal>
     </div>

@@ -20,3 +20,11 @@ export type Candidate = {
   tempId?: string,
   coverLetter?: string
 }
+
+export type Comment = {
+  id?: string,
+  firstName: string,
+  lastName: string,
+  comment: string,
+  date?: string
+}

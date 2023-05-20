@@ -17,88 +17,105 @@ import { useRouter } from "next/router";
 import { Notifier } from "./notifier";
 
 interface NavProps {
-  handleNav?: (item: string) => void,
-  logOut?: () => void,
-  next?: () => void
+  handleNav?: (item: string) => void;
+  logOut?: () => void;
+  next?: () => void;
 }
 
-export const Navbar = ({handleNav, logOut, next}: NavProps) => {
-  const { loggedIn, setLoggedIn } = useContext(MainContext) as any
-  const [status, setStatus] = useState<{[key: string]: any}>({
-    open: false
-  })
+export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
+  const { loggedIn, setLoggedIn } = useContext(MainContext) as any;
+  const [status, setStatus] = useState<{ [key: string]: any }>({
+    open: false,
+  });
 
+  //* nextjs navigation hook
   const router = useRouter();
-  // const [loggedIn, setLoggedIn] = useState<boolean>(false);
 
+  //* gets the candidate information from session storage
   useEffect(() => {
-    let cred = sessionStorage.getItem("cred")
-    if(cred) {
-      setLoggedIn(true)
+    let cred = sessionStorage.getItem("cred");
+    if (cred) {
+      setLoggedIn(true);
     }
-  },[])
+  }, []);
 
+  //* renders the names and paths of all pages
   const renderPageName = () => {
-    switch(router.pathname) {
-      case "/" :
-        return <p className="font-semibold text-2xl">Job Listings</p>
-      
-      case "/statusform" :
-        return <p className="font-semibold text-2xl">Check Status</p>
+    switch (router.pathname) {
+      case "/":
+        return <p className="font-semibold text-2xl">Job Listings</p>;
 
-      case "/applicant" :
-        return <p className="font-semibold text-2xl">Application Status</p>
+      case "/statusform":
+        return <p className="font-semibold text-2xl">Check Status</p>;
 
-      case "/admin" :
-        return <p className="font-semibold text-2xl">Admin</p>
+      case "/applicant":
+        return <p className="font-semibold text-2xl">Application Status</p>;
 
-      case "/signin" :
-        return <p className="font-semibold text-2xl">Sign In</p>
-      
-      case "/confirmation" :
-        return <p className="font-semibold text-2xl">Confirmation</p>
+      case "/admin":
+        return <p className="font-semibold text-2xl">Admin</p>;
 
-      default :
-      return <p></p>
+      case "/signin":
+        return <p className="font-semibold text-2xl">Sign In</p>;
+
+      case "/confirmation":
+        return <p className="font-semibold text-2xl">Confirmation</p>;
+
+      default:
+        return <p></p>;
     }
-  }
+  };
 
+  //* logs the user out
   const logout = () => {
     sessionStorage.clear();
     setLoggedIn(false);
-    clearStatus()
-    next?.()
-    router.push("/")
-  }
+    clearStatus();
+    next?.();
+    router.push("/");
+  };
 
+  //* displays the logout notification
   const showLogout = () => {
     setStatus({
       open: true,
       topic: "Confirmation",
       content: "Are you sure you want to sign out?",
-      hasNext: true
-    })
-  }
+      hasNext: true,
+    });
+  };
 
-  const pathsWithoutStatus = ["/admin"]
+  //* paths without a highlight on navbar
+  const pathsWithoutStatus = ["/admin"];
 
-  const statusPages = ["/statusform", "/applicant"]
+  //* paths with a highlight
+  const statusPages = ["/statusform", "/applicant"];
 
-  const clearStatus = () => setStatus({open: false})
+  //* clears the notifier state
+  const clearStatus = () => setStatus({ open: false });
 
+  //* checks session status and navigates to the application or status check screens
   const handleStatusNav = () => {
-    if(loggedIn) {
-      router.push("/applicant")
+    if (loggedIn) {
+      router.push("/applicant");
+    } else {
+      handleNav?.("status");
     }
-    else {
-      handleNav?.("status")
-    }
-  }
+  };
 
   return (
     <div className="">
-      <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
-        <Notifier hasNext={status.hasNext} topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus} other={() => logout()} />
+      <Modal
+        className="flex justify-center"
+        open={status?.open ? true : false}
+        onClose={clearStatus}
+      >
+        <Notifier
+          hasNext={status.hasNext}
+          topic={status?.topic ?? ""}
+          content={status?.content ?? ""}
+          close={clearStatus}
+          other={() => logout()}
+        />
       </Modal>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="fixed" className="bg-green-700 max-h-[60px]">
@@ -109,36 +126,51 @@ export const Navbar = ({handleNav, logOut, next}: NavProps) => {
               width={70}
               height={70}
             />
-            <div>
-              {renderPageName()}
-            </div>
+            <div>{renderPageName()}</div>
             <div className="flex flex-row justify-end ml-auto gap-8">
-              <a href="/" className={router.pathname == "/" ? "grid text-white bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1" : "grid text-white w-[50px]"}>
-              Home
+              <a
+                href="/"
+                className={
+                  router.pathname == "/"
+                    ? "grid text-white bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
+                    : "grid text-white w-[50px]"
+                }
+              >
+                Home
               </a>
-  
-              {
-                !pathsWithoutStatus.includes(router.pathname) && (
-                  <a onClick={handleStatusNav} href={"#"} className={statusPages.includes(router.pathname) ? "grid text-white bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1" : "grid text-white w-[100px]"}>
-                Check Status
-              </a>
-                )
-              }
+
+              {!pathsWithoutStatus.includes(router.pathname) && (
+                <a
+                  onClick={handleStatusNav}
+                  href={"#"}
+                  className={
+                    statusPages.includes(router.pathname)
+                      ? "grid text-white bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
+                      : "grid text-white w-[100px]"
+                  }
+                >
+                  Check Status
+                </a>
+              )}
               {router.pathname != "/admin" && (
                 <div>
-                  {
-                loggedIn ? <button onClick={showLogout} className="grid text-white w-[100px]">
-                Sign out
-              </button>
-              : <button onClick={() => handleNav?.("sign in")} className="grid text-white w-[100px]">
-              Sign in
-            </button>
-              }
+                  {loggedIn ? (
+                    <button
+                      onClick={showLogout}
+                      className="grid text-white w-[100px]"
+                    >
+                      Sign out
+                    </button>
+                  ) : (
+                    <button
+                      onClick={() => handleNav?.("sign in")}
+                      className="grid text-white w-[100px]"
+                    >
+                      Sign in
+                    </button>
+                  )}
                 </div>
               )}
-              {/* <a href="/signin" className={router.pathname == "/admin" ? "grid text-white bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1" : "grid text-white w-[100px]"}>
-                Admin
-              </a> */}
             </div>
           </Toolbar>
         </AppBar>

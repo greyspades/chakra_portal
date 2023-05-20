@@ -5,8 +5,8 @@ import { Provider } from 'react-redux';
 import { store } from '../store/store';
 import Context from '../context';
 
+//* root component of application
 export default function App({ Component, pageProps }: AppProps, { ...rest}) {
-  // const { store, props } = wrapper.useWrappedStore(rest);
   return <Context>
     <Component {...pageProps} />
   </Context>
