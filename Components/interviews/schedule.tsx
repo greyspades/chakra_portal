@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import {
   Paper,
@@ -25,6 +25,8 @@ import { Applicant } from "../applicant";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import LensIcon from "@mui/icons-material/Lens";
 import { Notifier } from "../notifier";
+import { MainContext } from "../../context";
+import { Admin } from "../../types/admin";
 
 export const Schedule = () => {
   const [roles, setRoles] = useState<Role[]>();
@@ -45,6 +47,12 @@ export const Schedule = () => {
     firstName: "",
     lastName: "",
   });
+
+  const { admin } = useContext(
+    MainContext
+  ) as any;
+
+  const adminData = admin as Admin
 
   //* gets active job roles
   useEffect(() => {
@@ -134,8 +142,11 @@ export const Schedule = () => {
 
   //* getches candidate data and navigates to the next screen
   const handleViewChange = (id: string, job: string) => {
+    let body = {
+      id
+    }
     axios
-      .get(`${process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID}/${id}`)
+      .post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
       .then((res: AxiosResponse) => {
         console.log(res.data);
         if (res.data.code == 200) {
@@ -321,13 +332,13 @@ export const Schedule = () => {
           </div>
           <div className="flex flex-row justify-between mt-[20px]">
             <Input
-              value={comment.firstName}
+              value={adminData.FirstName}
               onChange={(e) => handleCommentChange(e, "firstName")}
               className="w-[200px] bg-white p-2 h-[40px]"
               placeholder="Commenters Firstname"
             />
             <Input
-              value={comment.lastName}
+              value={adminData.LastName}
               onChange={(e) => handleCommentChange(e, "lastName")}
               className="w-[200px] bg-white p-2 h-[40px]"
               placeholder="Commenters Lastname"
@@ -382,8 +393,8 @@ export const Schedule = () => {
                   placeholder="Experience"
                   size="small"
                 >
-                  {roles?.map((item: Role) => (
-                    <MenuItem className="text-black" value={item.id}>
+                  {roles?.map((item: Role, idx: number) => (
+                    <MenuItem key={idx} className="text-black" value={item.id}>
                       {item.name}
                     </MenuItem>
                   ))}

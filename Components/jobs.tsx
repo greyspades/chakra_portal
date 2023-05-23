@@ -116,7 +116,7 @@ export const Jobs = () => {
   const handleSearch = (e: any) => {
     if (e.target.value) {
       let body = {
-        code: e.target.value,
+        value: e.target.value,
       };
       axios
         .post(process.env.NEXT_PUBLIC_SEARCH_JOB_ROLES as string, body)

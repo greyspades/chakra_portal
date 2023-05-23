@@ -15,9 +15,8 @@ export const Dashboard = () => {
     const [height, setHeight] = useState<number>(170);
 
     useEffect(() => {
-        axios.get("http://localhost:5048/api/Candidate/metrics")
+        axios.get(process.env.NEXT_PUBLIC_GET_METRICS as string)
         .then((res: AxiosResponse) => {
-            console.log(res.data)
             setMetrics(res.data.data);
         })
         .catch((err: AxiosError) => {

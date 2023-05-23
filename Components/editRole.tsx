@@ -96,8 +96,8 @@ export const EditRole = () => {
           label="Experience"
           placeholder="Experience"
           size="small"
-          >{units.map((item: string) => (
-            <MenuItem className='text-black' value={item}>{item}</MenuItem>
+          >{units.map((item: string, idx: number) => (
+            <MenuItem key={idx} className='text-black' value={item}>{item}</MenuItem>
           ))}
           </Select>
           </FormControl>

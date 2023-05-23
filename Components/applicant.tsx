@@ -109,6 +109,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     const exp = JSON.parse(data?.experience as string);
     setEducation(edu);
     setExp(exp);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //* fired once the status has changed
@@ -124,7 +125,6 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     }
     Axios.post(process.env.NEXT_PUBLIC_GET_COMMENTS_BY_ID as string, body)
     .then((res: AxiosResponse) => {
-      console.log(res.data)
       if(res.data.code == 200) {
         setComments(res.data.data);
       }
@@ -149,6 +149,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     getComments();
 
     return;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //* flags candidate
@@ -402,7 +403,6 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       <Modal className="flex justify-center" open={status?.open ? true : false} onClose={clearStatus}>
         <Notifier topic={status?.topic ?? ""} content={status?.content ?? ""} close={clearStatus}  />
       </Modal>
-      dialog for 
       <Dialog open={showDialog}>
         <div className="h-[170px] bg-white p-4">
           <p className="font-semibold text-xl">Cancel Application?</p>

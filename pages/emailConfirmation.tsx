@@ -15,11 +15,12 @@ const EmailConfirmation = () => {
         const { email } = router.query
         console.log(router.query)
         if(email && router.isReady) {
-            console.log("has email")
             setLoading(true);
-            axios.get(`http://localhost:5048/api/Candidate/validate/${email}`)
+            let body = {
+                email
+            }
+            axios.post(process.env.NEXT_PUBLIC_VALIDATE_EMAIL as string, body)
             .then((res: AxiosResponse) => {
-                console.log(res.data)
                 if(res.data.code == 200) {
                     setLoading(false);
                     setVerified(true);
@@ -29,6 +30,7 @@ const EmailConfirmation = () => {
                 setLoading(false);
             })
         }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [router.isReady])
 
   return (

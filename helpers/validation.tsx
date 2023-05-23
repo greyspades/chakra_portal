@@ -19,7 +19,7 @@ export const CandidateValidation = Yup.object().shape({
     .email('The email is invalid')
     .required('This field is required'),
   password: Yup.string()
-    .min(3, 'The password is too short')
+    .min(8, 'The password is too short')
     .max(12, 'The password is too long')
     .required('This field is required'),
   firstName: Yup.string()

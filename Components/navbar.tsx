@@ -15,6 +15,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import { MainContext } from "../context";
 import { useRouter } from "next/router";
 import { Notifier } from "./notifier";
+import Link from "next/link";
 
 interface NavProps {
   handleNav?: (item: string) => void;
@@ -125,10 +126,11 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
               src="http://10.0.0.143/img/icons/lapo_360_4.png"
               width={70}
               height={70}
+              alt={"/"}
             />
             <div>{renderPageName()}</div>
             <div className="flex flex-row justify-end ml-auto gap-8">
-              <a
+              <Link
                 href="/"
                 className={
                   router.pathname == "/"
@@ -137,10 +139,10 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
                 }
               >
                 Home
-              </a>
+              </Link>
 
               {!pathsWithoutStatus.includes(router.pathname) && (
-                <a
+                <Link
                   onClick={handleStatusNav}
                   href={"#"}
                   className={
@@ -150,7 +152,7 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
                   }
                 >
                   Check Status
-                </a>
+                </Link>
               )}
               {router.pathname != "/admin" && (
                 <div>

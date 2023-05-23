@@ -55,8 +55,13 @@ export const Applications = () => {
     setFlag("");
     setFilter("");
     setSearchVal("");
-    Axios.get(
-      `http://localhost:5048/api/Candidate/role/${id}/${nextPage}/${take}`
+    let body = {
+      id,
+      page: nextPage,
+      take
+    }
+    Axios.post(
+      process.env.NEXT_PUBLIC_GET_APPLICATIONS_BY_JOB as string, body
     )
       .then((res) => {
         setCandidates(res.data.data);
@@ -69,11 +74,12 @@ export const Applications = () => {
 
   useEffect(() => {
     getApplicants(page, take);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   //* gets all active job roles
   useEffect(() => {
-    Axios.get("http://localhost:5048/roles/Role").then((res) => {
+    Axios.get(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string).then((res) => {
       setRoles(res.data.data);
     });
   }, []);
@@ -151,7 +157,7 @@ export const Applications = () => {
 
   const renderSkillForm = () => {
     return skillForms.map((item: string, idx: number) => (
-      <div>
+      <div key={idx}>
         <Input
           value={item}
           onChange={(e) => handleSkillFormChange(e, idx)}
@@ -228,9 +234,8 @@ export const Applications = () => {
       roleId: id,
       flag: e.target.value,
     };
-    Axios.post("http://localhost:5048/api/Candidate/flag/candidates", body)
+    Axios.post(process.env.NEXT_PUBLIC_FLAG_APPLICATION as string, body)
       .then((res: AxiosResponse) => {
-        console.log(res.data);
         if (res.data.code == 200) {
           setCandidates(res.data.data);
         }

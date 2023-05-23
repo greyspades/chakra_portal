@@ -565,7 +565,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
 
                 if (type == "pdf") {
                   setLoading(true);
-                  Axios.post("http://localhost:5048/api/Candidate", body, {
+                  Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION as string, body, {
                     headers: {
                       "Access-Control-Allow-Origin": "*",
                       "Content-Type": "multipart/form-data",
@@ -573,7 +573,6 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   })
                     .then((res: AxiosResponse) => {
                       setLoading(false);
-                      console.log(res.data);
                       if (res.data.code == 200) {
                         setCandidate(candidateObj);
                         setRole(roleObj);

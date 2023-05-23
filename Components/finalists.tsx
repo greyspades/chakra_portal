@@ -23,6 +23,7 @@ export const Finalists = () => {
         axios.get(process.env.NEXT_PUBLIC_GET_ACTIVE_ROLES as string).then((res: AxiosResponse) => {
           setRoles(res.data.data);
         });
+        // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
 
     //* gets all candidates in the final stage
@@ -33,7 +34,7 @@ export const Finalists = () => {
     }
     axios.post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_STAGE as string, body)
     .then((res: AxiosResponse) => {
-        console.log(res.data)
+      console.log(res.data)
         if(res.data.code == 200) {
             setCandidates(res.data.data);
         }
@@ -42,6 +43,7 @@ export const Finalists = () => {
 
     useEffect(() => {
         getCandidates()
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [roleId])
 
     //* exits the candidate info view
@@ -192,8 +194,8 @@ export const Finalists = () => {
  label="Experience"
  placeholder="Experience"
  size="small"
- >{roles?.map((item: Role) => (
-   <MenuItem className='text-black' value={item.id}>{item.name}</MenuItem>
+ >{roles?.map((item: Role, idx: number) => (
+   <MenuItem key={idx} className='text-black' value={item.id}>{item.name}</MenuItem>
  ))}
  </Select>
  </FormControl>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import {
   Input,
   IconButton,
@@ -6,7 +6,8 @@ import {
   Paper,
   FormControl,
   Button,
-  Modal
+  Modal,
+  CircularProgress
 } from "@mui/material";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { Formik } from "formik";
@@ -16,7 +17,7 @@ import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useRouter } from "next/router";
 import { AdminForm } from "../helpers/validation";
 import { Notifier } from "../Components/notifier";
-
+import { MainContext } from "../context";
 
 const Signin = () => {
   const [visible, setVisible] = useState(false);
@@ -24,6 +25,10 @@ const Signin = () => {
   const [status, setStatus] = useState<{[key: string]: any}>({
     open: false
   })
+
+  const { admin, setAdmin } = useContext(
+    MainContext
+  ) as any;
 
   const router = useRouter();
 
@@ -54,12 +59,13 @@ const Signin = () => {
                     id: value.userId,
                     password: value.password
                 }
-                console.log(body)
-                axios.post("http://localhost:5048/api/Candidate/admin/auth", body)
+                axios.post(process.env.NEXT_PUBLIC_ADMIN_AUTH as string, body)
                 .then((res: AxiosResponse) => {
                     setLoading(false);
-                    console.log(res.data)
                     if(res.data.code == 200) {
+                      console.log(res.data.data)
+                        setAdmin(res.data.data)
+                        sessionStorage.setItem("auth", "True")
                         router.push('/admin')
                     }
                     else {
@@ -69,7 +75,7 @@ const Signin = () => {
                           content: res.data.message
                         })
                     }
-                }) 
+                })
                 .catch((e: AxiosError) => {
                     console.log(e.message);
                     setLoading(false);
@@ -117,7 +123,7 @@ const Signin = () => {
                   </FormControl>
                   <div className="flex justify-center mt-6">
                     <Button onClick={() => handleSubmit()} className="bg-green-700 text-white">
-                        Sign In
+                        {loading ? <CircularProgress className="text-white" thickness={5} /> : <p>Sign In</p>}
                     </Button>
                   </div>
                 </div>

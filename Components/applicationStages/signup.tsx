@@ -164,14 +164,13 @@ export const Signup = ({
 
                   let sessionData = JSON.stringify(sessionBody);
 
-                  Axios.post("http://localhost:5048/api/Candidate/user", body, {
+                  Axios.post(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body, {
                     headers: {
                       "Access-Control-Allow-Origin": "*",
                     },
                   })
                     .then((res: AxiosResponse) => {
                       setLoading(false);
-                      console.log(res.data);
                       if (res.data.code == 200) {
                         sessionStorage.setItem("cred", sessionData);
                         setLoggedIn(true);
@@ -347,8 +346,8 @@ export const Signup = ({
                           placeholder="Gender"
                           size="small"
                         >
-                          {genders.map((item: string) => (
-                            <MenuItem className="text-black" value={item}>
+                          {genders.map((item: string, idx: number) => (
+                            <MenuItem key={idx} className="text-black" value={item}>
                               {item}
                             </MenuItem>
                           ))}
@@ -368,8 +367,8 @@ export const Signup = ({
                           placeholder="Gender"
                           size="small"
                         >
-                          {maritalStatuses.map((item: string) => (
-                            <MenuItem className="text-black" value={item}>
+                          {maritalStatuses.map((item: string, idx: number) => (
+                            <MenuItem key={idx} className="text-black" value={item}>
                               {item}
                             </MenuItem>
                           ))}
@@ -488,8 +487,7 @@ export const Signup = ({
               <Formik
                 validationSchema={SignInValidation}
                 initialValues={{ email: "", password: "", validPassword: "" }}
-                onSubmit={(value, { validateForm }) => {
-                  console.log("got ite");
+                onSubmit={(value, { validateForm }) => {;
                   validateForm(value);
                   setLoading(true);
                   let body = {
@@ -499,9 +497,8 @@ export const Signup = ({
 
                   if (!isStatus) {
                     axios
-                      .post("http://localhost:5048/api/Candidate/signin", body)
+                      .post(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
                       .then((res: AxiosResponse) => {
-                        console.log(res.data);
                         if (res.data.code == 200) {
                           sessionStorage.setItem(
                             "cred",
@@ -530,9 +527,8 @@ export const Signup = ({
                         });
                       });
                   } else {
-                    console.log("is status");
                     axios
-                      .post("http://localhost:5048/status", body)
+                      .post(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
                       .then((res: AxiosResponse) => {
                         setLoading(false);
                         if (res.data.code == 200 && res.data.data.length > 0) {

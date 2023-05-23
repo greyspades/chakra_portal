@@ -21,17 +21,6 @@ import { Role } from "../../types/roles";
 import { Fields } from "../../types/roles";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
-import { MainContext } from "../../context";
-import { useRouter } from "next/router";
-import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import BusinessIcon from "@mui/icons-material/Business";
-import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
-import Divider from "@mui/material/Divider";
-import AddIcon from "@mui/icons-material/Add";
-import SchoolIcon from "@mui/icons-material/School";
-import HistoryEduIcon from "@mui/icons-material/HistoryEdu";
-import BookIcon from "@mui/icons-material/Book";
-import CloseIcon from "@mui/icons-material/Close";
 import {
   CandidateValidation,
   SignInValidation,

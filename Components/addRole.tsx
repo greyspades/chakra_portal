@@ -45,8 +45,11 @@ export const AddRole = ({ name, code, cancel }: Props) => {
 
   //* gets the job description
   useEffect(() => {
+    let body = {
+      code
+    }
     axios
-      .get(`${process.env.NEXT_PUBLIC_GET_JOB_DESCRIPTION}/${code}`)
+      .post(process.env.NEXT_PUBLIC_GET_JOB_DESCRIPTION as string, body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200) {
           setDesc(res.data.data);
@@ -55,6 +58,7 @@ export const AddRole = ({ name, code, cancel }: Props) => {
       .catch((err: AxiosError) => {
         console.log(err.message);
       });
+      // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   //* array containing years of experience values
