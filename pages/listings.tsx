@@ -191,7 +191,7 @@ const Listings = ({ data }: any) => {
         />
       </Modal>
       <Navbar handleNav={handleNav} next={() => setStep(1)} />
-      <div className="md:w-[65%] mt-[80px] grid grid-cols-3 gap-8 fixed capitalize">
+      <div className="md:w-[97%] mt-[80px] flex gap-8 fixed capitalize">
         <div className="">
           <div className="flex flex-col justify-center bg-green-700 h-[120px] p-3">
             <Input
@@ -229,7 +229,7 @@ const Listings = ({ data }: any) => {
         <div className="grid col-span-2 md:w-[170%]">
           {activeRole && step == 1 && (
             <div>
-              <Paper className=" md:h-[500px] bg-slate-100 grid p-6 align-middle pb-0">
+              <Paper className=" h-[90vh] bg-slate-100 grid p-6 align-middle pb-0">
                 <p className="text-3xl font-semibold flex flex-row w-[100%]">
                   {activeRole.name}
                   <LensIcon

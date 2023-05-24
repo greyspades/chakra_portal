@@ -12,8 +12,6 @@ const Home = () => {
 
   return (
     <div className='grid'>
-      <div className='z-5 relative'>
-      </div>
       <Listings />
     </div>
   )
