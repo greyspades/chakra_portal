@@ -102,7 +102,11 @@ export const Schedule = () => {
         }
       })
       .catch((err: AxiosError) => {
-        console.log(err.message);
+        setStatus({
+          open: true,
+          topic: "Unsuccessful",
+          content: err.message,
+        });
         setLoading(false);
       });
   };
@@ -288,7 +292,11 @@ export const Schedule = () => {
         }
       })
       .catch((err: AxiosError) => {
-        console.log(err.message);
+        setStatus({
+          open: true,
+          topic: "Unsuccessful",
+          content: err.message,
+        });
         setLoading(false);
       });
   };
@@ -332,13 +340,13 @@ export const Schedule = () => {
           </div>
           <div className="flex flex-row justify-between mt-[20px]">
             <Input
-              value={adminData.FirstName}
+              value={adminData?.FirstName}
               onChange={(e) => handleCommentChange(e, "firstName")}
               className="w-[200px] bg-white p-2 h-[40px]"
               placeholder="Commenters Firstname"
             />
             <Input
-              value={adminData.LastName}
+              value={adminData?.LastName}
               onChange={(e) => handleCommentChange(e, "lastName")}
               className="w-[200px] bg-white p-2 h-[40px]"
               placeholder="Commenters Lastname"
@@ -346,7 +354,7 @@ export const Schedule = () => {
           </div>
           <div className="flex justify-center mt-6">
             <TextField
-              value={comment.comment}
+              value={comment?.comment}
               onChange={(e) => handleCommentChange(e, "comment")}
               className="w-[100%] bg-white p-2 border-none"
               placeholder="Comment"

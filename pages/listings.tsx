@@ -6,25 +6,16 @@ import {
   Paper,
   Input,
   Divider,
-  FormControl,
-  InputLabel,
-  Select,
   SelectChangeEvent,
-  MenuItem,
   Modal,
 } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-// import { GetStaticProps } from 'next';
-import { Search } from "../Components/search";
 import { Role } from "../types/roles";
 import LensIcon from "@mui/icons-material/Lens";
-import { Application } from "../Components/application";
-import { Signup } from "../Components/applicationStages/signup";
-import { Navbar } from "../Components/navbar";
+import { Application } from "../components/application";
+import { Signup } from "../components/applicationStages/signup";
+import { Navbar } from "../components/navbar";
 import { MainContext } from "../context";
-import { Notifier } from "../Components/notifier";
+import { Notifier } from "../components/notifier";
 
 const Listings = ({ data }: any) => {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -161,7 +152,6 @@ const Listings = ({ data }: any) => {
 
   //* parses and maps through the job descriptions
   const parseDesc = (desc: string) => {
-    console.log(JSON.parse(desc));
     return JSON.parse(desc).map(
       (item: { [key: string]: string }, idx: number) => (
         <div key={idx} className="flex flex-row gap-4 mt-2">

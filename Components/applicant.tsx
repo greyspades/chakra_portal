@@ -131,6 +131,11 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     })
     .catch((err: AxiosError) => {
       console.log(err.message)
+      setStatus({
+        open: true,
+        topic: "Unsuccessful",
+        content: err.message,
+      });
     })
   }
 
@@ -174,7 +179,11 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         }
       })
       .catch((e: AxiosError) => {
-        console.log(e.message);
+        setStatus({
+          open: true,
+          topic: "Unsuccessful",
+          content: e.message,
+        });
         setFlagLoading(false);
       });
   };

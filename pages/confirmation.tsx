@@ -1,5 +1,5 @@
 import React, { useEffect, useContext } from "react";
-import { Navbar } from "../Components/navbar";
+import { Navbar } from "../components/navbar";
 import { MainContext } from "../context";
 import { Paper } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";

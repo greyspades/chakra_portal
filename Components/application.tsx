@@ -586,8 +586,12 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       }
                     })
                     .catch((err: AxiosError) => {
-                      console.log(err.message);
                       setLoading(false);
+                      setStatus({
+                        open: true,
+                        topic: "Unsuccessful",
+                        content: err.message,
+                      });
                     });
                 } else {
                   setFileError("Please Select a pdf file for your resume");

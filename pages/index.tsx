@@ -5,9 +5,8 @@ import { Button, Input, InputAdornment, Accordion } from '@mui/material'
 import PersonIcon from '@mui/icons-material/Person';
 import EmailIcon from '@mui/icons-material/Email';
 import PhoneIcon from '@mui/icons-material/Phone';
-import { Navbar } from '../Components/navbar';
+import { Navbar } from '../components/navbar';
 import Listings from './listings';
-import { Search } from '../Components/search';
 
 const Home = () => {
 

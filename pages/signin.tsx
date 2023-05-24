@@ -11,12 +11,12 @@ import {
 } from "@mui/material";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { Formik } from "formik";
-import { Navbar } from "../Components/navbar";
+import { Navbar } from "../components/navbar";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import { useRouter } from "next/router";
 import { AdminForm } from "../helpers/validation";
-import { Notifier } from "../Components/notifier";
+import { Notifier } from "../components/notifier";
 import { MainContext } from "../context";
 
 const Signin = () => {
@@ -63,7 +63,6 @@ const Signin = () => {
                 .then((res: AxiosResponse) => {
                     setLoading(false);
                     if(res.data.code == 200) {
-                      console.log(res.data.data)
                         setAdmin(res.data.data)
                         sessionStorage.setItem("auth", "True")
                         router.push('/admin')
@@ -77,7 +76,11 @@ const Signin = () => {
                     }
                 })
                 .catch((e: AxiosError) => {
-                    console.log(e.message);
+                  setStatus({
+                    open: true,
+                    topic: "Unsuccessful",
+                    content: e.message,
+                  });
                     setLoading(false);
                 })
               }}

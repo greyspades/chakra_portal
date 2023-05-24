@@ -97,7 +97,11 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
                     }
                   })
                   .catch((err: AxiosError) => {
-                    console.log(err.message);
+                    setStatus({
+                      open: true,
+                      topic: "Unsuccessful",
+                      content: err.message,
+                    });
                     setLoading(false);
                   });
               }}

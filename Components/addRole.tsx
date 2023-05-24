@@ -57,6 +57,11 @@ export const AddRole = ({ name, code, cancel }: Props) => {
       })
       .catch((err: AxiosError) => {
         console.log(err.message);
+        setStatus({
+          open: true,
+          topic: "Successful",
+          content: err.message,
+        });
       });
       // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -170,17 +175,15 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                 const body: Role = {
                   name: value.name,
                   experience: parseInt(experience),
-                  salary: salary,
                   unit: value.unit,
                   description: JSON.stringify(desc),
                   deadline: value.deadline,
                   status: "active",
                   code: code,
                 };
-
                 //* adds a new job role
                 axios
-                  .post(`${process.env.NEXT_PUBLIC_GET_JOB_ROLES}`, body, {
+                  .post(process.env.NEXT_PUBLIC_CREATE_NEW_JOB_ROLE as string, body, {
                     headers: {
                       "Access-Control-Allow-Origin": "*",
                       "Content-Type": "application/json",
@@ -201,8 +204,12 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                     }
                   })
                   .catch((err: AxiosError) => {
-                    console.log(err.message);
                     setLoading(false);
+                    setStatus({
+                      open: true,
+                      topic: "Unsuccessful",
+                      content: err.message,
+                    });
                   });
               }}
             >

@@ -20,10 +20,10 @@ import {
 import { MainContext } from "../context";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import { Role } from "../types/roles";
-import { Navbar } from "../Components/navbar";
+import { Navbar } from "../components/navbar";
 import { useRouter } from "next/router";
 import { Candidate } from "../types/candidate";
-import { Notifier } from "../Components/notifier";
+import { Notifier } from "../components/notifier";
 import ChromeReaderModeIcon from "@mui/icons-material/ChromeReaderMode";
 import TableViewIcon from "@mui/icons-material/TableView";
 import GridViewIcon from "@mui/icons-material/GridView";
@@ -134,7 +134,11 @@ const Applicant = () => {
         }
       })
       .catch((e) => {
-        console.log(e);
+        setStatus({
+          open: true,
+          topic: "Unsuccessful",
+          content: e.message,
+        });
       });
   };
 

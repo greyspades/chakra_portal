@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { Navbar } from '../Components/navbar'
+import { Navbar } from '../components/navbar'
 import { Paper, CircularProgress } from '@mui/material'
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { useRouter } from 'next/router';
@@ -13,7 +13,6 @@ const EmailConfirmation = () => {
 
     useEffect(() => {
         const { email } = router.query
-        console.log(router.query)
         if(email && router.isReady) {
             setLoading(true);
             let body = {

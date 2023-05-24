@@ -163,7 +163,6 @@ export const Signup = ({
                   let { password, ...sessionBody } = body;
 
                   let sessionData = JSON.stringify(sessionBody);
-
                   Axios.post(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body, {
                     headers: {
                       "Access-Control-Allow-Origin": "*",
