@@ -34,6 +34,7 @@ import { ApplicationValidation } from "../helpers/validation";
 import { Candidate } from "../types/candidate";
 import { Notifier } from "./notifier";
 import ArticleIcon from "@mui/icons-material/Article";
+import exp from "constants";
 
 export const Application: FC<Role> = ({ name, id }: Role) => {
   const [info, setInfo] = useState<{
@@ -59,7 +60,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
 
   const [fileError, setFileError] = useState<string>("");
 
-  const [hasCert, setHasCert] = useState<boolean>();
+  const [genError, setGenError] = useState<boolean>(false);
+
+  // const [hasCert, setHasCert] = useState<boolean>();
 
   const [basicInfo, setBasicInfo] = useState<{ [key: string]: string }>();
 
@@ -241,11 +244,20 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
           <TextField
             placeholder="Job Description"
             value={item.description}
-            className="bg-white rounded-md  w-[100%] mt-[7px] mb-[30px]"
+            className="bg-white rounded-md  w-[100%] mt-[7px] "
             onChange={(e) => handleExpChange("description", idx, e)}
             minRows={4}
             multiline
           />
+          <div className="mb-[30px] text-[11px]">
+            {
+              item?.hasError &&(
+                <p className="text-red-600">
+              Please fill out the information 
+            </p>
+              )
+            }
+          </div>
         </div>
       );
     });
@@ -255,7 +267,13 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   const addEdu = (type: string, e: any, index: number) => {
     //* if the candidate has other qualifications
     if (type == "degree" && e.target.value == "Other") {
-      setHasCert(true);
+      let update = eduField?.map((item: { [key: string]: any }, idx) => {
+        if (idx == index) {
+          item.hasCert = true
+        }
+        return item;
+      });
+      setEdufield(update);
     }
     if (type == "graduationDate") {
       //* if the field type is is graduation date its validates its a past date
@@ -284,8 +302,15 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   };
 
   //* removes other certifications
-  const removeCert = () => {
-    setHasCert(false);
+  const removeCert = (index: number) => {
+    let update = eduField?.map((item: { [key: string]: any }, idx) => {
+      if (idx == index) {
+        item.hasCert = false;
+        item.certification = ""
+      }
+      return item;
+    });
+    setEdufield(update);
   };
 
   //* renders the education fields
@@ -380,8 +405,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               ))}
             </Select>
           </FormControl>
-          {hasCert && (
-            <div>
+          {item?.hasCert && (
+            <div className="mt-[15px]">
               <FormControl>
                 <InputLabel className="">Certification</InputLabel>
                 <Input
@@ -389,7 +414,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   placeholder="Certification"
                   type="text"
                   onChange={(e) => addEdu("certification", e, idx)}
-                  className="bg-white w-[180px] h-[40px] px-2 mb-4"
+                  className="bg-white w-[400px] h-[40px] px-2 mb-4s"
                   startAdornment={
                     <InputAdornment position="start">
                       <ArticleIcon className="text-green-700" />
@@ -399,7 +424,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               </FormControl>
               <IconButton
                 className="bg-white h-[25px] w-[25px] ml-[15px]"
-                onClick={removeCert}
+                onClick={() => removeCert(idx)}
               >
                 <CloseIcon className="h-[15px] w-[15px]" />
               </IconButton>
@@ -418,6 +443,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
       startDate: "",
       endDate: "",
       isCurrent: false,
+      hasError: false
     };
     var update = [...expForm, newField];
     setExpForm(update);
@@ -431,6 +457,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
       graduationDate: "",
       degree: "",
       certification: "",
+      hasCert: false
     };
     var update = [...eduField, newField];
     setEdufield(update);
@@ -500,7 +527,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
           close={clearStatus}
         />
       </Modal>
-      <Paper className="flex flex-col w-[100%] justify-items-center md:h-[500px] bg-slate-100 overflow-y-scroll pb-10">
+      <Paper className="flex flex-col w-[80vw] justify-items-center md:h-[90vh] bg-slate-100 overflow-y-scroll pb-10">
         <p className="text-center font-bold text-xl mt-4 mb-4">
           Personal Information
         </p>
@@ -563,7 +590,33 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 let typeArr = file?.name.split(".");
                 let type = typeArr?.[typeArr?.length - 1];
 
-                if (type == "pdf") {
+                expForm.forEach((item: {[key: string]: any}, idx: number) => {
+                  if(!item.title || !item.startDate || !item.employer) {
+                    let update = expForm.map((exp: {[key: string]: any}, index: number) => {
+                      if(idx == index) {
+                        exp.hasError = true
+                      }
+                      return exp
+                    })
+                    setExpForm(update)
+                    setGenError(true)
+                  }
+                })
+
+                eduField.forEach((item: {[key: string]: any}, idx: number) => {
+                  if(!item.title || !item.startDate || !item.employer) {
+                    let update = expForm.map((exp: {[key: string]: any}, index: number) => {
+                      if(idx == index) {
+                        exp.hasError = true
+                      }
+                      return exp
+                    })
+                    setExpForm(update)
+                    setGenError(true)
+                  }
+                })
+
+                if (type == "pdf" && !genError) {
                   setLoading(true);
                   Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION as string, body, {
                     headers: {
@@ -593,7 +646,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         content: err.message,
                       });
                     });
-                } else {
+                } else if(type == "pdf"){
                   setFileError("Please Select a pdf file for your resume");
                 }
               }}
@@ -843,12 +896,17 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                     {loading ? (
                       <CircularProgress
                         thickness={7}
-                        className="text-white w-[10px] h-[10px] p-1"
+                        className="text-white w-[40px] h-[40px] p-1"
                       />
                     ) : (
                       <p>Submit</p>
                     )}
                   </Button>
+                  {genError && (
+                    <div className="p-4">
+                    <p className="text-red-600 text-[11px]">Please fill out the missing fields</p>
+                  </div>
+                  )}
                 </div>
               )}
             </Formik>

@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
 import Axios from "axios";
-import { Formik } from "formik";
 import {
   Button,
   Paper,
@@ -23,7 +22,9 @@ const Listings = ({ data }: any) => {
   const [activeRole, setActiveRole] = useState<Role>();
   const [step, setStep] = useState<number>(1);
   const [unit, setUnit] = useState<string | null>();
-  const [applying, setApplying] = useState<{ [key: string]: any }>({});
+  const [applying, setApplying] = useState<{ [key: string]: any }>({
+    value: false
+  });
   const [nav, setNav] = useState<string>("");
   const [status, setStatus] = useState<{ [key: string]: any }>({
     open: false,
@@ -42,11 +43,20 @@ const Listings = ({ data }: any) => {
 
   useEffect(() => {
     getAllRoles();
+
   }, []);
+
+  useEffect(() => {
+    if(activeRole?.description) {
+      console.log(activeRole?.description)
+    let data = JSON.parse(activeRole?.description as string)
+    console.log(data)
+    }
+  }, [activeRole])
 
   // useEffect(() => {
   //   if (unit) {
-  //     Axios.get(`http://localhost:5048/roles/Role/byUnit/${unit}`).then(
+  //     Axios.get(`http://localhost:8070/roles/Role/byUnit/${unit}`).then(
   //       (res) => {
   //         setRoles(res.data);
   //         console.log(res.data);
@@ -154,11 +164,18 @@ const Listings = ({ data }: any) => {
   const parseDesc = (desc: string) => {
     return JSON.parse(desc).map(
       (item: { [key: string]: string }, idx: number) => (
-        <div key={idx} className="flex flex-row gap-4 mt-2">
+        <div key={idx}>
+          <div  className="flex flex-row gap-4 mt-2">
           <p>{item?.["RowNum~~Blnk"]}</p>
           <p className="capitalize">
             {item?.["Job responsibility~~Sentc"].toLowerCase()}
           </p>
+        </div>
+          <div>
+            {/* <p className="capitalize">
+              {item?.desc}
+            </p> */}
+          </div>
         </div>
       )
     );
@@ -192,7 +209,7 @@ const Listings = ({ data }: any) => {
       </Modal>
       <Navbar handleNav={handleNav} next={() => setStep(1)} />
       <div className="md:w-[97%] mt-[80px] flex gap-8 fixed capitalize">
-        <div className="">
+        <div className=" w-[40%] pb-8">
           <div className="flex flex-col justify-center bg-green-700 h-[120px] p-3">
             <Input
               placeholder="Search for a job role"
@@ -201,13 +218,13 @@ const Listings = ({ data }: any) => {
               onChange={(e) => searchRole(e)}
             />
           </div>
-          <ul className="static bg-slate-100 overflow-auto h-[420px] pb-4">
+          <ul className="static bg-slate-100 overflow-auto h-[75vh] pb-8 px-4">
             {roles
               .filter((item: Role) =>
                 item.name.toLowerCase().includes(searchVal.toLowerCase())
               )
               .map((role: Role, index) => (
-                <li key={index} className="flex justify-center">
+                <li key={index} className="flex justify-center w-[100%]">
                   <button
                     onClick={() => handleRoleSelect(role)}
                     className="mt-2"
@@ -215,8 +232,8 @@ const Listings = ({ data }: any) => {
                     <Paper
                       className={
                         activeRole != role
-                          ? "p-2 w-[200px]"
-                          : "p-2 w-[200px] bg-green-700 text-white"
+                          ? "p-2 w-[100%]"
+                          : "p-2 w-[100%] bg-green-700 text-white"
                       }
                     >
                       {role.name}
@@ -247,6 +264,13 @@ const Listings = ({ data }: any) => {
                     <p className="flex w-auto">Unit:</p>
                     <p className="text-green-700 justify-start font-semibold">
                       {activeRole.unit}
+                    </p>
+                  </span>
+
+                  <span className="flex gap-2 items-center h-[60px] content-center text-[18px] ">
+                    <p className="flex w-auto">Job location:</p>
+                    <p className="flex text-green-700 justify-start font-semibold">
+                      {activeRole?.location}
                     </p>
                   </span>
 

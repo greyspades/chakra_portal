@@ -5,7 +5,6 @@ import {
   Step,
   StepLabel,
   Button,
-  Dialog,
   Modal,
   IconButton,
   Table,
@@ -15,7 +14,6 @@ import {
   TableHead,
   TableRow,
   TableFooter,
-  TablePagination,
 } from "@mui/material";
 import { MainContext } from "../context";
 import axios, { AxiosError, AxiosResponse } from "axios";
@@ -29,7 +27,7 @@ import TableViewIcon from "@mui/icons-material/TableView";
 import GridViewIcon from "@mui/icons-material/GridView";
 
 const Applicant = () => {
-  const { candidate, setCandidate, candidates, setCandidates } = useContext(
+  const { candidates, setCandidates } = useContext(
     MainContext
   ) as any;
   const [role, setRole] = useState<Role>();
@@ -321,7 +319,7 @@ const Applicant = () => {
         ) : view == "grid" ? (
           <div
             className={
-              candidates.length > 1
+              candidates?.length > 1
                 ? "grid grid-cols-2 gap-[70px] justify-center p-6"
                 : "grid justify-center"
             }

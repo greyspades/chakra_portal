@@ -1,11 +1,11 @@
-import React, { useEffect, useContext } from "react";
+import React, { useContext } from "react";
 import { Navbar } from "../components/navbar";
 import { MainContext } from "../context";
 import { Paper } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";
 
 const Confirmation = () => {
-  const { candidate, setCandidate, role, setRole } = useContext(
+  const { candidate, role, } = useContext(
     MainContext
   ) as any;
 

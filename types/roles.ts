@@ -9,7 +9,8 @@ export type Role = {
     deadline?: string,
     unit?: string,
     salary?: string,
-    code?: string
+    code?: string,
+    location?: string
 }
 
 export type Fields = {

@@ -1,5 +1,4 @@
-import React from 'react'
-import * as Yup from "yup";
+import * as Yup from "yup"
 
 //* calculates the candidates age and validates the birthday
 const calculateAge = (birthday: any) => {
@@ -20,7 +19,7 @@ export const CandidateValidation = Yup.object().shape({
     .required('This field is required'),
   password: Yup.string()
     .min(8, 'The password is too short')
-    .max(12, 'The password is too long')
+    .max(50, 'The password is too long')
     .required('This field is required'),
   firstName: Yup.string()
   .required('this field is required'),
@@ -43,8 +42,8 @@ export const SignInValidation = Yup.object().shape({
   .required('This field is required'),
   password: Yup.string()
   .required('This field is required'),
-  validPassword: Yup.string().required('this field is required')
-  .oneOf([Yup.ref('password')], 'Your passwords do not match.'),
+  // validPassword: Yup.string().required('this field is required')
+  // .oneOf([Yup.ref('password')], 'Your passwords do not match.'),
 })
 
 //* validation for creating a new job role

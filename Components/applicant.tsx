@@ -5,8 +5,6 @@ import {
   Button,
   CircularProgress,
   IconButton,
-  Alert,
-  AlertTitle,
   FormControl,
   InputLabel,
   Dialog,
@@ -213,27 +211,27 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   const fields: { [key: string]: any }[] = [
     {
       name: "First Name",
-      value: data.firstName?.charAt(0).toUpperCase() + data.firstName?.slice(1),
+      value: data?.firstName,
     },
     {
       name: "Other Name",
-      value: data.otherName?.charAt(0).toUpperCase() + (data.otherName?.slice(1) ?? ""),
+      value: data?.otherName,
     },
     {
     name: "Last Name",
-      value: data.lastName?.charAt(0).toUpperCase() + data.lastName?.slice(1),
+      value: data?.lastName,
     },
     {
       name: "Gender",
-      value: data.gender,
+      value: data?.gender,
     },
     {
       name: "Date of Birth",
-      value: data.dob?.split("T")[0],
+      value: data?.dob?.split("T")[0],
     },
     {
       name: "Application Date",
-      value: data.applDate?.split("T")[0],
+      value: data?.applDate?.split("T")[0],
     },
     {
       name: "Job Role Applied",
@@ -241,23 +239,23 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
     {
       name: "Phone Number",
-      value: data.phone,
+      value: data?.phone,
     },
     {
       name: "Application Stage",
-      value: data.stage,
+      value: data?.stage,
     },
     {
       name: "Application Status",
-      value: data.status,
+      value: data?.status,
     },
     {
       name: "Flag",
-      value: data.flag ?? "Not yet Flagged",
+      value: data?.flag ?? "Not yet Flagged",
     },
     {
       name: "Temporary Id",
-      value: data.tempId ?? "Not hired",
+      value: data?.tempId ?? "Not hired",
     },
   ];
 
@@ -280,10 +278,10 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     return comments?.map((item: Comment, idx: number) => (
       <div key={idx} className="bg-white p-2 mt-4 rounded-md">
         <div className="flex flex-row gap-10">
-        <p>Commented by: {item.firstName}</p>
-        <p>{item.lastName}</p>
+        <p>By: {item?.firstName}</p>
+        <p>{item?.lastName}</p>
         </div>
-        <p className="capitalize mt-4">comment: {item.comment}</p>
+        <p className="capitalize mt-4">comment: {item?.comment}</p>
       </div>
     ))
   }
@@ -416,7 +414,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         <div className="h-[170px] bg-white p-4">
           <p className="font-semibold text-xl">Cancel Application?</p>
           <p className="font-semibold mt-4">
-            Are you sure you want to cancel {data.firstName}'s Application?
+            Are you sure you want to cancel {data?.firstName}'s Application?
           </p>
           <div className="flex justify-end">
             <div className="flex flex-row justify-between w-[50%] mt-6">
@@ -459,7 +457,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             <Document
               className=""
               onLoadError={(e) => console.log(e)}
-              file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data.id}`}
+              file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data?.id}`}
               onLoadSuccess={onDocumentLoadSuccess}
             >
               <Page ref={printerRef} pageNumber={page} height={200} />
@@ -570,7 +568,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             className="h-[200px]"
             onLoadError={(e) => console.log(e)}
             onSourceError={(e) => console.log(e)}
-            file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data.id}`}
+            file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data?.id}`}
             onLoadSuccess={onDocumentLoadSuccess}
           >
             <Page pageNumber={page} height={800} />

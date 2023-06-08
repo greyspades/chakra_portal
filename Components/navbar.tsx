@@ -1,17 +1,8 @@
 import React, { useState, useEffect, useContext } from "react";
-import Axios from "axios";
-import { Formik } from "formik";
-import { Input, InputAdornment, Accordion, Modal } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
+import { Modal } from "@mui/material";
 import AppBar from "@mui/material/AppBar";
 import Box from "@mui/material/Box";
 import Toolbar from "@mui/material/Toolbar";
-import Typography from "@mui/material/Typography";
-import Button from "@mui/material/Button";
-import IconButton from "@mui/material/IconButton";
-import MenuIcon from "@mui/icons-material/Menu";
 import { MainContext } from "../context";
 import { useRouter } from "next/router";
 import { Notifier } from "./notifier";

@@ -2,20 +2,13 @@ import React, { useState, useEffect, useContext } from 'react'
 import { Paper, SelectChangeEvent, Select, MenuItem, FormControl, InputLabel, Divider, Button, IconButton } from '@mui/material'
 import { Role } from '../types/roles';
 import  Axios  from 'axios';
-import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline';
 import DriveFileRenameOutlineIcon from '@mui/icons-material/DriveFileRenameOutline';
 import { MainContext } from '../context';
 import FiberManualRecordIcon from '@mui/icons-material/FiberManualRecord';
-import { Context } from 'vm';
-import { AppContext } from 'next/app';
-import { AddRole } from './addRole';
-import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
 //* deprecated component may be taken out
 export const EditRole = () => {
   const [roles, setRoles] = useState<Role[]>([]);
-  const [searchVal, setSearchVal] = useState<string>("");
-  const [activeRole, setActiveRole] = useState<Role>();
   const [step, setStep] = useState<number>(1)
   const [unit, setUnit] = useState<string>("Finance")
   const [editing, setEditing] = useState<boolean>(false)

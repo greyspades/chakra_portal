@@ -18,6 +18,7 @@ const EmailConfirmation = () => {
             let body = {
                 email
             }
+            console.log(body)
             axios.post(process.env.NEXT_PUBLIC_VALIDATE_EMAIL as string, body)
             .then((res: AxiosResponse) => {
                 if(res.data.code == 200) {

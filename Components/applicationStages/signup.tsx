@@ -6,7 +6,6 @@ import {
   Input,
   InputAdornment,
   Paper,
-  TextField,
   CircularProgress,
   IconButton,
   FormControl,
@@ -67,6 +66,8 @@ export const Signup = ({
   const [isLogin, setIsLogin] = useState<boolean>(login);
 
   const [phone, setPhone] = useState<string>("");
+
+  const [reset, setReset] = useState<boolean>(false);
 
   const [status, setStatus] = useState<{ [key: string]: any }>({
     open: false,
@@ -159,7 +160,7 @@ export const Signup = ({
                     address: value.address,
                     maritalStatus: maritalStatus,
                   };
-
+                  console.log(body)
                   let { password, ...sessionBody } = body;
 
                   let sessionData = JSON.stringify(sessionBody);
@@ -463,7 +464,7 @@ export const Signup = ({
                       {loading ? (
                         <CircularProgress
                           thickness={7}
-                          className="text-white w-[10px] h-[10px] p-1"
+                          className="text-white w-[40px] h-[40px] p-1"
                         />
                       ) : (
                         <p>Submit</p>
@@ -493,7 +494,6 @@ export const Signup = ({
                     email: value.email,
                     password: value.password,
                   };
-
                   if (!isStatus) {
                     axios
                       .post(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
@@ -587,22 +587,6 @@ export const Signup = ({
                         </div>
                       </FormControl>
                     </div>
-
-                    <div className="mt-[20px]">
-                      <FormControl>
-                        <InputLabel>Retype Password</InputLabel>
-                        <Input
-                          placeholder="Retype Password"
-                          value={values.validPassword}
-                          type="password"
-                          onChange={handleChange("validPassword")}
-                          className="bg-white rounded-md h-[40px] w-[280px] p-1 pr-0 mt-1 mb-0 m-3"
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.validPassword as any}
-                        </div>
-                      </FormControl>
-                    </div>
                     <p>
                       Dont have an Account?{" "}
                       <button
@@ -610,6 +594,15 @@ export const Signup = ({
                         className="text-green-700 mt-6"
                       >
                         Sign Up
+                      </button>
+                    </p>
+                    <p>
+                      Forgot your password? click{" "}
+                      <button
+                        onClick={() => router.push("reset")}
+                        className="text-green-700 mt-6"
+                      >
+                        here
                       </button>
                     </p>
                     <div className="mt-[30px]">

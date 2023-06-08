@@ -179,8 +179,10 @@ export const Applications = () => {
       ?.filter((item: Candidate) =>
         item.lastName.toLowerCase().includes(searchVal?.toLowerCase())
       )
-      .map((candidate: Candidate, idx) => (
-        <TableRow
+      .map((candidate: Candidate, idx) => {
+        if(candidate.status == "Pending") {
+          return (
+            <TableRow
           key={idx}
           hover
           role="checkbox"
@@ -196,7 +198,9 @@ export const Applications = () => {
           <TableCell className="">{candidate.stage}</TableCell>
           <TableCell className="">{candidate.status}</TableCell>
         </TableRow>
-      ));
+          )
+        }
+      });
   };
 
   //* goes to the next page of candidates

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import { Button } from "@mui/material";
 import { AdminOptions } from "../types/options";
 import { Navbar } from "../components/navbar";
@@ -13,12 +13,14 @@ import ChromeReaderModeIcon from "@mui/icons-material/ChromeReaderMode";
 import GroupsIcon from "@mui/icons-material/Groups";
 import FlagIcon from "@mui/icons-material/Flag";
 import { useRouter } from "next/router";
+import { MainContext } from "../context";
 
 const Admin = () => {
   const [currentIdx, setCurrentIdx] = useState<number>(0);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
 
   const router = useRouter();
+
 
   //* admin tab names and icons
   const options: AdminOptions[] = [
@@ -35,7 +37,7 @@ const Admin = () => {
       ),
     },
     {
-      name: "View Applications",
+      name: "Applications",
       index: 2,
       icon: <ContactsIcon className={currentIdx == 2 ? "text-white" : ""} />,
     },

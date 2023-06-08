@@ -89,6 +89,7 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
                       setMeetingInfo(res.data.data);
                       setLoading(false);
                     } else if (res.data.code == 401) {
+                      setLoading(false)
                       setStatus({
                         open: true,
                         topic: "Unsuccessful",

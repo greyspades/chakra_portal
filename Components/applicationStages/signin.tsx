@@ -1,31 +1,19 @@
 import React, { useState, useEffect, FC, useContext } from "react";
-import Axios, { AxiosError, AxiosResponse } from "axios";
-import { Formik, ErrorMessage } from "formik";
+import Axios, { AxiosResponse } from "axios";
+import { Formik } from "formik";
 import {
   Button,
   Input,
   InputAdornment,
-  Paper,
-  TextField,
-  CircularProgress,
   IconButton,
   FormControl,
   InputLabel,
-  Select,
-  MenuItem,
 } from "@mui/material";
-import PersonIcon from "@mui/icons-material/Person";
-import EmailIcon from "@mui/icons-material/Email";
-import PhoneIcon from "@mui/icons-material/Phone";
-import { Role } from "../../types/roles";
-import { Fields } from "../../types/roles";
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
-  CandidateValidation,
   SignInValidation,
 } from "../../helpers/validation";
-import { Candidate } from "../../types/candidate";
 import axios from "axios";
 
 export const SignIn = () => {

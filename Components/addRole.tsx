@@ -13,6 +13,7 @@ import {
   AlertTitle,
   IconButton,
   Modal,
+  TextField,
 } from "@mui/material";
 import { Formik } from "formik";
 import "../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
@@ -39,6 +40,10 @@ export const AddRole = ({ name, code, cancel }: Props) => {
 
   const [desc, setDesc] = useState<{ [key: string]: string }[] | null>();
 
+  const [addDesc, setAddDesc] = useState<string>("");
+
+  const [location, setLocation] = useState<string>("");
+
   const [status, setStatus] = useState<{ [key: string]: any }>({
     open: false,
   });
@@ -46,8 +51,8 @@ export const AddRole = ({ name, code, cancel }: Props) => {
   //* gets the job description
   useEffect(() => {
     let body = {
-      code
-    }
+      code,
+    };
     axios
       .post(process.env.NEXT_PUBLIC_GET_JOB_DESCRIPTION as string, body)
       .then((res: AxiosResponse) => {
@@ -57,14 +62,54 @@ export const AddRole = ({ name, code, cancel }: Props) => {
       })
       .catch((err: AxiosError) => {
         console.log(err.message);
-        setStatus({
-          open: true,
-          topic: "Successful",
-          content: err.message,
-        });
+        // setStatus({
+        //   open: true,
+        //   topic: "Usuccessful",
+        //   content: err.message,
+        // });
       });
-      // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  const locations = [
+    "Abia",
+    "Adamawa",
+    "Akwa Ibom",
+    "Anambra",
+    "Bauchi",
+    "Bayelsa",
+    "Benue",
+    "Borno",
+    "Cross River",
+    "Delta",
+    "Ebonyi",
+    "Edo",
+    "Ekiti",
+    "Enugu",
+    "FCT - Abuja",
+    "Gombe",
+    "Imo",
+    "Jigawa",
+    "Kaduna",
+    "Kano",
+    "Katsina",
+    "Kebbi",
+    "Kogi",
+    "Kwara",
+    "Lagos",
+    "Nasarawa",
+    "Niger",
+    "Ogun",
+    "Ondo",
+    "Osun",
+    "Oyo",
+    "Plateau",
+    "Rivers",
+    "Sokoto",
+    "Taraba",
+    "Yobe",
+    "Zamfara",
+  ];
 
   //* array containing years of experience values
   const years = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
@@ -73,6 +118,11 @@ export const AddRole = ({ name, code, cancel }: Props) => {
   const handleExpChange = (event: SelectChangeEvent) => {
     setExperience(event.target.value as string);
   };
+
+    //* handles location change
+    const handleLocChange = (event: SelectChangeEvent) => {
+      setLocation(event.target.value as string);
+    };
 
   //* displays status message for operations
   const displayMessage = (code: number) => {
@@ -134,6 +184,10 @@ export const AddRole = ({ name, code, cancel }: Props) => {
     cancel();
   };
 
+  const handleDescChange = (e: any) => {
+    setAddDesc(e.target.value);
+  };
+
   return (
     <div>
       <Modal
@@ -170,26 +224,38 @@ export const AddRole = ({ name, code, cancel }: Props) => {
               }}
               onSubmit={(value, { resetForm }) => {
                 setLoading(true);
-
+                let combinedDesc = [
+                  ...(desc as { [key: string]: string }[]),
+                  {
+                    ["RowNum~~Blnk"]: "",
+                    ["JFR Code~~Blnk"]: "",
+                    ["Job responsibility~~Sentc"]: addDesc,
+                  },
+                ];
                 //* add job role request payload
                 const body: Role = {
                   name: value.name,
                   experience: parseInt(experience),
                   unit: value.unit,
-                  description: JSON.stringify(desc),
+                  description: JSON.stringify(combinedDesc),
                   deadline: value.deadline,
                   status: "active",
-                  code: code,
+                  code,
+                  location
                 };
                 //* adds a new job role
                 axios
-                  .post(process.env.NEXT_PUBLIC_CREATE_NEW_JOB_ROLE as string, body, {
-                    headers: {
-                      "Access-Control-Allow-Origin": "*",
-                      "Content-Type": "application/json",
-                    },
-                    withCredentials: false,
-                  })
+                  .post(
+                    process.env.NEXT_PUBLIC_CREATE_NEW_JOB_ROLE as string,
+                    body,
+                    {
+                      headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "application/json",
+                      },
+                      withCredentials: false,
+                    }
+                  )
                   .then((res: AxiosResponse) => {
                     setLoading(false);
                     if (res.data.code == 200) {
@@ -230,12 +296,22 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                     <div className="">
                       <p className="text-[16px] mt-4 mb-1">Responsibilities</p>
                     </div>
-                    <div className="h-[300px] bg-white p-4">
+                    <div className="h-[300px] bg-white p-4 overflow-y-scroll">
                       {displayDesc()}
+                      <div className="mt-6">
+                        <p className="font-semibold">Additional data</p>
+                        <TextField
+                          value={addDesc}
+                          onChange={handleDescChange}
+                          multiline
+                          minRows={3}
+                          className="bg-white w-[100%]"
+                        />
+                      </div>
                     </div>
                     <div className=""></div>
                     <div className="flex flex-row mt-4 justify-between justify-items-center h-[50px]">
-                      <div className="flex flex-row justify-between w-[55%] justify-items-center">
+                      <div className="flex flex-row justify-between w-[70%] justify-items-center">
                         <FormControl>
                           <input
                             value={values.unit}
@@ -258,7 +334,7 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                           <Select
                             value={experience}
                             onChange={handleExpChange}
-                            className="w-[120px] text-black bg-white h-[50px]"
+                            className="w-[120px] text-black bg-white h-[40px]"
                             label="Experience"
                             placeholder="Experience"
                             size="small"
@@ -273,6 +349,33 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                             {errors.experience as any}
                           </div>
                         </FormControl>
+
+                        <FormControl className="">
+                          <InputLabel
+                            className="text-sm"
+                            id="demo-simple-select-label"
+                          >
+                            Job Location
+                          </InputLabel>
+                          <Select
+                            value={location}
+                            onChange={handleLocChange}
+                            className="w-[120px] text-black bg-white h-[40px]"
+                            label="Job location"
+                            placeholder="Job location"
+                            size="small"
+                          >
+                            {locations.map((item: string, idx: number) => (
+                              <MenuItem key={idx} value={item}>
+                                {item}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          <div className="text-red-600 text-[10px] ml-4">
+                            {errors.experience as any}
+                          </div>
+                        </FormControl>
+
                         <FormControl>
                           <input
                             value={values.deadline}
@@ -295,7 +398,7 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                         {loading ? (
                           <CircularProgress
                             thickness={7}
-                            className="text-white w-[10px] h-[10px] p-1"
+                            className="text-white w-[30px] h-[30px] p-1"
                           />
                         ) : (
                           <p>Submit</p>
