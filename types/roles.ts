@@ -10,7 +10,11 @@ export type Role = {
     unit?: string,
     salary?: string,
     code?: string,
-    location?: string
+    location?: string,
+    office?: string,
+    skills?: string[] | string,
+    qualification?: string,
+    expanded?: boolean
 }
 
 export type Fields = {
