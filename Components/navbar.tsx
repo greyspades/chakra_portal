@@ -110,7 +110,7 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
         />
       </Modal>
       <Box sx={{ flexGrow: 1 }}>
-        <AppBar position="fixed" className="bg-green-700 max-h-[60px]">
+        <AppBar position="fixed" className="bg-white text-black max-h-[60px]">
           <Toolbar className="flex flex-row">
             <img
               className="grid col-span-1"
@@ -125,8 +125,8 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
                 href="/"
                 className={
                   router.pathname == "/"
-                    ? "grid text-white bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
-                    : "grid text-white w-[50px]"
+                    ? "grid text-black bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
+                    : "grid text-black w-[50px]"
                 }
               >
                 Home
@@ -138,8 +138,8 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
                   href={"#"}
                   className={
                     statusPages.includes(router.pathname)
-                      ? "grid text-white bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
-                      : "grid text-white w-[100px]"
+                      ? "grid text-black bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
+                      : "grid text-black w-[100px]"
                   }
                 >
                   Check Status
@@ -150,14 +150,14 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
                   {loggedIn ? (
                     <button
                       onClick={showLogout}
-                      className="grid text-white w-[100px]"
+                      className="grid text-black w-[100px]"
                     >
                       Sign out
                     </button>
                   ) : (
                     <button
                       onClick={() => handleNav?.("sign in")}
-                      className="grid text-white w-[100px]"
+                      className="grid text-black w-[100px]"
                     >
                       Sign in
                     </button>

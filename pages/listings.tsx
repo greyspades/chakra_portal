@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext } from "react";
-import Axios from "axios";
+import Axios, { AxiosError } from "axios";
 import {
   Button,
   Paper,
@@ -15,6 +15,8 @@ import { Signup } from "../components/applicationStages/signup";
 import { Navbar } from "../components/navbar";
 import { MainContext } from "../context";
 import { Notifier } from "../components/notifier";
+import { JobFilters } from "../components/applicationStages/jobFilters";
+import { JobList } from "../components/applicationStages/jobList";
 
 const Listings = ({ data }: any) => {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -30,28 +32,57 @@ const Listings = ({ data }: any) => {
     open: false,
   });
 
+  const [fields, setFields] = useState<{[key: string]: any}>({
+    location: "",
+    skill: "",
+    degree: ""
+  })
+  const [checkFields, setCheckFields] = useState<{[key: string]: any}>({
+    bachelors: false,
+    masters: false,
+    phd: false,
+    fullTime: false,
+    partTime: false,
+    internship: false,
+    contract: false
+  });
+
+const handleChange = (e: any, type: string) => {
+  let update = { ...fields }
+  update[type] = e.target.value
+  setFields(update)
+}
+
+const handleCheckChange = (e: any, type: string) => {
+  let update = { ...checkFields }
+  update[type] = !checkFields[type]
+  setCheckFields(update)
+}
+
   //* global context containing login state
   const { loggedIn, setLoggedIn } = useContext(MainContext) as any;
 
   //* gets all active job roles
   const getAllRoles = () => {
-    Axios.get(
-      process.env.NEXT_PUBLIC_GET_JOB_ROLES as string
-      // "http://localhost:5048/roles/Role"
-      ).then((res) => {
+    let body = {
+      value: searchVal
+    }
+    Axios.post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
+      console.log(res.data)
       setRoles(res.data.data);
       setActiveRole(res.data.data[0]);
+    }).catch((err: AxiosError) => {
+      console.group(err.message)
     });
   };
 
   useEffect(() => {
     getAllRoles();
 
-  }, []);
+  }, [searchVal]);
 
   // useEffect(() => {
   //   if(activeRole?.description) {
-  //     console.log(activeRole?.description)
   //   let data = JSON.parse(activeRole?.description as string)
   //   console.log(data)
   //   }
@@ -185,7 +216,7 @@ const Listings = ({ data }: any) => {
   };
 
   return (
-    <div>
+    <div className="bg-slate-100">
       <Modal
         className="flex justify-center"
         open={status?.open ? true : false}
@@ -211,7 +242,32 @@ const Listings = ({ data }: any) => {
         />
       </Modal>
       <Navbar handleNav={handleNav} next={() => setStep(1)} />
-      <div className="md:w-[97%] mt-[80px] flex gap-8 fixed capitalize">
+      <div className="flex flex-row mt-[80px] gap-8">
+          <div className="w-[27%] border-solid border-r-2 h-[100vh] fixed bg-white flex">
+            <JobFilters
+            fields={fields}
+            change={handleChange}
+            searchVal={searchVal}
+            searchRole={searchRole}
+            checkFields={checkFields}
+            checkChange={handleCheckChange}
+            />
+          </div>
+
+          <div className="w-[100%] flex justify-end">
+            <JobList roles={roles} setRole={setRoles} />
+          </div>
+      </div>
+
+
+
+
+
+
+
+
+
+      {/* <div className="md:w-[97%] mt-[80px] flex gap-8 fixed capitalize">
         <div className=" w-[40%] pb-8">
           <div className="flex flex-col justify-center bg-green-700 h-[120px] p-3">
             <Input
@@ -304,7 +360,7 @@ const Listings = ({ data }: any) => {
           )}
           {activeRole && step == 2 && <Application {...activeRole} />}
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

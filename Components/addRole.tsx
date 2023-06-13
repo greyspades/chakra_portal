@@ -22,6 +22,7 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Role } from "../types/roles";
 import { Notifier } from "./notifier";
 import { CreateJobValidation } from "../helpers/validation";
+import { Update } from "@mui/icons-material";
 
 interface Props {
   name: string;
@@ -44,9 +45,18 @@ export const AddRole = ({ name, code, cancel }: Props) => {
 
   const [location, setLocation] = useState<string>("");
 
+  const [qualification, setqualification] = useState<string>("");
+
   const [status, setStatus] = useState<{ [key: string]: any }>({
     open: false,
   });
+  const [skill, setSkill] = useState<string>()
+
+  const [reqSkills, setReqSkills] = useState<string[]>([])
+
+  const [course, setCourse] = useState<string>("")
+
+  const degrees = ["BSC", "MSC", "MBA", "PHD", "HND", "OND", "Other"];
 
   //* gets the job description
   useEffect(() => {
@@ -111,12 +121,20 @@ export const AddRole = ({ name, code, cancel }: Props) => {
     "Zamfara",
   ];
 
+  const handleCourseChange = (e: any) => {
+    setCourse(e.target.value)
+  }
+
   //* array containing years of experience values
   const years = ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"];
 
   //* handles experience change
   const handleExpChange = (event: SelectChangeEvent) => {
     setExperience(event.target.value as string);
+  };
+
+  const handleQualChange = (event: SelectChangeEvent) => {
+    setqualification(event.target.value as string);
   };
 
     //* handles location change
@@ -166,6 +184,26 @@ export const AddRole = ({ name, code, cancel }: Props) => {
     }
   };
 
+  const handleSkillChange = (e: any) => {
+    if(e.target.value.includes(",")) {
+      let skillList = e.target.value.split(",")
+      // console.log(skillList)
+      // let newSkill = skillList[skillList.length - 1]
+      // console.log(newSkill)
+      // let update = [ ...reqSkills, newSkill]
+      // console.log(update)
+      setReqSkills(skillList)
+    }
+  }
+
+  const renderReqSkills = () => {
+    return reqSkills.map((item: string, idx: number) => (
+      <div key={idx} className="bg-slate-400 p-2 rounded-lg text-white">
+          {item}
+      </div>
+    ))
+  }
+
   //* renders the job description
   const displayDesc = () => {
     return desc?.map((item: { [key: string]: string }, idx: number) => (
@@ -201,7 +239,7 @@ export const AddRole = ({ name, code, cancel }: Props) => {
           close={clearStatus}
         />
       </Modal>
-      <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
+      <Paper className=" md:h-auto bg-slate-100 p-4 align-middle md:mt-[30px] w-[79%] md:fixed overflow-y-scroll">
         <div className="flex flex-row justify-between">
           <p className="text-2xl h-[40px]">Add New Job Listing</p>
           <IconButton onClick={cancel}>
@@ -221,6 +259,10 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                 experience: "",
                 unit: "",
                 deadline: "",
+                course: "",
+                location: "",
+                qualification: "",
+                
               }}
               onSubmit={(value, { resetForm }) => {
                 setLoading(true);
@@ -241,45 +283,55 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                   deadline: value.deadline,
                   status: "active",
                   code,
-                  location
+                  location,
+                  skills: JSON.stringify(reqSkills),
+                  qualification
                 };
+                console.log(body)
                 //* adds a new job role
-                axios
-                  .post(
-                    process.env.NEXT_PUBLIC_CREATE_NEW_JOB_ROLE as string,
-                    body,
-                    {
-                      headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Content-Type": "application/json",
-                      },
-                      withCredentials: false,
-                    }
-                  )
-                  .then((res: AxiosResponse) => {
-                    setLoading(false);
-                    if (res.data.code == 200) {
-                      resetForm();
-                      setSalary("");
-                      setExperience("");
-                      setStatus({
-                        open: true,
-                        topic: "Successful",
-                        content: `Successfully created job role ${name}`,
-                      });
-                    }
-                  })
-                  .catch((err: AxiosError) => {
-                    setLoading(false);
-                    setStatus({
-                      open: true,
-                      topic: "Unsuccessful",
-                      content: err.message,
-                    });
-                  });
+                // axios
+                //   .post(
+                //     process.env.NEXT_PUBLIC_CREATE_NEW_JOB_ROLE as string,
+                //     body,
+                //     {
+                //       headers: {
+                //         "Access-Control-Allow-Origin": "*",
+                //         "Content-Type": "application/json",
+                //       },
+                //       withCredentials: false,
+                //     }
+                //   )
+                //   .then((res: AxiosResponse) => {
+                //     setLoading(false);
+                //     console.log(res.data)
+                //     if (res.data.code == 200) {
+                //       resetForm();
+                //       setSalary("");
+                //       setExperience("");
+                //       setStatus({
+                //         open: true,
+                //         topic: "Successful",
+                //         content: `Successfully created job role ${name}`,
+                //       });
+                //     } else {
+                //       setStatus({
+                //         open: true,
+                //         topic: "Unsuccessful",
+                //         content: res.data.message,
+                //       });
+                //     }
+                //   })
+                //   .catch((err: AxiosError) => {
+                //     setLoading(false);
+                //     setStatus({
+                //       open: true,
+                //       topic: "Unsuccessful",
+                //       content: err.message,
+                //     });
+                //   });
               }}
             >
-              {({ handleChange, handleSubmit, values, errors }) => (
+              {({ handleChange, handleSubmit, values, errors, setFieldValue }) => (
                 <div>
                   <div className="flex flex-col">
                     <FormControl>
@@ -296,7 +348,7 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                     <div className="">
                       <p className="text-[16px] mt-4 mb-1">Responsibilities</p>
                     </div>
-                    <div className="h-[280px] bg-white p-4 overflow-y-scroll">
+                    <div className="h-[200px] bg-white p-4 overflow-y-scroll">
                       {displayDesc()}
                       <div className="mt-6">
                         <p className="font-semibold">Additional data</p>
@@ -311,7 +363,7 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                     </div>
                     <div className=""></div>
                     <div className="flex flex-row mt-4 justify-between justify-items-center h-[50px]">
-                      <div className="flex flex-row justify-between w-[70%] justify-items-center">
+                      <div className="flex flex-row justify-between w-[100%] justify-items-center">
                         <FormControl>
                           <input
                             value={values.unit}
@@ -358,8 +410,8 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                             Job Location
                           </InputLabel>
                           <Select
-                            value={location}
-                            onChange={handleLocChange}
+                            value={values.location}
+                            onChange={(e) => setFieldValue("location", e.target.value)}
                             className="w-[120px] text-black bg-white h-[40px]"
                             label="Job location"
                             placeholder="Job location"
@@ -371,6 +423,46 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                               </MenuItem>
                             ))}
                           </Select>
+                          <div className="text-red-600 text-[10px] ml-4">
+                            {errors.experience as any}
+                          </div>
+                        </FormControl>
+
+                        <FormControl className="">
+                          <InputLabel
+                            className="text-sm"
+                            id="demo-simple-select-label"
+                          >
+                            Required Qualification
+                          </InputLabel>
+                          <Select
+                            value={qualification}
+                            onChange={handleQualChange}
+                            className="w-[120px] text-black bg-white h-[40px]"
+                            label="Job location"
+                            placeholder="Qualification"
+                            size="small"
+                          >
+                            {degrees.map((item: string, idx: number) => (
+                              <MenuItem key={idx} value={item}>
+                                {item}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                          <div className="text-red-600 text-[10px] ml-4">
+                            {errors.experience as any}
+                          </div>
+                        </FormControl>
+
+                        <FormControl className="">
+                          <Input
+                            value={values.course}
+                            onChange={handleChange("course")}
+                            className="w-[120px] text-black bg-white h-[40px] px-2"
+                            placeholder="Course of study"
+                            size="small"
+                          />
+                            
                           <div className="text-red-600 text-[10px] ml-4">
                             {errors.experience as any}
                           </div>
@@ -391,7 +483,27 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                           </div>
                         </FormControl>
                       </div>
-                      <Button
+                    </div>
+                    
+                    <div className="flex flex-row gap-4 mt-4">
+                    <FormControl>
+                          <input
+                            value={skill}
+                            onChange={handleSkillChange}
+                            placeholder="Required skills"
+                            className="bg-white p-2 min-w-[300px]"
+                            type="text"
+                          />
+                          <div className="text-red-600 text-[10px] ml-4">
+                            {errors.deadline as any}
+                          </div>
+                        </FormControl>
+                        <div className="flex flex-row flex-wrap gap-4">
+                          {renderReqSkills()}
+                        </div>
+                    </div>
+                    <div className="mt-[20px]">
+                    <Button
                         className="bg-green-700 text-white w-[150px]"
                         onClick={handleSubmit as any}
                       >

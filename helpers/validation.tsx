@@ -52,6 +52,10 @@ export const CreateJobValidation = Yup.object().shape({
   .required('This field is required'),
   unit: Yup.string()
   .required('This field is required'),
+  // location: Yup.string()
+  // .required('This field is required'),
+  // qualification: Yup.string()
+  // .required('This field is required'),
   deadline: Yup.date().required('this field is required').min(new Date(), "Please select a future date"),
 })
 
