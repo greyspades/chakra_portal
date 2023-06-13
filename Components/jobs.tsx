@@ -11,6 +11,7 @@ import {
   TableBody,
   TablePagination,
   Input,
+  Button,
 } from "@mui/material";
 import { AddRole } from "./addRole";
 import { Role } from "../types/roles";
@@ -145,11 +146,19 @@ export const Jobs = () => {
     getJobs(page, takeVal);
   };
 
+  const handleRefresh = () => {
+    getJobs(page, take)
+    setSearchVal("")
+  }
+
   return (
     <div>
       <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
         <div className="flex flex-row justify-between">
           <p className="text-2xl h-[40px] mb-2"> All Jobs</p>
+          <Button className="text-green-700" onClick={handleRefresh}>
+            Show all
+          </Button>
           <Input
             value={searchVal}
             onChange={handleSearch}

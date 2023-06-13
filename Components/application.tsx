@@ -553,7 +553,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               onSubmit={(value: any, { validateForm }) => {
                 //* validates the form against the schema
                 validateForm(value);
-
+                
                 //* request body
                 var body = {
                   firstName: value.firstName,
@@ -604,19 +604,24 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 })
 
                 eduField.forEach((item: {[key: string]: any}, idx: number) => {
-                  if(!item.title || !item.startDate || !item.employer) {
-                    let update = expForm.map((exp: {[key: string]: any}, index: number) => {
+                  if(!item.course || !item.graduationDate || !item.degree || !item.school) {
+                    let update = eduField.map((edu: {[key: string]: any}, index: number) => {
                       if(idx == index) {
-                        exp.hasError = true
+                        edu.hasError = true
                       }
-                      return exp
+                      return edu
                     })
-                    setExpForm(update)
+                    setEdufield(update)
                     setGenError(true)
                   }
                 })
 
-                if (type == "pdf" && !genError) {
+                let expResult = expForm.every((item: {[key: string]: string}) => item.title != "" && item.startDate != "" && item.employer != "")
+
+                let eduResult = eduField.every((item: {[key: string]: string}) => item.course != "" && item.graduationDate != "" && item.degree != "" && item.school != "")
+
+                if (type == "pdf" && expResult && eduResult && expForm.length > 0 && eduField.length > 0) {
+                  setGenError(false)
                   setLoading(true);
                   Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION as string, body, {
                     headers: {
@@ -646,8 +651,26 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         content: err.message,
                       });
                     });
-                } else if(type == "pdf"){
+                } else if(type != "pdf"){
                   setFileError("Please Select a pdf file for your resume");
+                } else if(!eduResult || !expResult) {
+                  setStatus({
+                    open: true,
+                    topic: "Unsuccessful",
+                    content: "Please fill in the missing fields in your application",
+                  });
+                } else if(expForm.length < 1) {
+                  setStatus({
+                            open: true,
+                            topic: "Unsuccessful",
+                            content: "Please add some work experience to your application",
+                          });
+                } else if(eduField.length < 1) {
+                  setStatus({
+                            open: true,
+                            topic: "Unsuccessful",
+                            content: "Please add some education to your application",
+                          });
                 }
               }}
             >

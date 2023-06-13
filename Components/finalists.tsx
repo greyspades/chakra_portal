@@ -218,7 +218,7 @@ export const Finalists = () => {
             <Button onClick={handleViewChange} className='bg-green-700 h-[40px] text-white'>
               <p>View Candidate</p>
             </Button>
-            <Button onClick={() => setModalOpen("hire")} className='bg-green-700 h-[40px] text-white'>
+            <Button disabled={selctCandidate?.status == "Pending" ? false : true} onClick={() => setModalOpen("hire")} className={selctCandidate?.status == "Pending" ? 'bg-green-700 h-[40px] text-white' : 'bg-slate-400 h-[40px] text-white'}>
               <p>Hire Candidate</p>
             </Button>
           </div>

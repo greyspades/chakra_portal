@@ -519,6 +519,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         <FormControl className="">
           <InputLabel className="text-sm">Flag Candidate</InputLabel>
           <Select
+            disabled={data.status == "Pending" ? false : true}
             value={flag}
             onChange={handleFlag}
             className="w-[120px] text-black bg-white h-[50px]"
@@ -539,7 +540,8 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
           </div>
         )}
         <Button
-          className="bg-green-700 text-white w-[200px]"
+          disabled={data.status == "Pending" ? false : true}
+          className={data.status == "Pending" ? "bg-green-700 text-white w-[200px]" : "bg-slate-400 text-white w-[200px]"}
           onClick={() => setInterview(true)}
         >
           {loading ? (

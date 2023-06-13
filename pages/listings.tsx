@@ -35,7 +35,10 @@ const Listings = ({ data }: any) => {
 
   //* gets all active job roles
   const getAllRoles = () => {
-    Axios.get(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string).then((res) => {
+    Axios.get(
+      process.env.NEXT_PUBLIC_GET_JOB_ROLES as string
+      // "http://localhost:5048/roles/Role"
+      ).then((res) => {
       setRoles(res.data.data);
       setActiveRole(res.data.data[0]);
     });
@@ -46,13 +49,13 @@ const Listings = ({ data }: any) => {
 
   }, []);
 
-  useEffect(() => {
-    if(activeRole?.description) {
-      console.log(activeRole?.description)
-    let data = JSON.parse(activeRole?.description as string)
-    console.log(data)
-    }
-  }, [activeRole])
+  // useEffect(() => {
+  //   if(activeRole?.description) {
+  //     console.log(activeRole?.description)
+  //   let data = JSON.parse(activeRole?.description as string)
+  //   console.log(data)
+  //   }
+  // }, [activeRole])
 
   // useEffect(() => {
   //   if (unit) {

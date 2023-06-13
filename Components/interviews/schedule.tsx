@@ -45,17 +45,16 @@ export const Schedule = () => {
     MainContext
   ) as any;
 
-  const adminData = admin as Admin
+  const adminData = admin as Admin || null
   const [comment, setComment] = useState<Comment>({
     id: "",
     comment: "",
-    firstName: adminData.FirstName as string,
-    lastName: adminData.LastName as string,
+    firstName: adminData?.FirstName as string,
+    lastName: adminData?.LastName as string,
   });
 
   //* gets active job roles
   useEffect(() => {
-    console.log(admin)
     axios
       .get(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string)
       .then((res: AxiosResponse) => {
@@ -94,6 +93,12 @@ export const Schedule = () => {
       .then((res: AxiosResponse) => {
         setLoading(false);
         if (res.data.code == 200) {
+          setComment({
+            id: "",
+            comment: "",
+            firstName: adminData?.FirstName as string,
+            lastName: adminData?.LastName as string,
+          })
           setStatus({
             open: true,
             topic: "Successful",
@@ -340,16 +345,14 @@ export const Schedule = () => {
           </div>
           <div className="flex flex-row justify-between mt-[20px]">
             <Input
-              value={adminData?.FirstName}
-              readOnly
-              // onChange={(e) => handleCommentChange(e, "firstName")}
+              value={comment?.firstName}
+              onChange={(e) => handleCommentChange(e, "firstName")}
               className="w-[200px] bg-white p-2 h-[40px]"
               placeholder="Commenters Firstname"
             />
             <Input
-              value={adminData?.LastName}
-              readOnly
-              // onChange={(e) => handleCommentChange(e, "lastName")}
+              value={comment?.lastName}
+              onChange={(e) => handleCommentChange(e, "lastName")}
               className="w-[200px] bg-white p-2 h-[40px]"
               placeholder="Commenters Lastname"
             />

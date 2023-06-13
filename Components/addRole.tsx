@@ -296,7 +296,7 @@ export const AddRole = ({ name, code, cancel }: Props) => {
                     <div className="">
                       <p className="text-[16px] mt-4 mb-1">Responsibilities</p>
                     </div>
-                    <div className="h-[300px] bg-white p-4 overflow-y-scroll">
+                    <div className="h-[280px] bg-white p-4 overflow-y-scroll">
                       {displayDesc()}
                       <div className="mt-6">
                         <p className="font-semibold">Additional data</p>

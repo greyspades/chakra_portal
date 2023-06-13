@@ -79,7 +79,10 @@ export const Applications = () => {
 
   //* gets all active job roles
   useEffect(() => {
-    Axios.get(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string).then((res) => {
+    Axios.get(
+      process.env.NEXT_PUBLIC_GET_JOB_ROLES as string
+      // "http://localhost:5048/roles/Role"
+      ).then((res) => {
       setRoles(res.data.data);
     });
   }, []);
@@ -179,28 +182,24 @@ export const Applications = () => {
       ?.filter((item: Candidate) =>
         item.lastName.toLowerCase().includes(searchVal?.toLowerCase())
       )
-      .map((candidate: Candidate, idx) => {
-        if(candidate.status == "Pending") {
-          return (
-            <TableRow
-          key={idx}
-          hover
-          role="checkbox"
-          tabIndex={-1}
-          className=""
-          onClick={() => handleViewChange(candidate)}
-        >
-          <TableCell className="">{candidate?.firstName}</TableCell>
-          <TableCell className="">{candidate?.lastName}</TableCell>
-          <TableCell className="">
-            {candidate.applDate?.split("T")[0]}
-          </TableCell>
-          <TableCell className="">{candidate.stage}</TableCell>
-          <TableCell className="">{candidate.status}</TableCell>
-        </TableRow>
-          )
-        }
-      });
+      .map((candidate: Candidate, idx) => (
+        <TableRow
+      key={idx}
+      hover
+      role="checkbox"
+      tabIndex={-1}
+      className=""
+      onClick={() => handleViewChange(candidate)}
+    >
+      <TableCell className="">{candidate?.firstName}</TableCell>
+      <TableCell className="">{candidate?.lastName}</TableCell>
+      <TableCell className="">
+        {candidate.applDate?.split("T")[0]}
+      </TableCell>
+      <TableCell className="">{candidate.stage}</TableCell>
+      <TableCell className="">{candidate.status}</TableCell>
+    </TableRow>
+      ));
   };
 
   //* goes to the next page of candidates
