@@ -24,7 +24,7 @@ export const Dashboard = () => {
         })
     }, [])
   return (
-    <div>
+    <div className=''>
       <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed">
         <div className='flex flex-row justify-between'>
         <div className='w-[200px] grid grid-rows-2 justify-center py-6 relative border-solid border-green-700 border-2 min-h-[200px] rounded-md'>

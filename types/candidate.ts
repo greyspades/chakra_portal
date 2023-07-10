@@ -18,7 +18,11 @@ export type Candidate = {
   otherName?: string,
   jobName?: string,
   tempId?: string,
-  coverLetter?: string
+  coverLetter?: string,
+  address?: string,
+  maritalStatus?: string,
+  state?: string,
+  lga?: string
 }
 
 export type Comment = {

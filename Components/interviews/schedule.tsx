@@ -27,15 +27,20 @@ import LensIcon from "@mui/icons-material/Lens";
 import { Notifier } from "../notifier";
 import { MainContext } from "../../context";
 import { Admin } from "../../types/admin";
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+
+
 
 export const Schedule = () => {
   const [roles, setRoles] = useState<Role[]>();
   const [candidate, setCandidate] = useState<Candidate>();
-  const [roleId, setRoleId] = useState<string>("all");
+  const [roleId, setRoleId] = useState<string>("");
   const [role, setRole] = useState<Role>();
   const [meetings, setMeetings] = useState<Meeting[]>();
   const [viewing, setViewing] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
+  const [page, setPage] = useState<number>(0)
   //* holds the notifier state
   const [status, setStatus] = useState<{ [key: string]: any }>({
     open: false,
@@ -49,23 +54,33 @@ export const Schedule = () => {
   const [comment, setComment] = useState<Comment>({
     id: "",
     comment: "",
-    firstName: adminData?.FirstName as string,
-    lastName: adminData?.LastName as string,
+    firstName: adminData?.FirstName as string ?? "",
+    lastName: adminData?.LastName as string ?? "",
   });
 
   //* gets active job roles
   useEffect(() => {
+    let body = {
+      value: "",
+      page: 0,
+      filter: ""
+    }
     axios
-      .get(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string)
+      .post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
       .then((res: AxiosResponse) => {
         setRoles(res.data.data);
       });
   }, []);
 
   //* gets meetings for a job role
-  useEffect(() => {
+  const getMeetings = () => {
+    let body = {
+      id: roleId,
+      page,
+      take: 10
+    }
     axios
-      .get(process.env.NEXT_PUBLIC_GET_MEETINGS as string)
+      .post(process.env.NEXT_PUBLIC_GET_MEETINGS as string, body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200) {
           let sortedMeetings = res.data.data.sort(
@@ -82,6 +97,10 @@ export const Schedule = () => {
       .catch((err: AxiosError) => {
         console.log(err.message);
       });
+
+  }
+  useEffect(() => {
+    getMeetings()
   }, [roleId]);
 
   //* creates a new comment
@@ -117,7 +136,7 @@ export const Schedule = () => {
   };
 
   //* changes unit
-  const handleUnitChange = (event: SelectChangeEvent) => {
+  const handleJobChange = (event: SelectChangeEvent) => {
     setRoleId(event.target.value as string);
     var item: Role = roles?.find(
       (item: Role) => item.id == event.target.value
@@ -181,8 +200,8 @@ export const Schedule = () => {
       <div key={idx} className="mt-[10px] capitalize">
         <Accordion>
           <AccordionSummary>
-            <div className="flex flex-row gap-4 justify-between">
-              <div className="flex flex-row gap-1 w-[300px] text-ellipsis overflow-hidden ...">
+            <div className="flex flex-row gap-2 justify-between w-[100%] text-[14px]">
+              <div className="flex flex-row gap-1 w-[270px] text-ellipsis overflow-hidden ...">
                 role:<p className="text-green-700">{item.jobTitle ?? "null"}</p>
               </div>
               <div className="flex flex-row gap-1">
@@ -202,12 +221,12 @@ export const Schedule = () => {
                 lastname:
                 <p className="text-green-700">{item.lastName ?? "null"}</p>
               </div>
-              <div className="flex flex-row gap-1">
+              {/* <div className="flex flex-row gap-1">
                 status:
                 <p className="text-green-700">
                   {renderDayIcon(item.date.split("T")[0])}
                 </p>
-              </div>
+              </div> */}
             </div>
           </AccordionSummary>
           <AccordionDetails>
@@ -319,6 +338,14 @@ export const Schedule = () => {
     setComment(data as Comment);
   };
 
+  const nextPage = () => {
+
+  }
+
+  const prevPage = () => {
+
+  }
+
   return (
     <div>
       <Modal
@@ -400,23 +427,26 @@ export const Schedule = () => {
                 </InputLabel>
                 <Select
                   value={roleId}
-                  onChange={handleUnitChange}
+                  onChange={handleJobChange}
                   className="w-[170px] text-black bg-white h-[50px]"
                   label="Experience"
                   placeholder="Experience"
                   size="small"
                 >
-                  {roles?.map((item: Role, idx: number) => (
+                  {roles ? roles?.map((item: Role, idx: number) => (
                     <MenuItem key={idx} className="text-black" value={item.id}>
                       {item.name}
                     </MenuItem>
-                  ))}
+                  )) : <div className="flex justify-center">
+                  <CircularProgress className="w-[30px] h-[30px] text-green-700" />
+                </div>}
                 </Select>
               </FormControl>
               <IconButton
-                onClick={() => setRoleId("all")}
-                className="bg-white w-[60px] h-[50px] rounded-sm"
+                onClick={() => setRoleId("")}
+                className="bg-white w-[60px] h-[50px] rounded-sm flex flex-col"                
               >
+                <p className="text-[11px]">Refresh</p>
                 <RefreshIcon className="text-green-700" />
               </IconButton>
             </div>
@@ -425,6 +455,29 @@ export const Schedule = () => {
               className="bg-green-700 h-[2px] mt-2"
             />
             <div className="overflow-y-auto h-[400px]">{renderMeetings()}</div>
+
+              <div className="flex justify-end">
+            <div className="flex flex-row w-[20%] justify-between">
+            <div className="flex flex-row justify-center place-items-center gap-4">
+        <IconButton className="rounded-full shadow-md bg-white" onClick={prevPage}>
+        <KeyboardArrowLeftIcon className="text-green-700 w-[30px] h-[30px]" />
+        </IconButton>
+      </div>
+      <div className="flex flex-row place-items-center gap-4">
+      <p className="semibold">
+          Page
+        </p>
+        <p className="text-[18px] text-green-700 font-semibold">
+          {page + 1}
+        </p>
+      </div>
+      <div className="flex flex-row justify-center place-items-center gap-4">
+        <IconButton className="rounded-full shadow-md bg-white" onClick={nextPage}>
+        <KeyboardArrowRightIcon className="text-green-700 w-[30px] h-[30px]" />
+        </IconButton>
+      </div>
+            </div>
+              </div>
           </div>
         )}
         {viewing && (

@@ -1,31 +1,14 @@
-import React, { useContext, useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Paper,
-  Stepper,
-  Step,
-  StepLabel,
   Button,
   Modal,
-  IconButton,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TableFooter,
   Input,
 } from "@mui/material";
-import { MainContext } from "../context";
 import axios, { AxiosError, AxiosResponse } from "axios";
-import { Role } from "../types/roles";
 import { Navbar } from "../components/navbar";
-import { useRouter } from "next/router";
-import { Candidate } from "../types/candidate";
 import { Notifier } from "../components/notifier";
-import ChromeReaderModeIcon from "@mui/icons-material/ChromeReaderMode";
-import TableViewIcon from "@mui/icons-material/TableView";
-import GridViewIcon from "@mui/icons-material/GridView";
+import Footer from "../components/footer";
 
 const Reset = () => {
     const [mail, setMail] = useState<string>()
@@ -70,7 +53,6 @@ const Reset = () => {
         setCounting(false)
         axios.post(process.env.NEXT_PUBLIC_SEND_PASS_RESET_MAIL as string, body)
         .then((res: AxiosResponse) => {
-            console.log(res.data.data)
             if(res.data.code == 200) {
                 setStatus({
                     open: true,
@@ -81,9 +63,17 @@ const Reset = () => {
                 setCounting(true)
                 setSentMail(true)
                 startCountDown()
+            } else {
+                setStatus({
+                    open: true,
+                    topic: "Unsuccessful",
+                    content: res.data.message,
+                    hasNext: false,
+                });
             }
         }).catch((err: AxiosError) => {
             console.log(err.message)
+            console.log(err.cause)
             setStatus({
                 open: true,
                 topic: "Unsuccessful",
@@ -98,7 +88,7 @@ const Reset = () => {
     };
 
   return (
-    <div>
+    <div className="h-[100vh] bg-slate-100">
     <Modal
         className="flex justify-center"
         open={status?.open ? true : false}
@@ -113,8 +103,8 @@ const Reset = () => {
       </Modal>
         <Navbar />
         {loaded &&(
-            <div className="mt-[80px] flex justify-center">
-            <Paper className="md:h-[50vh] bg-slate-100 p-1 w-[50vw]">
+            <div className="mt-[60px] flex justify-center">
+            <Paper className="md:h-[50vh] bg-white p-1 md:w-[50vw] w-[97%] mt-[20px] pb-6">
                 <div className="mt-[30px]">
                     <p className="text-center">
                         Please enter your email address to reset your password
@@ -124,21 +114,32 @@ const Reset = () => {
                     <Input
                     value={mail}
                     onChange={handleMailChange}
-                    className="bg-white px-2 w-[400px] h-[50px]"
+                    className="h-[40px] md:w-[65%] w-[97%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
                     placeholder="Your valid email address"
                     />
                 </div>
                 <div className="flex justify-center mt-[40px]">
-                    <Button onClick={handleSubmit} className="bg-green-700 h-[50px] capitalize w-[400px] text-white">
+                    <Button onClick={handleSubmit} className="bg-green-700 h-[40px] capitalize md:w-[400px] w-[97%] text-white">
                         Submit
                     </Button>
                 </div>
-                {sentMail &&(<p className="text-center text-[14px]">
-                    Didn't recieve mail? click <Button onClick={handleSubmit} className="capitalize" disabled={time != 0 ? true : false}>here</Button> {counting && (<p>after ({time}),s</p>)}
-                </p>)}
+                {sentMail &&(<div className="w-[100%] flex flex-row justify-center place-items-center mt-8">
+                    <p className="text-center text-[14px]">
+                    Didn't recieve mail? click 
+                </p>
+                <div>
+                <Button onClick={handleSubmit} className="capitalize" disabled={time != 0 ? true : false}>here</Button>
+                </div>
+                <div>
+                {counting && (<p>after ({time}),s</p>)}
+                </div>
+                </div>)}
             </Paper>
         </div>
         )}
+        <div className="mt-6">
+        <Footer />
+      </div>
     </div>
   )
 }

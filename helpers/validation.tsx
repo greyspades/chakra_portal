@@ -50,13 +50,38 @@ export const SignInValidation = Yup.object().shape({
 export const CreateJobValidation = Yup.object().shape({
   name: Yup.string()
   .required('This field is required'),
-  unit: Yup.string()
+  course: Yup.string()
   .required('This field is required'),
   // location: Yup.string()
   // .required('This field is required'),
   // qualification: Yup.string()
   // .required('This field is required'),
   deadline: Yup.date().required('this field is required').min(new Date(), "Please select a future date"),
+})
+
+export const AcceptanceInfoValidation = Yup.object().shape({
+  state: Yup.string()
+  .required('This field is required'),
+  rank: Yup.string()
+  .required('This field is required'),
+  location: Yup.string()
+  .required('This field is required'),
+  reportTo: Yup.string()
+  .required('This field is required'),
+  salary: Yup.number()
+  .required('This field is required'),
+  salWords: Yup.string()
+  .required('This field is required'),
+  startDate: Yup.date().required('this field is required').min(new Date(), "Please select a future date"),
+})
+
+export const PasswordReset = Yup.object().shape({
+  password: Yup.string()
+    .min(8, 'The password is too short')
+    .max(50, 'The password is too long')
+    .required('This field is required'),
+  confirmPassword: Yup.string().required('this field is required')
+    .oneOf([Yup.ref('password')], 'Your passwords do not match.'),
 })
 
 //* validation for interview scheduling

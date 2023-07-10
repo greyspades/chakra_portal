@@ -86,13 +86,14 @@ const Signin = () => {
               }}
             >
               {({ handleSubmit, handleChange, values, errors }) => (
-                <div className="mt-[20px] flex justify-center flex-col">
+                <div className="mt-[20px] flex justify-center flex-col gap-8">
                   <FormControl>
                   <Input
                     value={values.userId}
                     onChange={handleChange("userId")}
                     placeholder="User Id"
-                    className="px-2 bg-white h-[40px] w-[220px]"
+                    disableUnderline
+                    className="h-[40px] w-[250px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                   />
                   <div className="text-red-600 text-[10px] ml-4">
                   {errors.userId as any}
@@ -104,8 +105,9 @@ const Signin = () => {
                     value={values.password}
                     onChange={handleChange("password")}
                     placeholder="Password"
+                    disableUnderline
                     type={visible ? "text" : "password"}
-                    className="px-2 bg-white mt-[20px] h-[40px] w-[220px]"
+                    className="h-[40px] w-[250px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                     endAdornment={
                       <InputAdornment position="end">
                         {visible ? (

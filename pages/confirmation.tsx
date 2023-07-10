@@ -3,6 +3,7 @@ import { Navbar } from "../components/navbar";
 import { MainContext } from "../context";
 import { Paper } from "@mui/material";
 import VerifiedIcon from "@mui/icons-material/Verified";
+import Footer from "../components/footer";
 
 const Confirmation = () => {
   const { candidate, role, } = useContext(
@@ -10,10 +11,10 @@ const Confirmation = () => {
   ) as any;
 
   return (
-    <div className="grid w-[100%]">
+    <div className="grid w-[100%] bg-slate-100 h-[100vh]">
       <Navbar />
-      <div className="grid justify-center md:mt-[150px] md:w-[100%]">
-        <Paper className="flex flex-row justify-center md:h-[300px] md:w-[400px] bg-slate-100 p-4">
+      <div className="grid justify-center md:w-[100%] md:mt-[100px]">
+        <Paper className="flex flex-row justify-center md:h-[300px] md:w-[400px] bg-white p-4">
           <div className="flex flex-col justify-items-center">
             <div className="flex justify-center">
               <VerifiedIcon className="text-green-700 w-[80px] h-[80px]" />
@@ -27,6 +28,9 @@ const Confirmation = () => {
             </p>
           </div>
         </Paper>
+      </div>
+      <div className='mt-[60px]'>
+        <Footer />
       </div>
     </div>
   );

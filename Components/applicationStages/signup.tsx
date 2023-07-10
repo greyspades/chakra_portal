@@ -1,4 +1,4 @@
-import React, { useState, useContext } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import Axios, { AxiosError, AxiosResponse } from "axios";
 import { Formik } from "formik";
 import {
@@ -29,6 +29,9 @@ import axios from "axios";
 import { Notifier } from "../notifier";
 import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
+import { Close } from "@mui/icons-material";
+import NaijaStates from 'naija-state-local-government';
+
 
 interface SignupProps {
   exit?: () => void;
@@ -73,6 +76,11 @@ export const Signup = ({
     open: false,
   });
 
+  const [location, setLocation] = useState<{[key: string]: string}>({
+    state: "Lagos",
+    lga: "Ikeja"
+  })
+
   const genders = ["Male", "Female"];
 
   const maritalStatuses: string[] = ["Single", "Married", "Divorced"];
@@ -95,10 +103,19 @@ export const Signup = ({
     router.push(`/${nextPage}`);
   };
 
+  useEffect(() => {
+    console.log(NaijaStates.lgas("Oyo"))
+  },[])
+
   //* handles phone number update
   const handlePhoneChange = (e: any) => {
     setPhone(e);
   };
+
+  const handleLocationChange = (e: any, type: string) => {
+    let update = { ...location, [type]: e.target.value}
+    setLocation(update)
+  }
 
   return (
     <div>
@@ -119,16 +136,19 @@ export const Signup = ({
       <Paper
         className={
           !isLogin
-            ? "flex flex-col w-[100%] justify-items-center md:h-[85%] bg-slate-100 overflow-y-scroll p-4"
-            : "flex flex-col w-[400px] justify-items-center md:h-[500px] bg-slate-100 overflow-y-scroll p-4"
+            ? "flex flex-col md:w-[100%] w-[380px] m-0 justify-items-center md:h-[85%] h-[100%] bg-white overflow-y-scroll md:p-4 p-0 md:pb-0 pb-8"
+            : "flex flex-col md:w-[400px] w-[380px] justify-items-center md:h-[450px] mt-[20px] bg-white overflow-y-scroll p-4"
         }
       >
         {/* if the context action is to signup a user */}
         {!isLogin && (
           <div>
-            <p className="text-center font-bold text-xl mt-4 mb-4">
-              Personal Information
-            </p>
+            <div className="flex justify-center md:mt-0 mt-4 md:mb-[30px] mb-6">
+              <p className="text-xl font-semibold md:ml-0 ml-8">Sign Up</p>
+              <IconButton className="ml-auto mr-4 md:mr-0" onClick={exit}>
+                <Close />
+              </IconButton>
+            </div>
             <form>
               <Formik
                 validateOnChange={true}
@@ -159,11 +179,13 @@ export const Signup = ({
                     password: value.password,
                     address: value.address,
                     maritalStatus: maritalStatus,
+                    state: location.state,
+                    lga: location.lga
                   };
-                  console.log(body)
                   let { password, ...sessionBody } = body;
 
                   let sessionData = JSON.stringify(sessionBody);
+
                   Axios.post(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body, {
                     headers: {
                       "Access-Control-Allow-Origin": "*",
@@ -180,8 +202,6 @@ export const Signup = ({
                           content: "Successfully Created a Profile, Please click the link sent to your email to continue",
                           hasNext: true,
                         });
-                        // exit?.()
-                        // next?.()
                       } else {
                         setStatus({
                           open: true,
@@ -198,7 +218,7 @@ export const Signup = ({
               >
                 {({ handleSubmit, handleChange, values, errors }) => (
                   <div className="grid justify-items-center">
-                    <div className="flex flex-row gap-3">
+                    <div className="flex md:flex-row flex-col gap-3">
                       <FormControl>
                         <InputLabel className="w-[100%] flex flex-row">
                           <p className="mr-2 text-red-700 text-[20px]">*</p>
@@ -207,9 +227,10 @@ export const Signup = ({
                         <Input
                           placeholder="First name"
                           required
+                          disableUnderline
                           value={values.firstName}
                           onChange={handleChange("firstName")}
-                          className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
+                          className="h-[40px] md:w-[270px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           startAdornment={
                             <InputAdornment position="start">
                               <PersonIcon className="text-green-700" />
@@ -228,9 +249,10 @@ export const Signup = ({
                         <Input
                           placeholder="Other Name"
                           required
+                          disableUnderline
                           value={values.otherName}
                           onChange={handleChange("otherName")}
-                          className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
+                          className="h-[40px] w-[320px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           startAdornment={
                             <InputAdornment position="start">
                               <PersonIcon className="text-green-700" />
@@ -250,9 +272,10 @@ export const Signup = ({
                         <Input
                           placeholder="Last name"
                           required
+                          disableUnderline
                           value={values.lastName}
                           onChange={handleChange("lastName")}
-                          className="bg-white rounded-md h-[40px] w-[270px] p-4 mb-0 m-1"
+                          className="h-[40px] w-[320px] md:w-[270px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           startAdornment={
                             <InputAdornment position="start">
                               <PersonIcon className="text-green-700" />
@@ -265,7 +288,7 @@ export const Signup = ({
                       </FormControl>
                     </div>
 
-                    <div className="flex flex-row mt-4">
+                    <div className="flex md:flex-row flex-col mt-4 gap-4">
                       <FormControl>
                         <InputLabel className="w-[100%] flex flex-row">
                           <p className="mr-2 text-red-700 text-[20px]">*</p>
@@ -274,9 +297,10 @@ export const Signup = ({
                         <Input
                           placeholder="Email Address"
                           required
+                          disableUnderline
                           value={values.email}
                           onChange={handleChange("email")}
-                          className="bg-white rounded-md h-[40px] w-[300px] p-4 mb-0 m-3"
+                          className="h-[40px] w-[320px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           startAdornment={
                             <InputAdornment position="start">
                               <EmailIcon className="text-green-700" />
@@ -295,6 +319,7 @@ export const Signup = ({
                           <p className="text-[11px]">Phone Number</p>
                         </div>
                         <PhoneInput
+                         inputClass="h-[40px] w-[320px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline shadow-lg"
                           country={"ng"}
                           value={phone}
                           onChange={(phone) => handlePhoneChange(phone)}
@@ -318,8 +343,9 @@ export const Signup = ({
                           required
                           value={values.dob}
                           type="date"
+                          disableUnderline
                           onChange={handleChange("dob")}
-                          className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 mb-0 m-3"
+                          className="h-[40px] md:w-[200px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           startAdornment={
                             <InputAdornment position="start">
                               <CalendarTodayIcon className="text-green-700" />
@@ -332,7 +358,7 @@ export const Signup = ({
                       </FormControl>
                     </div>
 
-                    <div className="flex flex-row gap-4 mt-4">
+                    <div className="flex md:flex-row flex-col gap-4 mt-4">
                       <FormControl className="mt-[-8px]">
                         <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
                           <p className="mr-2 text-red-700 text-[13px]">*</p>
@@ -341,10 +367,11 @@ export const Signup = ({
                         <Select
                           value={gender}
                           onChange={(e) => setGender(e.target.value)}
-                          className="w-[150px] text-black bg-white h-[40px] mt-1"
+                          className="h-[40px] md:w-[150px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
                           label="Experience"
                           placeholder="Gender"
                           size="small"
+                          disableUnderline
                         >
                           {genders.map((item: string, idx: number) => (
                             <MenuItem key={idx} className="text-black" value={item}>
@@ -362,10 +389,11 @@ export const Signup = ({
                         <Select
                           value={maritalStatus}
                           onChange={(e) => setMaritalStatus(e.target.value)}
-                          className="w-[150px] text-black bg-white h-[40px] mt-1"
+                          className="h-[40px] w-[320px] md:w-[150px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
                           label="Experience"
                           placeholder="Gender"
                           size="small"
+                          disableUnderline
                         >
                           {maritalStatuses.map((item: string, idx: number) => (
                             <MenuItem key={idx} className="text-black" value={item}>
@@ -380,8 +408,9 @@ export const Signup = ({
                         <Input
                           value={values.address}
                           onChange={handleChange("address")}
+                          disableUnderline
                           placeholder="Residential Address"
-                          className="bg-white rounded-md h-[40px] w-[500px] p-4 mt-1 mb-0 m-3"
+                          className="h-[40px] w-[320px] md:w-[500px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           startAdornment={
                             <InputAdornment position="start">
                               <CalendarTodayIcon className="text-green-700" />
@@ -391,7 +420,50 @@ export const Signup = ({
                       </FormControl>
                     </div>
 
-                    <div className="flex flex-row mt-[20px] justify-start">
+                    <div className="flex md:flex-row flex-col md:mt-[20px] mt-2 justify-start md:gap-4 gap-2">
+                      <FormControl className="mt-[-4px]">
+                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
+                          <p className="mr-2 text-red-700 text-[13px]">*</p>
+                          State
+                        </div>
+                        <Select
+                          value={location.state}
+                          className="h-[40px] w-[320px] md:w-[150px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
+                          label="State"
+                          placeholder="State"
+                          size="small"
+                          disableUnderline
+                          onChange={(e) => handleLocationChange(e, "state")}
+                        >
+                          {NaijaStates.states().map((item: string, idx: number) => (
+                            <MenuItem value={item} key={idx}>
+                              {item}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                      <FormControl className="mt-[-4px]">
+                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
+                          <p className="mr-2 text-red-700 text-[13px]">*</p>
+                          City
+                        </div>
+                        <Select
+                          // disabled={location.state == "" ? true : false}
+                          value={location.lga}
+                          className="h-[40px] w-[320px] md:w-[150px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
+                          label="State"
+                          placeholder="State"
+                          size="small"
+                          disableUnderline
+                          onChange={(e) => handleLocationChange(e, "lga")}
+                        >
+                          {NaijaStates.lgas(location?.state)?.lgas?.map((item: string, idx: number) => (
+                            <MenuItem value={item} key={idx}>
+                              {item}
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                       <FormControl className="">
                         <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
                           <p className="mr-2 text-red-700 text-[13px]">*</p>
@@ -399,10 +471,11 @@ export const Signup = ({
                         </div>
                         <Input
                           placeholder="Password"
+                          disableUnderline
                           value={values.password}
                           type={visible ? "text" : "password"}
                           onChange={handleChange("password")}
-                          className="bg-white rounded-md h-[40px] w-[280px] p-1 pr-0 mt-1 mb-0 m-3"
+                          className="h-[40px] w-[280px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           endAdornment={
                             <InputAdornment position="end">
                               <IconButton onClick={() => setVisible(!visible)}>
@@ -426,11 +499,12 @@ export const Signup = ({
                           Confirm Password
                         </div>
                         <Input
+                          disableUnderline
                           placeholder="Confirm Password"
                           value={values.validPassword}
                           type={visible ? "text" : "password"}
                           onChange={handleChange("validPassword")}
-                          className="bg-white rounded-md h-[40px] w-[280px] p-1 pr-0 mt-1 mb-0 m-3"
+                          className="h-[40px] w-[280px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           endAdornment={
                             <InputAdornment position="end">
                               <IconButton onClick={() => setVisible(!visible)}>
@@ -458,7 +532,7 @@ export const Signup = ({
                       </button>
                     </p>
                     <Button
-                      className="bg-green-700 text-white w-[200px] h-[50px]"
+                      className="bg-green-700 text-white md:w-[60%] w-[85%] h-[40px]"
                       onClick={() => handleSubmit()}
                     >
                       {loading ? (
@@ -477,16 +551,25 @@ export const Signup = ({
           </div>
         )}
 
+
+
+
         {/* if the context action is to log the user in */}
         {isLogin && (
-          <div className="mt-[60px]">
-            <div>
-              <p className="text-xl mt-[-40px] ml-[80px]">Sign in</p>
+          <div className="">
+            {/* <div className="flex justify-end">
+              
+            </div> */}
+            <div className="flex justify-center">
+              <p className="text-xl font-semibold">Sign in</p>
+              <IconButton className="ml-auto" onClick={exit}>
+                <Close />
+              </IconButton>
             </div>
             <form>
               <Formik
                 validationSchema={SignInValidation}
-                initialValues={{ email: "", password: "", validPassword: "" }}
+                initialValues={{ email: "", password: ""}}
                 onSubmit={(value, { validateForm }) => {;
                   validateForm(value);
                   setLoading(true);
@@ -501,7 +584,7 @@ export const Signup = ({
                         if (res.data.code == 200) {
                           sessionStorage.setItem(
                             "cred",
-                            JSON.stringify(res.data.data)
+                            JSON.stringify({...res.data.data, password: null})
                           );
                           setLoggedIn(true);
                           setStatus({
@@ -551,9 +634,10 @@ export const Signup = ({
                         <InputLabel>Email Address</InputLabel>
                         <Input
                           value={values.email}
+                          disableUnderline
                           onChange={handleChange("email")}
                           placeholder="Email Address"
-                          className="bg-white rounded-md h-[40px] w-[280px] p-1 pr-0 mt-1 mb-0 m-3"
+                          className="h-[40px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         />
                         <div className="text-red-600 text-[10px] ml-4">
                           {errors.email as any}
@@ -567,9 +651,10 @@ export const Signup = ({
                         <Input
                           placeholder="Password"
                           value={values.password}
+                          disableUnderline
                           type={visible ? "text" : "password"}
                           onChange={handleChange("password")}
-                          className="bg-white rounded-md h-[40px] w-[280px] p-1 pr-0 mt-1px] mb-0 m-3"
+                          className="h-[40px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                           endAdornment={
                             <InputAdornment position="end">
                               <IconButton onClick={() => setVisible(!visible)}>
@@ -587,28 +672,34 @@ export const Signup = ({
                         </div>
                       </FormControl>
                     </div>
+                    <div className="flex place-items-center mt-4 gap-2">
                     <p>
                       Dont have an Account?{" "}
-                      <button
+                      
+                    </p>
+                    <button
                         onClick={() => setIsLogin(false)}
-                        className="text-green-700 mt-6"
+                        className="text-green-700"
                       >
                         Sign Up
                       </button>
-                    </p>
-                    <p>
-                      Forgot your password? click{" "}
+                    </div>
+        
+                    <div className="flex place-items-center mt-2 gap-2">
+                      <p>
+                      Forgot your password? click
+                      </p>
                       <button
                         onClick={() => router.push("reset")}
-                        className="text-green-700 mt-6"
+                        className="text-green-700"
                       >
                         here
                       </button>
-                    </p>
+                    </div>
                     <div className="mt-[30px]">
                       <Button
                         onClick={() => handleSubmit()}
-                        className="bg-green-700 h-[40px] w-[200px] text-white"
+                        className="bg-green-700 h-[40px] md:w-[320px] w-[320px] text-white"
                       >
                         Sign In
                       </Button>

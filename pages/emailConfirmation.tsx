@@ -4,6 +4,7 @@ import { Paper, CircularProgress } from '@mui/material'
 import VerifiedIcon from "@mui/icons-material/Verified";
 import { useRouter } from 'next/router';
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import Footer from '../components/footer';
 
 
 const EmailConfirmation = () => {
@@ -18,7 +19,6 @@ const EmailConfirmation = () => {
             let body = {
                 email
             }
-            console.log(body)
             axios.post(process.env.NEXT_PUBLIC_VALIDATE_EMAIL as string, body)
             .then((res: AxiosResponse) => {
                 if(res.data.code == 200) {
@@ -49,6 +49,9 @@ const EmailConfirmation = () => {
             </Paper> : <div><CircularProgress thickness={7} className="text-green-700" /></div>
             }
         </div>
+        <div className='mt-[200px]'>
+        <Footer />
+      </div>
     </div>
   )
 }

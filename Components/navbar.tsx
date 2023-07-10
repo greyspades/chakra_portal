@@ -35,22 +35,22 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
   const renderPageName = () => {
     switch (router.pathname) {
       case "/":
-        return <p className="font-semibold text-2xl">Job Listings</p>;
+        return <p className="font-semibold md:text-2xl">Job Listings</p>;
 
       case "/statusform":
-        return <p className="font-semibold text-2xl">Check Status</p>;
+        return <p className="font-semibold md:text-2xl">Check Status</p>;
 
       case "/applicant":
-        return <p className="font-semibold text-2xl">Application Status</p>;
+        return <p className="font-semibold md:text-2xl">Application Status</p>;
 
       case "/admin":
-        return <p className="font-semibold text-2xl">Admin</p>;
+        return <p className="font-semibold md:text-2xl">Admin</p>;
 
       case "/signin":
-        return <p className="font-semibold text-2xl">Sign In</p>;
+        return <p className="font-semibold md:text-2xl">Sign In</p>;
 
       case "/confirmation":
-        return <p className="font-semibold text-2xl">Confirmation</p>;
+        return <p className="font-semibold md:text-2xl">Confirmation</p>;
 
       default:
         return <p></p>;
@@ -94,6 +94,10 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
     }
   };
 
+  const protectedRoutes = [
+    "admin", "signup", "status"
+  ]
+
   return (
     <div className="">
       <Modal
@@ -114,52 +118,57 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
           <Toolbar className="flex flex-row">
             <img
               className="grid col-span-1"
-              src="http://10.0.0.143/img/icons/lapo_360_4.png"
-              width={70}
-              height={70}
+              src="/logo.png"
+              width={100}
+              height={100}
               alt={"/"}
             />
-            <div>{renderPageName()}</div>
-            <div className="flex flex-row justify-end ml-auto gap-8">
-              <Link
+            <div className="flex flex-row justify-end ml-auto md:gap-8 gap-3">
+              {router.pathname != "admin" && (
+                <Link
                 href="/"
                 className={
                   router.pathname == "/"
-                    ? "grid text-black bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
-                    : "grid text-black w-[50px]"
+                    ? "flex place-items-center text-black bg-green-300 h-[20px] w-[70px] md:text-[14px] text-[12px] md:h-[30px] md:w-[100px] text-center rounded-md p-1"
+                    : "flex place-items-center text-black h-[20px] w-[70px] md:text-[14px] text-[12px] md:h-[30px] md:w-[100px]"
                 }
               >
-                Home
+                Job listings
               </Link>
-
+              )}
               {!pathsWithoutStatus.includes(router.pathname) && (
                 <Link
                   onClick={handleStatusNav}
                   href={"#"}
                   className={
                     statusPages.includes(router.pathname)
-                      ? "grid text-black bg-[#90c9a1] h-[30px] w-[100px] text-center rounded-md p-1"
-                      : "grid text-black w-[100px]"
+                    ? "flex place-items-center text-black bg-green-300 h-[20px] w-[80px] md:text-[14px] text-[12px] md:h-[30px] md:w-[100px] text-center rounded-md p-1"
+                    : "flex place-items-center text-black h-[20px] w-[70px] md:text-[14px] text-[12px] md:h-[30px] md:w-[100px]"
                   }
                 >
                   Check Status
                 </Link>
               )}
+              {router.pathname == "/admin" && (
+                <button onClick={logOut}>
+                  Sign Out
+                </button>
+              )}
               {router.pathname != "/admin" && (
-                <div>
+                <div className="text-[12px]">
                   {loggedIn ? (
                     <button
                       onClick={showLogout}
-                      className="grid text-black w-[100px]"
+                      className="text-black h-[20px] w-[70px] md:text-[14px] text-[12px] md:h-[30px] md:w-[100px]"
                     >
-                      Sign out
+                      Sign Out
                     </button>
                   ) : (
                     <button
                       onClick={() => handleNav?.("sign in")}
-                      className="grid text-black w-[100px]"
+                      className="text-black h-[20px] w-[70px] md:text-[14px] text-[12px] md:h-[30px] md:w-[100px]"
                     >
-                      Sign in
+                      Sign In
                     </button>
                   )}
                 </div>

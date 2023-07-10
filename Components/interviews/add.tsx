@@ -7,6 +7,7 @@ import {
   InputLabel,
   CircularProgress,
   Modal,
+  IconButton,
 } from "@mui/material";
 import { Candidate } from "../../types/candidate";
 import { Formik } from "formik";
@@ -15,15 +16,18 @@ import { Role } from "../../types/roles";
 import { Meeting } from "../../types/meetings";
 import { InterviewForm } from "../../helpers/validation";
 import { Notifier } from "../notifier";
+import { Close } from "@mui/icons-material";
 
 interface ScheduleProps {
   candidate: Candidate;
   role: Role;
+  close: () => void;
 }
 
 export const ScheduleInterview: React.FC<ScheduleProps> = ({
   candidate,
   role,
+  close
 }) => {
   const [loading, setLoading] = useState<boolean>();
 
@@ -50,10 +54,13 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
         />
       </Modal>
       <Paper className="w-[700px] bg-slate-100 p-4 mt-4 h-[550px] flex flex-col">
-        <div>
+        <div className="flex flex-row justify-between">
           <p className="text-green-700 text-xl font-semibold">
             Schedule Interview
           </p>
+          <IconButton onClick={close}>
+            <Close />
+          </IconButton>
         </div>
         <div className="mt-10">
           <form>
@@ -66,7 +73,6 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
               }}
               onSubmit={(value, { validateForm }) => {
                 validateForm(value);
-                console.log(value.date);
                 var body = {
                   date: value.date,
                   time: value.time,
@@ -79,6 +85,7 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
                   jobId: role.id,
                 };
                 setLoading(true);
+                console.log(body)
 
                 //* creates a new online meeting
                 axios

@@ -18,6 +18,7 @@ import {
   TablePagination,
   TableRow,
   TableFooter,
+  CircularProgress,
 } from "@mui/material";
 import Axios, { AxiosError, AxiosResponse } from "axios";
 import { Candidate } from "../types/candidate";
@@ -51,12 +52,12 @@ export const Applications = () => {
   });
 
   //* fetches all applicants by job role
-  const getApplicants = (nextPage?: number, take?: number) => {
+  const getApplicants = (nextPage?: number, take?: number, jobId?: string) => {
     setFlag("");
     setFilter("");
     setSearchVal("");
     let body = {
-      id,
+      id: jobId ?? id,
       page: nextPage,
       take
     }
@@ -69,6 +70,7 @@ export const Applications = () => {
       })
       .catch((e: AxiosError) => {
         console.log(e.message);
+        console.log(e.cause)
       });
   };
 
@@ -79,10 +81,12 @@ export const Applications = () => {
 
   //* gets all active job roles
   useEffect(() => {
-    Axios.get(
-      process.env.NEXT_PUBLIC_GET_JOB_ROLES as string
-      // "http://localhost:5048/roles/Role"
-      ).then((res) => {
+    let body = {
+      value: "",
+      page: 0,
+    }
+    Axios.post(
+      process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
       setRoles(res.data.data);
     });
   }, []);
@@ -96,6 +100,11 @@ export const Applications = () => {
     "Maintainance",
     "It",
   ];
+
+  const refreshList = () => {
+    setId("")
+    getApplicants(page, take, "")
+  }
 
   //* changes the unit
   const handleUnitChange = (event: SelectChangeEvent) => {
@@ -132,6 +141,11 @@ export const Applications = () => {
 
   //* switches the view to the applicants information
   const handleViewChange = (candidate: Candidate) => {
+    var item: Role = roles?.find(
+      (item: Role) => item.id == candidate?.roleId
+    ) as Role;
+
+    setRole(item);
     setApplicant(candidate);
     setViewing(true);
   };
@@ -237,7 +251,7 @@ export const Applications = () => {
       roleId: id,
       flag: e.target.value,
     };
-    Axios.post(process.env.NEXT_PUBLIC_FLAG_APPLICATION as string, body)
+    Axios.post(process.env.NEXT_PUBLIC_GET_APPLICANTS_BY_FLAG as string, body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200) {
           setCandidates(res.data.data);
@@ -269,7 +283,7 @@ export const Applications = () => {
           {renderSkillForm()}
         </div>
       </Dialog>
-      <Paper className=" md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[97%]">
+      <Paper className=" md:h-[80vh] bg-slate-100 p-6 align-middle md:mt-[30px] w-[97%]">
         {!viewing && (
           <div>
             <div className="flex flex-row">
@@ -288,11 +302,14 @@ export const Applications = () => {
                   placeholder="Experience"
                   size="small"
                 >
-                  {roles?.map((item: Role, idx: number) => (
+                  {roles ? roles.map((item: Role, idx: number) => (
                     <MenuItem key={idx} className="text-black" value={item.id}>
                       {item.name}
                     </MenuItem>
-                  ))}
+                  )) : <div className="flex justify-center">
+                      <CircularProgress className="w-[30px] h-[30px] text-green-700" />
+                    </div>}
+                  
                 </Select>
               </FormControl>
               <FormControl>
@@ -300,6 +317,7 @@ export const Applications = () => {
                   by Flag
                 </InputLabel>
                 <Select
+                  // disabled={id == "" ? true : false}
                   value={flag}
                   onChange={handleFlagChange}
                   className="w-[170px] text-black bg-white h-[50px]"
@@ -340,9 +358,10 @@ export const Applications = () => {
                 </Select>
               </FormControl>
               <IconButton
-                onClick={() => getApplicants(0)}
-                className="bg-white w-[60px] h-[50px] rounded-sm"
+                onClick={refreshList}
+                className="bg-white w-[60px] h-[50px] rounded-sm flex flex-col"
               >
+                <p className="text-[11px]">Refresh</p>
                 <RefreshIcon className="text-green-700" />
               </IconButton>
               <Input
@@ -360,7 +379,7 @@ export const Applications = () => {
               variant="fullWidth"
               className="bg-green-700 h-[2px] mt-4"
             />
-            <TableContainer className="overflow-y-auto md:h-[350px]">
+            <TableContainer className="overflow-y-auto">
               <Table stickyHeader className="">
                 <TableHead sx={{ display: "table-header-group" }}>
                   <TableRow>
@@ -395,7 +414,7 @@ export const Applications = () => {
           </div>
         )}
         {viewing && (
-          <div className="static">
+          <div className="">
             <Applicant
               close={exitView}
               data={applicant as Candidate}

@@ -25,6 +25,7 @@ import { Notifier } from "../components/notifier";
 import ChromeReaderModeIcon from "@mui/icons-material/ChromeReaderMode";
 import TableViewIcon from "@mui/icons-material/TableView";
 import GridViewIcon from "@mui/icons-material/GridView";
+import Footer from "../components/footer";
 
 const Applicant = () => {
   const { candidates, setCandidates } = useContext(
@@ -91,8 +92,13 @@ const Applicant = () => {
 
   //* gets the roles
   useEffect(() => {
+    let body = {
+      value: "",
+      page: 0,
+      filter: ""
+    }
     axios
-      .get(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string)
+      .post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200 && res.data.data.length > 0) {
           setRoles(res.data.data);
@@ -154,32 +160,32 @@ const Applicant = () => {
   //* renders all applications in grid form
   const renderApplications = () => {
     return candidates?.map((item: Candidate, idx: number) => (
-      <div key={idx} className="">
-        <Paper className="md:h-[400px] bg-slate-100 p-4 w-[400px]">
-          <div className="flex flex-row text-green-700 font-semibold text-2xl">
+      <div key={idx} className="flex justify-center">
+        <Paper className="md:h-[400px] bg-white p-4 w-[90%] place-items-center">
+          <div className="flex flex-row text-green-700 font-semibold md:text-2xl text-xl">
             {item.firstName} {item.lastName}
           </div>
-          <div className="flex flex-row place-items-center bg-white rounded-md mt-2">
-            <div className="bg-white rounded-md p-1">Role Applied:</div>
-            <div className="bg-white rounded-md text-green-700 font-semibold truncate ... md:w-[250px] md:ml-1">
+          <div className="flex flex-row place-items-center bg-slate-100 rounded-md mt-2">
+            <div className="bg-slate-100 rounded-md p-1">Applied for:</div>
+            <div className="bg-slate-100 rounded-md text-green-700 font-semibold truncate ... md:w-[250px] md:ml-1">
               {roleData(item.roleId)?.name}
             </div>
           </div>
-          <div className="flex flex-row place-items-center bg-white rounded-md mt-2">
-            <div className="bg-white rounded-md p-1">Required Experience:</div>
-            <div className="bg-white rounded-md  text-green-700 font-semibold ml-2">
+          <div className="flex flex-row place-items-center bg-slate-100 rounded-md mt-2">
+            <div className="bg-slate-100 rounded-md p-1">Required Experience:</div>
+            <div className="bg-slate-100 rounded-md  text-green-700 font-semibold ml-2">
               {roleData(item.roleId)?.experience}
             </div>
           </div>
-          <div className="flex flex-row place-items-center bg-white rounded-md mt-2">
-            <div className="bg-white rounded-md p-1">Unit:</div>
+          {/* <div className="flex flex-row place-items-center bg-slate-100 rounded-md mt-2">
+            <div className="bg-slate-100 rounded-md p-1">Unit:</div>
             <div className="ml-2 text-green-700 font-semibold ">
               {roleData(item.roleId)?.unit}
             </div>
-          </div>
-          <div className="flex flex-row place-items-center bg-white rounded-md mt-2">
-            <div className="bg-white rounded-md p-1">Application Status:</div>
-            <div className="bg-white rounded-md  ml-2 text-green-700 font-semibold">
+          </div> */}
+          <div className="flex flex-row place-items-center bg-slate-100 rounded-md mt-2">
+            <div className="bg-slate-100 rounded-md p-1">Application Status:</div>
+            <div className="bg-slate-100 rounded-md  ml-2 text-green-700 font-semibold">
               {item?.status}
             </div>
           </div>
@@ -215,7 +221,7 @@ const Applicant = () => {
                   </Step>
                 </Stepper>
               </div>
-              <div className="flex justify-center md:mt-[10px]">
+              <div className="flex justify-center md:mt-[10px] mt-[20px]">
                 <Button
                   onClick={() => cancelPrompt(item?.id as string)}
                   className="bg-green-700 text-white"
@@ -238,7 +244,7 @@ const Applicant = () => {
     return candidates?.map((candidate: Candidate, idx: number) => (
       <TableRow key={idx} hover role="checkbox" tabIndex={-1} className="">
         <TableCell className="">{candidate?.jobName}</TableCell>
-        <TableCell className="">{roleData(candidate.roleId)?.unit}</TableCell>
+        {/* <TableCell className="">{roleData(candidate.roleId)?.unit}</TableCell> */}
         <TableCell className="">{candidate.applDate?.split("T")[0]}</TableCell>
         <TableCell className="">{candidate.stage}</TableCell>
         <TableCell className="">{candidate.status}</TableCell>
@@ -254,13 +260,13 @@ const Applicant = () => {
   };
 
   return (
-    <div>
+    <div className="bg-slate-100 h-[100vh] md:text-[16px] text-[14px]">
       <Navbar />
-      <div className="flex flex-row justify-between w-[100%] mt-[70px] px-6">
-        <Paper className="p-2 mb-4">
+      <div className="flex flex-row justify-between w-[100%] mt-[60px] px-6">
+        {/* <Paper className="p-2 mb-4">
           <p>Check your Application status</p>
-        </Paper>
-        <Paper className="md:h-[70px] bg-slate-100 p-1 w-[200px]">
+        </Paper> */}
+        <Paper className="md:h-[70px] bg-white p-1 w-[200px] mt-[10px]">
           <div className="flex flex-row justify-between">
             <IconButton
               onClick={() => setView("table")}
@@ -294,7 +300,7 @@ const Applicant = () => {
           />
         </Modal>
         {view == "table" ? (
-          <Paper className="md:h-[400px] bg-slate-100 m-6 p-4 w-[100%]">
+          <Paper className="md:h-[400px] bg-white m-6 p-4 w-[100%]">
             <div className={"flex justify-center"}>
               {/* {renderApplications()} */}
               <TableContainer className="overflow-y-auto md:h-[350px]">
@@ -302,7 +308,6 @@ const Applicant = () => {
                   <TableHead sx={{ display: "table-header-group" }}>
                     <TableRow>
                       <TableCell>Job Applied</TableCell>
-                      <TableCell>Unit</TableCell>
                       <TableCell>Application Date</TableCell>
                       <TableCell>Stage</TableCell>
                       <TableCell>Status</TableCell>
@@ -320,7 +325,7 @@ const Applicant = () => {
           <div
             className={
               candidates?.length > 1
-                ? "grid grid-cols-2 gap-[70px] justify-center p-6"
+                ? "grid md:grid-cols-2 md:gap-[70px] gap-4 justify-center p-6"
                 : "grid justify-center"
             }
           >
@@ -329,6 +334,9 @@ const Applicant = () => {
         ) : (
           <div></div>
         )}
+      </div>
+      <div>
+        <Footer />
       </div>
     </div>
   );

@@ -28,6 +28,9 @@ import { Role } from "../types/roles";
 import { useReactToPrint } from "react-to-print";
 import { ScheduleInterview } from "./interviews/add";
 import { Notifier } from "./notifier";
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
 
@@ -96,7 +99,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     setNumPages(numPages);
     if (numPages > 1) {
       setTimeout(() => {
-        setPage(2);
+        setPage(1);
       }, 0);
     }
   };
@@ -165,6 +168,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       flag: e.target.value,
       roleName: role.name,
     };
+
     Axios.post(`${process.env.NEXT_PUBLIC_FLAG_CANDIDATE}`, body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200) {
@@ -235,11 +239,23 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
     {
       name: "Job Role Applied",
-      value: role?.name,
+      value: data?.jobName,
     },
     {
       name: "Phone Number",
       value: data?.phone,
+    },
+    {
+      name: "Email Address",
+      value: data?.email
+    },
+    {
+      name: "House Address",
+      value: data?.address
+    },
+    {
+      name: "Marital Status",
+      value: data?.maritalStatus
     },
     {
       name: "Application Stage",
@@ -255,7 +271,15 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
     {
       name: "Temporary Id",
-      value: data?.tempId ?? "Not hired",
+      value: `TSN${data?.tempId}` ?? "Not hired",
+    },
+    {
+      name: "State",
+      value: data?.state,
+    },
+    {
+      name: "LGA",
+      value: data?.lga,
     },
   ];
 
@@ -284,6 +308,18 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         <p className="capitalize mt-4">comment: {item?.comment}</p>
       </div>
     ))
+  }
+
+  const nextPage = () => {
+    if(page < numPages) {
+      setPage((page) => page + 1)
+    }
+  }
+
+  const prevPage = () => {
+    if(page <= numPages) {
+      setPage((page) => page - 1)
+    }
   }
 
   //* renders candidate education information
@@ -519,7 +555,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         <FormControl className="">
           <InputLabel className="text-sm">Flag Candidate</InputLabel>
           <Select
-            disabled={data.status == "Pending" ? false : true}
+            disabled={data.status == "Hired" ? true : false}
             value={flag}
             onChange={handleFlag}
             className="w-[120px] text-black bg-white h-[50px]"
@@ -565,7 +601,8 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         onClose={closeModal}
         className="flex justify-center"
       >
-        <div className="w-[600px] h-[700px] flex justify-center overflow-scroll">
+        <div className="">
+        <div className="w-[550px] sticky top-0 h-[90vh] flex flex-col justify-center overflow-scroll">
           <Document
             className="h-[200px]"
             onLoadError={(e) => console.log(e)}
@@ -576,6 +613,40 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             <Page pageNumber={page} height={800} />
           </Document>
         </div>
+
+        <div className="bg-white h-[60px] w-[550px] flex flex-row justify-between place-items-center">
+          <div className="flex flex-row w-[70%] justify-between place-items-center ">
+      <div className="flex flex-row justify-center place-items-center">
+        <IconButton onClick={prevPage}>
+        <ArrowBackIosNewIcon className="text-green-700" />
+        </IconButton>
+        <p>prev Page</p>
+      </div>
+        <div className="flex flex-row gap-2 place-content-center">
+        <p className="text-[18px] text-green-700 font-semibold">
+          {numPages}
+        </p>
+        <p>
+          Pages
+        </p>
+        </div>
+      <div className="flex flex-row justify-center place-items-center">
+        <p>next Page</p>
+        <IconButton onClick={nextPage}>
+        <ArrowForwardIosIcon className="text-green-700" />
+        </IconButton>
+      </div>
+    </div>
+    <div className="flex flex-row gap-2">
+      <p>
+      Page
+      </p>
+      <p className="bg-green-300 w-[60px] h-[30px] flex justify-center">
+          {page}
+      </p>
+    </div>
+          </div>
+        </div>
       </Modal>
       {/* modal for scheduling interviews */}
       <Modal
@@ -584,7 +655,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         className="flex justify-center"
       >
         {/* component for adding new schedules */}
-        <ScheduleInterview candidate={data} role={role} />
+        <ScheduleInterview close={() => setInterview(false)} candidate={data} role={role} />
       </Modal>
     </div>
   );

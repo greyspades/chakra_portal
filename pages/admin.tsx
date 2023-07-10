@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react";
-import { Button } from "@mui/material";
+import { Button, Modal } from "@mui/material";
 import { AdminOptions } from "../types/options";
 import { Navbar } from "../components/navbar";
 import ContactsIcon from "@mui/icons-material/Contacts";
@@ -14,10 +14,14 @@ import GroupsIcon from "@mui/icons-material/Groups";
 import FlagIcon from "@mui/icons-material/Flag";
 import { useRouter } from "next/router";
 import { MainContext } from "../context";
+import { Notifier } from "../components/notifier";
 
 const Admin = () => {
   const [currentIdx, setCurrentIdx] = useState<number>(0);
   const [authenticated, setAuthenticated] = useState<boolean>(false);
+  const [status, setStatus] = useState<{ [key: string]: any }>({
+    open: false,
+  });
 
   const router = useRouter();
 
@@ -87,11 +91,44 @@ const Admin = () => {
     }
   };
 
+  const clearStatus = () => {
+    setStatus({ open: false });
+};
+
+  const logOut = () => {
+    sessionStorage.removeItem("auth")
+    router.replace("/")
+  }
+
+  const showNav = () => {
+    setStatus({
+      open: true,
+      topic: "Unsuccsessful",
+      content: "Are you sure you want to log out?",
+      hasNext: true
+    });
+  }
+
   return (
     <div className="">
-      <Navbar />
+      <Navbar logOut={showNav} />
+      <Modal
+        className="flex justify-center"
+        open={status?.open ? true : false}
+        onClose={clearStatus}
+      >
+        <div>
+        <Notifier
+          hasNext={status?.hasNext}
+          topic={status?.topic ?? ""}
+          content={status?.content ?? ""}
+          close={clearStatus}
+          other={logOut}
+        />
+        </div>
+      </Modal>
       {authenticated && (
-        <div className="grid md:grid-cols-6 md:mt-[60px] h-[100%] gap-8 capitalize">
+        <div className=" grid md:grid-cols-6 md:mt-[60px] h-[100%] gap-8 capitalize">
           <div className="grid md:col-span-1 bg-slate-100 h-[180%]">
             <div className="bg-slate-100 p-4 h-[100%] fixed">
               {options.map((options: AdminOptions, idx) => (

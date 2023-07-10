@@ -149,16 +149,16 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   const renderExperience = () => {
     return expForm?.map((item: any, idx: number) => {
       return (
-        <div key={idx} className="grid justify-center ">
+        <div key={idx} className="grid md:px-4 mt-4">
           <div className="grid justify-end">
             <IconButton
-              className="bg-white h-[35px] w-[35px] mt-[-20px] mb-[20px]"
+              className="bg-green-300 h-[35px] w-[35px] md:mb-[-20px]"
               onClick={() => removeExp(idx)}
             >
               <CloseIcon className="w-[15px] h-[15px]" />
             </IconButton>
           </div>
-          <div className="flex flex-row gap-2">
+          <div className="flex md:flex-row flex-col md:gap-2 gap-4">
             <FormControl>
               <InputLabel className="flex flex-row ml-[-10px]">
                 <p className="mr-2 text-red-700 text-[13px]">*</p>
@@ -168,7 +168,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 placeholder="Employer"
                 value={item.employer}
                 onChange={(e) => handleExpChange("employer", idx, e)}
-                className="bg-white rounded-md h-[40px] w-[230px] p-4"
+                disableUnderline
+                // className="bg-white rounded-md h-[40px] w-[230px] p-4"
+                className="h-[40px] md:w-[100%] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
                 startAdornment={
                   <InputAdornment position="start">
                     <BusinessIcon className="text-green-700" />
@@ -185,7 +187,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 placeholder="Title"
                 value={item.title}
                 onChange={(e) => handleExpChange("title", idx, e)}
-                className="bg-white rounded-md h-[40px] w-[230px] p-4"
+                disableUnderline
+                // className="bg-white rounded-md h-[40px] w-[230px] p-4"
+                className="h-[40px] md:w-[100%] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
                 startAdornment={
                   <InputAdornment position="start">
                     <WorkOutlineIcon className="text-green-700" />
@@ -193,7 +197,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 }
               />
             </FormControl>
-            <FormControl>
+            <div className="flex flex-row md:gap-2 gap-2 md:mt-0 mt-2">
+            <FormControl className="">
               <InputLabel className="flex flex-row ml-[-10px]">
                 <p className="mr-2 text-red-700 text-[13px]">*</p>
                 Start Date
@@ -203,7 +208,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 value={item.startDate}
                 type="date"
                 onChange={(e) => handleExpChange("startDate", idx, e)}
-                className="bg-white rounded-md h-[40px] w-[190px] p-4"
+                disableUnderline
+                className="h-[40px] md:w-[100%] w-[140px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
                 startAdornment={
                   <InputAdornment position="start">
                     <CalendarTodayIcon className="text-green-700" />
@@ -211,7 +217,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 }
               />
             </FormControl>
-            <FormControl>
+            <FormControl className="">
               <InputLabel className="flex flex-row ml-[-10px]">
                 <p className="mr-2 text-red-700 text-[13px]">*</p>
                 End Date
@@ -222,7 +228,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 value={item.endDate}
                 type="date"
                 onChange={(e) => handleExpChange("endDate", idx, e)}
-                className="bg-white rounded-md h-[40px] w-[190px] p-4"
+                disableUnderline
+                // className="bg-white rounded-md h-[40px] w-[190px] p-4"
+                className="h-[40px] md:w-[100%] w-[140px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
                 startAdornment={
                   <InputAdornment position="start">
                     <CalendarTodayIcon className="text-green-700" />
@@ -240,11 +248,13 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 onClick={(e) => handleExpChange("isCurrent", idx, e)}
               />
             </FormControl>
+            </div>
           </div>
           <TextField
             placeholder="Job Description"
             value={item.description}
-            className="bg-white rounded-md  w-[100%] mt-[7px] "
+            // className="bg-white rounded-md  w-[100%] mt-[7px] "
+            className="w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline shadow-lg mt-[7px]"
             onChange={(e) => handleExpChange("description", idx, e)}
             minRows={4}
             multiline
@@ -319,13 +329,13 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
       <div key={idx} className="mt-4">
         <div className="grid justify-end">
           <IconButton
-            className="bg-white h-[35px] w-[35px]"
+            className="bg-green-300 h-[35px] w-[35px]"
             onClick={() => removeEdu(idx)}
           >
             <CloseIcon className="w-[15px] h-[15px]" />
           </IconButton>
         </div>
-        <div className="grid grid-cols-2 mt-[-10px]">
+        <div className="grid md:grid-cols-2 mt-[-10px]">
           <FormControl>
             <InputLabel className="flex flex-row ml-[-10px]">
               <p className="mr-2 text-red-700 text-[13px]">*</p>
@@ -335,7 +345,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               value={item.school}
               placeholder="School Attended"
               onChange={(e) => addEdu("school", e, idx)}
-              className="bg-white w-[400px] h-[40px] px-2 mb-4"
+              disableUnderline
+              // className="bg-white w-[400px] h-[40px] px-2 mb-4"
+              className="h-[40px] md:w-[350px] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
               startAdornment={
                 <InputAdornment position="start">
                   <SchoolIcon className="text-green-700" />
@@ -352,7 +364,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               value={item.course}
               placeholder="Course of Study"
               onChange={(e) => addEdu("course", e, idx)}
-              className="bg-white w-[400px] h-[40px] px-2 mb-4"
+              disableUnderline
+              // className="bg-white w-[400px] h-[40px] px-2 mb-4"
+              className="h-[40px] md:w-[350px] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
               startAdornment={
                 <InputAdornment position="start">
                   <BookIcon className="text-green-700" />
@@ -360,7 +374,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               }
             />
           </FormControl>
-          <FormControl>
+              <div className="flex flex-row md:gap-[50%] gap-2 md:mt-4">
+              <FormControl>
             <InputLabel className="flex flex-row ml-[-10px]">
               <p className="mr-2 text-red-700 text-[13px]">*</p>
               Graduation Date
@@ -370,7 +385,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               placeholder="Graduation Date"
               type="date"
               onChange={(e) => addEdu("graduationDate", e, idx)}
-              className="bg-white w-[180px] h-[40px] px-2 mb-4"
+              disableUnderline
+              // className="bg-white w-[180px] h-[40px] px-2 mb-4"
+              className="h-[40px] md:w-[180px] w-[170px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
               startAdornment={
                 <InputAdornment position="start">
                   <CalendarTodayIcon className="text-green-700" />
@@ -393,7 +410,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
             <Select
               value={item.degree}
               onChange={(e) => addEdu("degree", e, idx)}
-              className="w-[150px] text-black bg-white h-[40px] mt-4"
+              disableUnderline
+              // className="w-[150px] text-black bg-white h-[40px] mt-4"
+              className="h-[40px] w-[150px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mt-4"
               label="Experience"
               placeholder="Experience"
               size="small"
@@ -405,6 +424,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               ))}
             </Select>
           </FormControl>
+              </div>
           {item?.hasCert && (
             <div className="mt-[15px]">
               <FormControl>
@@ -414,7 +434,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   placeholder="Certification"
                   type="text"
                   onChange={(e) => addEdu("certification", e, idx)}
-                  className="bg-white w-[400px] h-[40px] px-2 mb-4s"
+                  disableUnderline
+                  // className="bg-white w-[400px] h-[40px] px-2 mb-4"
+                  className="h-[40px] md:w-[350px] w-[280px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
                   startAdornment={
                     <InputAdornment position="start">
                       <ArticleIcon className="text-green-700" />
@@ -423,7 +445,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 />
               </FormControl>
               <IconButton
-                className="bg-white h-[25px] w-[25px] ml-[15px]"
+                className="bg-green-300 h-[25px] w-[25px] ml-[15px]"
                 onClick={() => removeCert(idx)}
               >
                 <CloseIcon className="h-[15px] w-[15px]" />
@@ -497,12 +519,13 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
       <div key={idx} className="flex flex-row align-middle">
         <input
           value={item}
-          className="bg-white w-[200px] h-[40px] px-2 mb-4 rounded-md border-b-transparent"
+          // className="bg-white w-[200px] h-[40px] px-2 mb-4 rounded-md border-b-transparent"
+          className="md:w-[200px] w-[160px] h-[40px] bg-white border-green-700 border-solid border-2 rounded-md no-underline shadow-lg mb-4 px-2"
           onChange={(e) => addKill(e, idx)}
           placeholder="skill"
         />
         <IconButton
-          className="mt-[-11px] ml-[-7px] mr-[35px] bg-white h-[10px] w-[10px]"
+          className="mt-[-11px] ml-[-7px] mr-[35px] bg-green-300 h-[10px] w-[10px]"
           onClick={() => removeSkill(idx)}
         >
           <CloseIcon className="w-[13px] h-[13px]" />
@@ -515,7 +538,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   const clearStatus = () => setStatus({ open: false });
 
   return (
-    <div>
+    <div className="">
       <Modal
         className="flex justify-center"
         open={status?.open ? true : false}
@@ -527,8 +550,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
           close={clearStatus}
         />
       </Modal>
-      <Paper className="flex flex-col w-[80vw] justify-items-center md:h-[90vh] bg-slate-100 overflow-y-scroll pb-10">
-        <p className="text-center font-bold text-xl mt-4 mb-4">
+      <Paper className="flex flex-col justify-items-center md:h-[90vh] bg-white overflow-y-scroll pb-[100px] m-2 md:px-6">
+        <p className="text-center font-bold text-xl mt-4 mb-[40px]">
           Personal Information
         </p>
         {basicInfo && (
@@ -676,7 +699,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
             >
               {({ handleSubmit, handleChange, values, errors }) => (
                 <div className="grid justify-items-center">
-                  <div className="flex flex-row gap-3">
+                  <div className="flex md:flex-row flex-col gap-3">
                     <FormControl>
                       <InputLabel className="w-[100%] flex flex-row">
                         First Name
@@ -686,7 +709,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         readOnly
                         value={values.firstName}
                         onChange={handleChange("firstName")}
-                        className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
+                        disableUnderline
+                        // className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
+                        className="h-[40px] md:w-[100%] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         startAdornment={
                           <InputAdornment position="start">
                             <PersonIcon className="text-green-700" />
@@ -706,8 +731,10 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         placeholder="Other Name"
                         readOnly
                         value={values.otherName}
+                        disableUnderline
                         onChange={handleChange("otherName")}
-                        className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
+                        // className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
+                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         startAdornment={
                           <InputAdornment position="start">
                             <PersonIcon className="text-green-700" />
@@ -727,8 +754,10 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         placeholder="Last name"
                         readOnly
                         value={values.lastName}
+                        disableUnderline
                         onChange={handleChange("lastName")}
-                        className="bg-white rounded-md h-[40px] w-[270px] p-4 mb-0 m-1"
+                        // className="bg-white rounded-md h-[40px] w-[270px] p-4 mb-0 m-1"
+                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         startAdornment={
                           <InputAdornment position="start">
                             <PersonIcon className="text-green-700" />
@@ -740,7 +769,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       </div>
                     </FormControl>
                   </div>
-                  <div className="flex flex-row gap-6 mt-4">
+                  <div className="flex md:flex-row flex-col gap-6 mt-4">
                     <FormControl>
                       <InputLabel className="w-[100%] flex flex-row">
                         Email
@@ -749,8 +778,10 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         placeholder="Email Address"
                         readOnly
                         value={values.email}
+                        disableUnderline
                         onChange={handleChange("email")}
-                        className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
+                        // className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
+                        className="h-[40px] md:w-[300px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         startAdornment={
                           <InputAdornment position="start">
                             <EmailIcon className="text-green-700" />
@@ -770,7 +801,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         readOnly
                         value={values.phone}
                         onChange={handleChange("phone")}
-                        className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
+                        disableUnderline
+                        // className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
+                        className="h-[40px] md:w-[300px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         startAdornment={
                           <InputAdornment position="start">
                             <PhoneIcon className="text-green-700" />
@@ -782,7 +815,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       </div>
                     </FormControl>
                   </div>
-                  <div className="flex flex-row gap-2 mt-4">
+                  <div className="flex md:flex-row flex-col gap-2 mt-4">
                     <FormControl>
                       <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
                         Date of Birth
@@ -792,8 +825,10 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         readOnly
                         value={values.dob}
                         type="date"
+                        disableUnderline
                         onChange={handleChange("dob")}
-                        className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 mb-0 m-3"
+                        // className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 mb-0 m-3"
+                        className="h-[40px] md:w-[200px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         startAdornment={
                           <InputAdornment position="start">
                             <CalendarTodayIcon className="text-green-700" />
@@ -811,7 +846,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       <Select
                         value={gender}
                         onChange={(e) => setGender(e.target.value)}
-                        className="w-[100px] text-black bg-white h-[40px] mt-1"
+                        // className="w-[100px] text-black bg-white h-[40px] mt-1"
+                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                         label="Experience"
                         placeholder="Gender"
                         size="small"
@@ -841,11 +877,13 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         required
                         type="file"
                         onChange={handleFileChange}
-                        className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 m-3"
+                        disableUnderline
+                        // className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 m-3"
+                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
                       />
                       {fileError && (
                         <div>
-                          <p className="text-red-600 text-[10px] mt-[-10px] ml-[10px]">
+                          <p className="text-red-600 text-[10px] ml-[10px]">
                             {fileError}
                           </p>
                         </div>
@@ -854,8 +892,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   </div>
 
                   <FormControl className="w-[93%] my-[20px]">
-                    <div className="flex flex-row ml-[-10px] text-[13px] mb-1">
-                      <p className="mr-2 text-red-700 text-[13px]">*</p>
+                    <div className="flex flex-row md:ml-[-10px] text-[13px] mb-1">
+                      <p className="md:mr-2 text-red-700 text-[13px]">*</p>
                       <p className="text-gray-600">Cover Letter</p>
                     </div>
                     <TextField
@@ -863,7 +901,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       onChange={handleChange("coverLetter")}
                       multiline
                       rows={4}
-                      className="bg-white w-[100%]"
+                      // className="bg-white w-[100%]"
+                      className=" bg-white w-[100%] border-green-700 border-solid border-2 rounded-md no-underline shadow-lg"
                       placeholder="Cover Letter"
                     />
                     <div className="text-red-600 text-[10px] ml-4">
@@ -872,8 +911,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   </FormControl>
 
                   <div className="w-[100%]">
-                    <Divider className="bg-green-700 h-[2px] mx-6" />
-                    <p className="font-bold pl-7 mb-2 mt-2">Work Experience</p>
+                    <Divider className="bg-green-700 h-[2px] md:mx-6 mx-2" />
+                    <p className="font-bold pl-7 mt-2">Work Experience</p>
                     <div className="p-4">{renderExperience()}</div>
                     <Button
                       onClick={addExpField}
@@ -885,9 +924,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   </div>
 
                   <div className="w-[100%]">
-                    <Divider className="bg-green-700 h-[2px] mx-6" />
+                    <Divider className="bg-green-700 h-[2px] md:mx-6 mx-2" />
                     <p className="mb-6 font-bold pl-7 mt-4">Skills</p>
-                    <div className="grid grid-cols-4 px-6">
+                    <div className="grid md:grid-cols-4 grid-cols-2 md:px-6 px-2 md:gap-12 gap-2">
                       {renderSkills()}
                     </div>
                     <Button
@@ -899,11 +938,11 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                     </Button>
                   </div>
                   <div className="w-[100%]">
-                    <Divider className="bg-green-700 h-[2px] mx-6" />
-                    <p className="font-bold pl-7 mt-4">
+                    <Divider className="bg-green-700 h-[2px] md:mx-6 mx-2" />
+                    <p className="font-bold pl-7 mt-4 mb-6">
                       Education/Certifications
                     </p>
-                    <div className="mx-6">{renderEducation()}</div>
+                    <div className="md:mx-6 mx-2">{renderEducation()}</div>
                     <Button
                       onClick={addEduField}
                       className="flex flex-row text-green-700 align-middle pl-6 capitalize"
@@ -912,6 +951,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       <AddIcon />
                     </Button>
                   </div>
+                  <div className="md:mt-[30px] mt-[50px]">
                   <Button
                     className="bg-green-700 text-white w-[150px]"
                     onClick={() => handleSubmit()}
@@ -925,6 +965,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       <p>Submit</p>
                     )}
                   </Button>
+                  </div>
                   {genError && (
                     <div className="p-4">
                     <p className="text-red-600 text-[11px]">Please fill out the missing fields</p>

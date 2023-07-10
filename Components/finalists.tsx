@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { Paper, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Divider, IconButton, Input, Dialog, Table, TableHead, TableBody , TableContainer, TableRow, TableCell , Button, CircularProgress, Modal } from "@mui/material"
+import { Paper, FormControl, InputLabel, Select, MenuItem, SelectChangeEvent, Divider, IconButton, Input, Dialog, Table, TableHead, TableBody , TableContainer, TableRow, TableCell , Button, CircularProgress, Modal, ToggleButton, FormControlLabel, Checkbox, TableFooter, TablePagination } from "@mui/material"
 import axios, { AxiosError, AxiosResponse } from 'axios';
 import { Candidate } from '../types/candidate';
 import { Role } from '../types/roles';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import { Applicant } from './applicant';
 import { Notifier } from './notifier';
+import { Formik } from 'formik';
+import { AcceptanceInfoValidation } from '../helpers/validation';
 
 export const Finalists = () => {
     const [candidates, setCandidates] = useState<Candidate[]>();
@@ -18,9 +20,15 @@ export const Finalists = () => {
     const [tempId, setTempId] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(false);
     const [searchVal, setSearchVal] = useState<string>("");
+    const [sendMail, setSendMail] = useState<boolean>(false);
+    const [selRole, setSelRole] = useState<Role>()
     const [status, setStatus] = useState<{ [key: string]: any }>({
       open: false,
     });
+    const [inputType, setInputType] = useState<string>("text");
+    const [dataCount, setDataCount] = useState<number>();
+    const [page, setPage] = useState<number>(0);
+    const [take, setTake] = useState<number>(10)
     
     const [metaData, setMetadata] = useState<{[key: string]: any}>({
       rank: "",
@@ -29,13 +37,20 @@ export const Finalists = () => {
       startDate: "",
       salary: "",
       city: "",
-      salWords: ""
+      salWords: "",
+      sendMail: false
     });
 
     //* gets all active roles
     useEffect(() => {
-        axios.get(process.env.NEXT_PUBLIC_GET_ACTIVE_ROLES as string).then((res: AxiosResponse) => {
+      let body = {
+        value: "",
+        page: 0,
+      }
+        axios.post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res: AxiosResponse) => {
           setRoles(res.data.data);
+        }).catch((err: AxiosError) => {
+          console.log(err.message)
         });
         // eslint-disable-next-line react-hooks/exhaustive-deps
       }, []);
@@ -44,14 +59,19 @@ export const Finalists = () => {
     const getCandidates = () => {
       let body = {
         stage: "3",
-        roleId
+        roleId,
+        page,
+        take
     }
     axios.post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_STAGE as string, body)
     .then((res: AxiosResponse) => {
       console.log(res.data)
         if(res.data.code == 200) {
             setCandidates(res.data.data);
+            setDataCount(res.data.count)
         }
+    }).catch((err: AxiosError) => {
+      console.log(err.message)
     })
     }
 
@@ -73,6 +93,8 @@ export const Finalists = () => {
 
       const handleCandidateSelc = (item: Candidate) => {
         setSelctCandidate(item);
+        let role = roles?.find((r: Role) => r.id == item.roleId);
+        setSelRole(role);
         setModalOpen("applicant");
       }
 
@@ -186,14 +208,29 @@ export const Finalists = () => {
           update[key] = e.target.value
           setMetadata(update)
         }
-      } else if(key == "salary") {
-        return
+      } else if(key == "sendMail") {
+        update[key] = !update[key]
+        setMetadata(update)
       }
       else {
         update[key] = e.target.value
         setMetadata(update)
       }
     }
+
+    const handleTakeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+      var takeVal = parseInt(e.target.value);
+      setTake(takeVal);
+      getCandidates()
+    };
+
+    const handleChangePage = (
+      event: React.MouseEvent<HTMLButtonElement> | null,
+      value: number
+    ) => {
+      setPage(value);
+      getCandidates()
+    };
 
 
   return (
@@ -237,78 +274,203 @@ export const Finalists = () => {
         </div>
       </Modal>
       <Modal className='flex justify-center' open={modalOpen == "hire" ? true : false} onClose={closeModal}>
-        <div className='bg-slate-100 p-6 w-[550px] h-[430px] mt-[60px] rounded-md'>
+        <div className='bg-slate-100 p-6 w-[550px] h-[70vh] mt-[60px] rounded-md'>
             <div>
               <p>
                 Acceptance information
               </p>
             </div>
-            <div className='flex flex-row justify-between mt-6'>
+            <form>
+              <Formik validationSchema={AcceptanceInfoValidation} initialValues={{state: selctCandidate?.state, reportTo: "", startDate: "", rank: "", salary: "", location: selRole?.location, salWords: ""}} onSubmit={(value) => {
+                
+                if(selctCandidate?.status != "Hired") {
+                  setLoading(true);
+                  let body = {
+                    reportTo: value.reportTo,
+                    city: value.state,
+                    startDate: value.startDate,
+                    rank: value.rank,
+                    salary: value.salary.slice(0, 1) + "," + value.salary.slice(1),
+                    location: value.location,
+                    salWords: value.salWords,
+                    sendMail: metaData?.sendMail,
+                    id:selctCandidate?.id
+                  }
+                  // console.log(body)
+                  axios.post(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
+                  .then((res: AxiosResponse) => {
+                    if(res.data.code == 200) {
+                      setTempId(res.data.data);
+                      setLoading(false);
+                      setStatus({
+                        open: true,
+                        topic: "Successful",
+                        content: res.data.message,
+                        hasNext: false,
+                      });
+                      closeModal()
+                    }
+                  })
+                  .catch((err: AxiosError) => {
+                    setLoading(false);
+                    console.log(err.message)
+                    console.log(err.cause);
+                    setStatus({
+                      open: true,
+                      topic: "Unsuccessful",
+                      content: err.message,
+                      hasNext: false,
+                    });
+                  })
+                }
+                
+              }}>{({handleSubmit, handleChange, values, errors}) => (
+                <div>
+                  <div className='flex flex-row justify-between mt-6'>
+            <FormControl>
+              <InputLabel>
+                State of residence
+              </InputLabel>
             <Input
-                value={metaData.city}
-                onChange={(e) => handleMetaChange("city", e)}
+                value={values.state}
+                onChange={handleChange("state")}
                 className="bg-white h-[40px] w-[240px] px-2"
                 placeholder='city'
               />
+              <div className="text-red-600 text-[10px] ml-4">
+                {errors.state as any}
+              </div>
+            </FormControl>
 
+              <FormControl>
+              <InputLabel>
+                Rank
+              </InputLabel>
               <Input
-                value={metaData.rank}
-                onChange={(e) => handleMetaChange("rank", e)}
+                value={values.rank}
+                onChange={handleChange("rank")}
                 className="bg-white h-[40px] w-[240px] px-2"
                 placeholder='rank'
               />
+              <div className="text-red-600 text-[10px] ml-4">
+                {errors.rank as any}
+              </div>
+              </FormControl>
             </div>
             <div className='flex flex-row justify-between mt-6'>
+              <FormControl>
+              <InputLabel>
+                Reports to
+              </InputLabel>
               <Input
-                value={metaData.reportTo}
-                onChange={(e) => handleMetaChange("reportTo", e)}
+                value={values.reportTo}
+                onChange={handleChange("reportTo")}
                 className="bg-white h-[40px] w-[240px] px-2"
                 placeholder='report to'
               />
+              <div className="text-red-600 text-[10px] ml-4">
+                {errors.reportTo as any}
+              </div>
+              </FormControl>
 
+              <FormControl>
+              <InputLabel>
+                Location
+              </InputLabel>
               <Input
-                value={metaData.location}
-                onChange={(e) => handleMetaChange("location", e)}
+                value={values.location}
+                onChange={handleChange("location")}
                 className="bg-white h-[40px] w-[240px] px-2"
                 placeholder='location'
               />
+              <div className="text-red-600 text-[10px] ml-4">
+                {errors.location as any}
+              </div>
+              </FormControl>
             </div>
             <div className='flex flex-row justify-between mt-6'>
+              <FormControl>
+              <InputLabel>
+                Start date
+              </InputLabel>
               <Input
-                value={metaData.startDate}
-                onChange={(e) => handleMetaChange("startDate", e)}
+                value={values.startDate}
+                onChange={handleChange("startDate")}
                 className="bg-white h-[40px] w-[240px] px-2"
-                placeholder='start date'
-                type='date'
+                placeholder="start date"
+                type={inputType}
+                onFocus={() => setInputType("date")}
+                onBlur={() => setInputType("text")}
               />
+              <div className="text-red-600 text-[10px] ml-4">
+                {errors.startDate as any}
+              </div>
+              </FormControl>
 
+              <FormControl>
+              <InputLabel>
+                Salary
+              </InputLabel>
               <Input
-                value={metaData.salary}
-                onChange={(e) => handleMetaChange("salary", e)}
+                value={values.salary}
+                onChange={handleChange("salary")}
                 className="bg-white h-[40px] w-[240px] px-2"
                 placeholder='salary'
               />
+              <div className="text-red-600 text-[10px] ml-4">
+                {errors.salary as any}
+              </div>
+              </FormControl>
                 
             </div>
 
             <div className='flex flex-row justify-between mt-6'>
-            <Input
-                value={metaData.salWords}
-                onChange={(e) => handleMetaChange("salWords", e)}
-                className="bg-white h-[40px] w-[100%] px-2"
-                placeholder='salary in words'
+              <FormControl className='w-[80%]'>
+              <InputLabel>
+                Salary in words
+              </InputLabel>
+              <Input
+                  value={values?.salWords}
+                  onChange={handleChange("salWords")}
+                  className="bg-white h-[40px] w-[100%] px-2"
+                  placeholder='salary in words'
+                />
+                <div className="text-red-600 text-[10px] ml-4">
+                {errors.salWords as any}
+              </div>
+              </FormControl>
+
+              <FormControlLabel
+              className=''
+                control={
+                  <Checkbox
+                    checked={metaData?.sendMail}
+                    onChange={(e) => handleMetaChange("sendMail", e)}
+                  />
+                }
+                classes={{
+                  label: "text-[10px]"
+                }}
+                labelPlacement="start"
+                label="Send Email"
               />
             </div>
 
             <div className='flex justify-center mt-8'>
-              <Button onClick={hireCandidate} className='bg-green-700 h-[50px] w-[400px] text-white capitalize'>
+              <Button onClick={handleSubmit as any} className='bg-green-700 h-[50px] w-[400px] text-white capitalize'>
                 {loading ? <CircularProgress className='w-[30px] h-[30px] text-white' thickness={7} /> : <p>Hire candidate</p>}
               </Button>
             </div>
+                </div>
+              )}
+
+              </Formik>
+            </form>
+            
         </div>
 
       </Modal>
-      <Paper className={!viewing ? "md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed" : "md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[97%]"}>
+      <Paper className={!viewing ? "md:h-[90vh] bg-slate-100 p-6 align-middle md:mt-[30px] w-[79%] md:fixed" : "md:h-auto bg-slate-100 p-6 align-middle md:mt-[30px] w-[97%]"}>
             {!viewing && (
               <div>
                               <div>
@@ -326,9 +488,11 @@ export const Finalists = () => {
  label="Experience"
  placeholder="Experience"
  size="small"
- >{roles?.map((item: Role, idx: number) => (
+ >{roles ? roles?.map((item: Role, idx: number) => (
    <MenuItem key={idx} className='text-black' value={item.id}>{item.name}</MenuItem>
- ))}
+ )) : <div className="flex justify-center">
+ <CircularProgress className="w-[30px] h-[30px] text-green-700" />
+</div>}
  </Select>
  </FormControl>
  <FormControl className='mt-[-15px]'>
@@ -342,13 +506,14 @@ export const Finalists = () => {
     className='w-[160px] h-[50px] bg-white'
   />
  </FormControl>
- <IconButton onClick={refresh} className='bg-white w-[60px] h-[50px] rounded-sm'>
+ <IconButton onClick={refresh} className="bg-white w-[60px] h-[50px] rounded-sm flex flex-col">
+ <p className="text-[11px]">Refresh</p>
    <RefreshIcon className='text-green-700' />
  </IconButton>
    </div>
    <Divider variant='fullWidth' className='bg-green-700 h-[2px] mt-2' />
    <div>
-   <TableContainer className="overflow-y-auto md:h-[350px]">
+   <TableContainer className="overflow-y-auto">
      <Table stickyHeader className="">
      <TableHead sx={{ display: "table-header-group" }}>
    <TableRow>
@@ -372,6 +537,24 @@ export const Finalists = () => {
  <TableBody className=''>
      {displayCandidates()}
      </TableBody>
+     <TableFooter>
+                  <TableRow>
+                    <TablePagination
+                      colSpan={6}
+                      count={dataCount}
+                      rowsPerPage={take}
+                      page={page}
+                      SelectProps={{
+                        inputProps: {
+                          "aria-label": "rows per page",
+                        },
+                        native: true,
+                      }}
+                      onPageChange={handleChangePage}
+                      onRowsPerPageChange={handleTakeChange}
+                    />
+                  </TableRow>
+                </TableFooter>
      </Table>
    </TableContainer>
    </div>
