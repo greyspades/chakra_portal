@@ -3,16 +3,10 @@ import Axios, { AxiosError, AxiosResponse } from "axios";
 import { Formik } from "formik";
 import {
   Button,
-  Input,
-  InputAdornment,
   Paper,
-  TextField,
   CircularProgress,
   IconButton,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   Modal,
   Radio,
 } from "@mui/material";
@@ -27,14 +21,15 @@ import BusinessIcon from "@mui/icons-material/Business";
 import WorkOutlineIcon from "@mui/icons-material/WorkOutline";
 import Divider from "@mui/material/Divider";
 import AddIcon from "@mui/icons-material/Add";
-import SchoolIcon from "@mui/icons-material/School";
 import BookIcon from "@mui/icons-material/Book";
 import CloseIcon from "@mui/icons-material/Close";
 import { ApplicationValidation } from "../helpers/validation";
 import { Candidate } from "../types/candidate";
 import { Notifier } from "./notifier";
 import ArticleIcon from "@mui/icons-material/Article";
-import exp from "constants";
+import { CustomInput } from "./customInput";
+import CryptoJS from "crypto-js";
+
 
 export const Application: FC<Role> = ({ name, id }: Role) => {
   const [info, setInfo] = useState<{
@@ -83,7 +78,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
 
   //* gets basic user info from session storage
   useEffect(() => {
-    let data = JSON.parse(sessionStorage.getItem("cred") ?? "");
+    const bytes = CryptoJS.AES.decrypt(sessionStorage.getItem("cred") ?? "", process.env.NEXT_PUBLIC_AES_KEY);
+    const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
     if (data) {
       setBasicInfo(data);
       setGender(data?.gender);
@@ -150,96 +146,53 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
     return expForm?.map((item: any, idx: number) => {
       return (
         <div key={idx} className="grid md:px-4 mt-4">
-          <div className="grid justify-end">
+          <div className="grid justify-end mb-[20px]">
             <IconButton
-              className="bg-green-300 h-[35px] w-[35px] md:mb-[-20px]"
+              className="bg-green-300 h-[35px] w-[35px]"
               onClick={() => removeExp(idx)}
             >
               <CloseIcon className="w-[15px] h-[15px]" />
             </IconButton>
           </div>
           <div className="flex md:flex-row flex-col md:gap-2 gap-4">
-            <FormControl>
-              <InputLabel className="flex flex-row ml-[-10px]">
-                <p className="mr-2 text-red-700 text-[13px]">*</p>
-                Employer
-              </InputLabel>
-              <Input
-                placeholder="Employer"
-                value={item.employer}
-                onChange={(e) => handleExpChange("employer", idx, e)}
-                disableUnderline
-                // className="bg-white rounded-md h-[40px] w-[230px] p-4"
-                className="h-[40px] md:w-[100%] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
-                startAdornment={
-                  <InputAdornment position="start">
-                    <BusinessIcon className="text-green-700" />
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-            <FormControl>
-              <InputLabel className="flex flex-row ml-[-10px]">
-                <p className="mr-2 text-red-700 text-[13px]">*</p>
-                Title
-              </InputLabel>
-              <Input
-                placeholder="Title"
-                value={item.title}
-                onChange={(e) => handleExpChange("title", idx, e)}
-                disableUnderline
-                // className="bg-white rounded-md h-[40px] w-[230px] p-4"
-                className="h-[40px] md:w-[100%] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
-                startAdornment={
-                  <InputAdornment position="start">
-                    <WorkOutlineIcon className="text-green-700" />
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
+            <CustomInput
+              value={item.employer}
+              onChange={(e) => handleExpChange("employer", idx, e)}
+              component={"text"}
+              placeHolder="Employer"
+              classes="h-[40px] md:w-[100%] w-[100%] bg-gray-100 rounded-md no-underline px-1 shadow-md"
+              icon={<BusinessIcon className="text-green-700" />}
+             />
+            <CustomInput
+              value={item.title}
+              onChange={(e) => handleExpChange("title", idx, e)}
+              component={"text"}
+              placeHolder="Title"
+              classes="h-[40px] md:w-[95%] w-[100%] bg-gray-100 rounded-md no-underline px-1 shadow-md"
+              icon={<WorkOutlineIcon className="text-green-700" />}
+             />
             <div className="flex flex-row md:gap-2 gap-2 md:mt-0 mt-2">
-            <FormControl className="">
-              <InputLabel className="flex flex-row ml-[-10px]">
-                <p className="mr-2 text-red-700 text-[13px]">*</p>
-                Start Date
-              </InputLabel>
-              <Input
-                placeholder="Start Date"
-                value={item.startDate}
-                type="date"
-                onChange={(e) => handleExpChange("startDate", idx, e)}
-                disableUnderline
-                className="h-[40px] md:w-[100%] w-[140px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
-                startAdornment={
-                  <InputAdornment position="start">
-                    <CalendarTodayIcon className="text-green-700" />
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-            <FormControl className="">
-              <InputLabel className="flex flex-row ml-[-10px]">
-                <p className="mr-2 text-red-700 text-[13px]">*</p>
-                End Date
-              </InputLabel>
-              <Input
-                disabled={item?.isCurrent ? true : false}
-                placeholder="End Date"
-                value={item.endDate}
-                type="date"
-                onChange={(e) => handleExpChange("endDate", idx, e)}
-                disableUnderline
-                // className="bg-white rounded-md h-[40px] w-[190px] p-4"
-                className="h-[40px] md:w-[100%] w-[140px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-1 shadow-lg"
-                startAdornment={
-                  <InputAdornment position="start">
-                    <CalendarTodayIcon className="text-green-700" />
-                  </InputAdornment>
-                }
-              />
-            </FormControl>
-            <FormControl className="flex flex-col">
-              <p className="text-[11px] mt-[-10px] ml-[-5px]">Is current</p>
+            <CustomInput
+              value={item.startDate}
+              onChange={(e) => handleExpChange("startDate", idx, e)}
+              component={"text"}
+              placeHolder="Start Date"
+              type="date"
+              classes="h-[40px] md:w-[95%] w-[140px] bg-gray-100 rounded-md no-underline px-1 shadow-md"
+              // icon={<CalendarTodayIcon className="text-green-700" />}
+             />
+            <CustomInput
+              disabled={item?.isCurrent ? true : false}
+              value={item.endDate}
+              onChange={(e) => handleExpChange("endDate", idx, e)}
+              component={"text"}
+              type="date"
+              placeHolder="End Date"
+              classes="h-[40px] md:w-[100%] w-[140px] bg-gray-100 rounded-md no-underline px-1 shadow-md"
+              // icon={<CalendarTodayIcon className="text-green-700" />}
+             />
+            <FormControl className="flex flex-col md:ml-4">
+              <p className="text-[11px] mt-[-10px]">Current</p>
               <Radio
                 name="isCurrent"
                 className="text-green-700"
@@ -250,15 +203,17 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
             </FormControl>
             </div>
           </div>
-          <TextField
-            placeholder="Job Description"
-            value={item.description}
-            // className="bg-white rounded-md  w-[100%] mt-[7px] "
-            className="w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline shadow-lg mt-[7px]"
-            onChange={(e) => handleExpChange("description", idx, e)}
-            minRows={4}
-            multiline
-          />
+            <div className="mt-4">
+            <CustomInput
+              value={item.description}
+              onChange={(e) => handleExpChange("description", idx, e)}
+              component={"field"}
+              type="text"
+              placeHolder="Description"
+              classes="w-[100%] bg-gray-100 rounded-md no-underline shadow-md mt-[7px]"
+              rows={4}
+             />
+            </div>
           <div className="mb-[30px] text-[11px]">
             {
               item?.hasError &&(
@@ -336,116 +291,59 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
           </IconButton>
         </div>
         <div className="grid md:grid-cols-2 mt-[-10px]">
-          <FormControl>
-            <InputLabel className="flex flex-row ml-[-10px]">
-              <p className="mr-2 text-red-700 text-[13px]">*</p>
-              School Attended
-            </InputLabel>
-            <Input
+          <CustomInput
               value={item.school}
-              placeholder="School Attended"
               onChange={(e) => addEdu("school", e, idx)}
-              disableUnderline
-              // className="bg-white w-[400px] h-[40px] px-2 mb-4"
-              className="h-[40px] md:w-[350px] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
-              startAdornment={
-                <InputAdornment position="start">
-                  <SchoolIcon className="text-green-700" />
-                </InputAdornment>
-              }
-            />
-          </FormControl>
-          <FormControl>
-            <InputLabel className="flex flex-row ml-[-10px]">
-              <p className="mr-2 text-red-700 text-[13px]">*</p>
-              Course of Study
-            </InputLabel>
-            <Input
+              component={"text"}
+              placeHolder="School Attended"
+              classes="h-[40px] md:w-[350px] w-[100%] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
+              icon={<BookIcon className="text-green-700" />}
+             />
+          <CustomInput
               value={item.course}
-              placeholder="Course of Study"
               onChange={(e) => addEdu("course", e, idx)}
-              disableUnderline
-              // className="bg-white w-[400px] h-[40px] px-2 mb-4"
-              className="h-[40px] md:w-[350px] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
-              startAdornment={
-                <InputAdornment position="start">
-                  <BookIcon className="text-green-700" />
-                </InputAdornment>
-              }
-            />
-          </FormControl>
-              <div className="flex flex-row md:gap-[50%] gap-2 md:mt-4">
-              <FormControl>
-            <InputLabel className="flex flex-row ml-[-10px]">
-              <p className="mr-2 text-red-700 text-[13px]">*</p>
-              Graduation Date
-            </InputLabel>
-            <Input
+              component={"text"}
+              placeHolder="Course of study"
+              classes="h-[40px] md:w-[350px] w-[100%] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
+              icon={<BookIcon className="text-green-700" />}
+             />
+        <div className="flex flex-row gap-2 md:mt-4">
+              
+          <CustomInput
               value={item.graduationDate}
-              placeholder="Graduation Date"
-              type="date"
               onChange={(e) => addEdu("graduationDate", e, idx)}
-              disableUnderline
-              // className="bg-white w-[180px] h-[40px] px-2 mb-4"
-              className="h-[40px] md:w-[180px] w-[170px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
-              startAdornment={
-                <InputAdornment position="start">
-                  <CalendarTodayIcon className="text-green-700" />
-                </InputAdornment>
-              }
-            />
-            <div className="md:mt-[-10px] md:ml-[-10px]">
-              {gradError && (
-                <div className="text-red-600 text-[10px] ml-4">
-                  Please select a past date
-                </div>
-              )}
-            </div>
-          </FormControl>
-          <FormControl className="md:ml-[-190px]">
-            <InputLabel className="flex flex-row ml-[-10px]">
-              <p className="mr-2 text-red-700 text-[13px]">*</p>
-              Qualification
-            </InputLabel>
-            <Select
+              component={"text"}
+              type="date"
+              placeHolder="Graduation date"
+              classes="h-[40px] md:w-[180px] w-[170px] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
+              // icon={<CalendarTodayIcon className="text-green-700" />}
+              error={gradError ? "Please select a past date" : null}
+             />
+
+            <CustomInput
               value={item.degree}
               onChange={(e) => addEdu("degree", e, idx)}
-              disableUnderline
-              // className="w-[150px] text-black bg-white h-[40px] mt-4"
-              className="h-[40px] w-[150px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mt-4"
-              label="Experience"
-              placeholder="Experience"
-              size="small"
-            >
-              {degrees.map((item: string, idx: number) => (
-                <MenuItem key={idx} className="text-black" value={item}>
-                  {item}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
+              component={"select"}
+              selValues={degrees}
+              placeHolder="Qualification"
+              classes="h-[40px] w-[150px] bg-gray-100 rounded-md no-underline px-2 shadow-md mt-4"
+              icon={<CalendarTodayIcon className="text-green-700" />}
+              // error={gradError ? "Please select a past date" : null}
+             />
               </div>
           {item?.hasCert && (
-            <div className="mt-[15px]">
-              <FormControl>
-                <InputLabel className="">Certification</InputLabel>
-                <Input
-                  value={item.certification}
-                  placeholder="Certification"
-                  type="text"
-                  onChange={(e) => addEdu("certification", e, idx)}
-                  disableUnderline
-                  // className="bg-white w-[400px] h-[40px] px-2 mb-4"
-                  className="h-[40px] md:w-[350px] w-[280px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-2 shadow-lg mb-4"
-                  startAdornment={
-                    <InputAdornment position="start">
-                      <ArticleIcon className="text-green-700" />
-                    </InputAdornment>
-                  }
-                />
-              </FormControl>
+            <div className="mt-[15px] flex flex-row">
+            <CustomInput
+              value={item.certification}
+              onChange={(e) => addEdu("certification", e, idx)}
+              component={"text"}
+              placeHolder="Certification"
+              classes="h-[40px] md:w-[350px] w-[280px] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
+              icon={<ArticleIcon className="text-green-700" />}
+             />
+
               <IconButton
-                className="bg-green-300 h-[25px] w-[25px] ml-[15px]"
+                className="bg-green-300 h-[25px] w-[25px]"
                 onClick={() => removeCert(idx)}
               >
                 <CloseIcon className="h-[15px] w-[15px]" />
@@ -477,7 +375,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
       school: "",
       course: "",
       graduationDate: "",
-      degree: "",
+      degree: "BSC",
       certification: "",
       hasCert: false
     };
@@ -517,13 +415,13 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   const renderSkills = () => {
     return skillForm?.map((item: any, idx) => (
       <div key={idx} className="flex flex-row align-middle">
-        <input
-          value={item}
-          // className="bg-white w-[200px] h-[40px] px-2 mb-4 rounded-md border-b-transparent"
-          className="md:w-[200px] w-[160px] h-[40px] bg-white border-green-700 border-solid border-2 rounded-md no-underline shadow-lg mb-4 px-2"
-          onChange={(e) => addKill(e, idx)}
-          placeholder="skill"
-        />
+        <CustomInput
+              value={item}
+              onChange={(e) => addKill(e, idx)}
+              component={"text"}
+              placeHolder="Skill"
+              classes="md:w-[200px] w-[160px] h-[40px] bg-gray-100 rounded-md no-underline shadow-md mb-4 px-2"
+             />
         <IconButton
           className="mt-[-11px] ml-[-7px] mr-[35px] bg-green-300 h-[10px] w-[10px]"
           onClick={() => removeSkill(idx)}
@@ -700,198 +598,97 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               {({ handleSubmit, handleChange, values, errors }) => (
                 <div className="grid justify-items-center">
                   <div className="flex md:flex-row flex-col gap-3">
-                    <FormControl>
-                      <InputLabel className="w-[100%] flex flex-row">
-                        First Name
-                      </InputLabel>
-                      <Input
-                        placeholder="First name"
-                        readOnly
-                        value={values.firstName}
-                        onChange={handleChange("firstName")}
-                        disableUnderline
-                        // className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
-                        className="h-[40px] md:w-[100%] w-[100%] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <PersonIcon className="text-green-700" />
-                          </InputAdornment>
-                        }
+                    <CustomInput
+                      value={values.firstName}
+                      onChange={handleChange("firstName")}
+                      component={"text"}
+                      placeHolder="First Name"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                      icon={<PersonIcon className="text-green-700" />}
+                      error={errors.firstName}
                       />
-                      <div className="text-red-600 text-[10px] ml-4">
-                        {errors.firstName as any}
-                      </div>
-                    </FormControl>
 
-                    <FormControl>
-                      <InputLabel className="w-[100%] flex flex-row">
-                        Other Name
-                      </InputLabel>
-                      <Input
-                        placeholder="Other Name"
-                        readOnly
-                        value={values.otherName}
-                        disableUnderline
-                        onChange={handleChange("otherName")}
-                        // className="bg-white rounded-md h-[40px] w-[270px] p-2 mb-0 m-1"
-                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <PersonIcon className="text-green-700" />
-                          </InputAdornment>
-                        }
+                    <CustomInput
+                      value={values.otherName}
+                      onChange={handleChange("otherName")}
+                      component={"text"}
+                      placeHolder="Other Name"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                      icon={<PersonIcon className="text-green-700" />}
+                      error={errors.otherName}
                       />
-                      <div className="text-red-600 text-[10px] ml-4">
-                        {errors.otherName as any}
-                      </div>
-                    </FormControl>
-
-                    <FormControl>
-                      <InputLabel className="w-[100%] flex flex-row">
-                        Last Name
-                      </InputLabel>
-                      <Input
-                        placeholder="Last name"
-                        readOnly
-                        value={values.lastName}
-                        disableUnderline
-                        onChange={handleChange("lastName")}
-                        // className="bg-white rounded-md h-[40px] w-[270px] p-4 mb-0 m-1"
-                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <PersonIcon className="text-green-700" />
-                          </InputAdornment>
-                        }
+                    <CustomInput
+                      value={values.lastName}
+                      onChange={handleChange("lastName")}
+                      component={"text"}
+                      placeHolder="Last Name"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                      icon={<PersonIcon className="text-green-700" />}
+                      error={errors.lastName}
                       />
-                      <div className="text-red-600 text-[10px] ml-4">
-                        {errors.lastName as any}
-                      </div>
-                    </FormControl>
                   </div>
-                  <div className="flex md:flex-row flex-col gap-6 mt-4">
-                    <FormControl>
-                      <InputLabel className="w-[100%] flex flex-row">
-                        Email
-                      </InputLabel>
-                      <Input
-                        placeholder="Email Address"
-                        readOnly
-                        value={values.email}
-                        disableUnderline
-                        onChange={handleChange("email")}
-                        // className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
-                        className="h-[40px] md:w-[300px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <EmailIcon className="text-green-700" />
-                          </InputAdornment>
-                        }
+                  <div className="flex md:flex-row flex-col gap-6 mt-[30px]">
+                  <CustomInput
+                      value={values.email}
+                      onChange={handleChange("email")}
+                      component={"text"}
+                      placeHolder="Email"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                      icon={<EmailIcon className="text-green-700" />}
+                      error={errors.email}
                       />
-                      <div className="text-red-600 text-[10px] ml-4">
-                        {errors.email as any}
-                      </div>
-                    </FormControl>
-                    <FormControl>
-                      <InputLabel className="w-[100%] flex flex-row">
-                        Phone Number
-                      </InputLabel>
-                      <Input
-                        placeholder="Phone Number"
-                        readOnly
-                        value={values.phone}
-                        onChange={handleChange("phone")}
-                        disableUnderline
-                        // className="bg-white rounded-md h-[40px] w-[400px] p-4 mb-0 m-3"
-                        className="h-[40px] md:w-[300px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <PhoneIcon className="text-green-700" />
-                          </InputAdornment>
-                        }
+                      <CustomInput
+                      value={values.phone}
+                      onChange={handleChange("phone")}
+                      component={"text"}
+                      placeHolder="Phone number"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                      icon={<PhoneIcon className="text-green-700" />}
+                      error={errors.phone}
                       />
-                      <div className="text-red-600 text-[10px] ml-4">
-                        {errors.phone as any}
-                      </div>
-                    </FormControl>
                   </div>
-                  <div className="flex md:flex-row flex-col gap-2 mt-4">
-                    <FormControl>
-                      <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                        Date of Birth
-                      </div>
-                      <Input
-                        placeholder="Date of Birth"
-                        readOnly
-                        value={values.dob}
-                        type="date"
-                        disableUnderline
-                        onChange={handleChange("dob")}
-                        // className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 mb-0 m-3"
-                        className="h-[40px] md:w-[200px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        startAdornment={
-                          <InputAdornment position="start">
-                            <CalendarTodayIcon className="text-green-700" />
-                          </InputAdornment>
-                        }
+                  <div className="flex md:flex-row flex-col gap-2 mt-[30px]">
+                    <CustomInput
+                      value={values.dob}
+                      onChange={handleChange("dob")}
+                      component={"text"}
+                      type="date"
+                      placeHolder="Date of Birth"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                      icon={<CalendarTodayIcon className="text-green-700" />}
+                      error={errors.dob}
                       />
-                      <div className="text-red-600 text-[10px] ml-4">
-                        {errors.dob as any}
-                      </div>
-                    </FormControl>
-                    <FormControl>
-                      <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                        Gender
-                      </div>
-                      <Select
-                        value={gender}
-                        onChange={(e) => setGender(e.target.value)}
-                        // className="w-[100px] text-black bg-white h-[40px] mt-1"
-                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        label="Experience"
-                        placeholder="Gender"
-                        size="small"
-                        readOnly
-                      >
-                        {genders.map((item: string, idx: number) => (
-                          <MenuItem
-                            key={idx}
-                            className="text-black"
-                            value={item}
-                          >
-                            {item}
-                          </MenuItem>
-                        ))}
-                      </Select>
-                    </FormControl>
-                    <FormControl className="">
-                      <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                        <p className="mr-2 text-red-700 text-[13px]">*</p>
-                        Resume
-                        <div className="mr-2 text-red-700 text-[13px] ml-6">
-                          pdf only
-                        </div>
-                      </div>
-                      <Input
-                        placeholder="Resume"
-                        required
-                        type="file"
-                        onChange={handleFileChange}
-                        disableUnderline
-                        // className="bg-white rounded-md h-[40px] w-[200px] p-4 mt-1 m-3"
-                        className="h-[40px] md:w-[100%] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
+                    <CustomInput
+                      value={values.gender}
+                      onChange={handleChange("otherName")}
+                      component={"select"}
+                      placeHolder="Gender"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md mt-[15px]"
+                      selValues={genders}
+                      error={errors.gender}
                       />
-                      {fileError && (
-                        <div>
-                          <p className="text-red-600 text-[10px] ml-[10px]">
-                            {fileError}
-                          </p>
-                        </div>
-                      )}
-                    </FormControl>
+   
+                    <CustomInput
+                      onChange={handleFileChange}
+                      component={"text"}
+                      helper="Pdf only"
+                      type={"file"}
+                      placeHolder="Resume"
+                      readonly
+                      classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                      selValues={genders}
+                      error={fileError}
+                      />
                   </div>
 
-                  <FormControl className="w-[93%] my-[20px]">
+                  {/* <FormControl className="w-[93%] my-[20px]">
                     <div className="flex flex-row md:ml-[-10px] text-[13px] mb-1">
                       <p className="md:mr-2 text-red-700 text-[13px]">*</p>
                       <p className="text-gray-600">Cover Letter</p>
@@ -902,13 +699,25 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       multiline
                       rows={4}
                       // className="bg-white w-[100%]"
-                      className=" bg-white w-[100%] border-green-700 border-solid border-2 rounded-md no-underline shadow-lg"
+                      className=" bg-gray-100 w-[100%] border-green-700 border-solid border-2 rounded-md no-underline shadow-lg"
                       placeholder="Cover Letter"
                     />
                     <div className="text-red-600 text-[10px] ml-4">
                       {errors.coverLetter as any}
                     </div>
-                  </FormControl>
+                  </FormControl> */}
+                  <div className="w-[98%] my-[20px]">
+                  <CustomInput
+                      value={values.coverLetter}
+                      onChange={handleChange("coverLetter")}
+                      component={"field"}
+                      type={"text"}
+                      placeHolder="Cover letter"
+                      rows={4}
+                      classes=" bg-gray-100 w-[100%] rounded-md no-underline shadow-md mt-4"
+                      error={errors?.coverLetter}
+                    />
+                  </div>
 
                   <div className="w-[100%]">
                     <Divider className="bg-green-700 h-[2px] md:mx-6 mx-2" />

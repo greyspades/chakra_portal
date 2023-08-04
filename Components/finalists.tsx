@@ -29,6 +29,7 @@ export const Finalists = () => {
     const [dataCount, setDataCount] = useState<number>();
     const [page, setPage] = useState<number>(0);
     const [take, setTake] = useState<number>(10)
+    const [location, setLocation] = useState<string>(selRole?.location)
     
     const [metaData, setMetadata] = useState<{[key: string]: any}>({
       rank: "",
@@ -40,6 +41,52 @@ export const Finalists = () => {
       salWords: "",
       sendMail: false
     });
+
+    const locations = [
+      "Abia",
+      "Adamawa",
+      "Akwa Ibom",
+      "Anambra",
+      "Bauchi",
+      "Bayelsa",
+      "Benue",
+      "Borno",
+      "Cross River",
+      "Delta",
+      "Ebonyi",
+      "Edo",
+      "Ekiti",
+      "Enugu",
+      "FCT - Abuja",
+      "Gombe",
+      "Imo",
+      "Jigawa",
+      "Kaduna",
+      "Kano",
+      "Katsina",
+      "Kebbi",
+      "Kogi",
+      "Kwara",
+      "Lagos",
+      "Nasarawa",
+      "Niger",
+      "Ogun",
+      "Ondo",
+      "Osun",
+      "Oyo",
+      "Plateau",
+      "Rivers",
+      "Sokoto",
+      "Taraba",
+      "Yobe",
+      "Zamfara",
+    ];
+
+    const changeLocation = (e: any) => {
+      // setLocation(e.target.value)
+      let update = { ...selRole, location: e.target.value}
+      setSelRole(update)
+    }
 
     //* gets all active roles
     useEffect(() => {
@@ -63,12 +110,12 @@ export const Finalists = () => {
         page,
         take
     }
+    // console.log(body)
     axios.post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_STAGE as string, body)
     .then((res: AxiosResponse) => {
-      console.log(res.data)
         if(res.data.code == 200) {
             setCandidates(res.data.data);
-            setDataCount(res.data.count)
+            setDataCount(res.data.count);
         }
     }).catch((err: AxiosError) => {
       console.log(err.message)
@@ -281,8 +328,7 @@ export const Finalists = () => {
               </p>
             </div>
             <form>
-              <Formik validationSchema={AcceptanceInfoValidation} initialValues={{state: selctCandidate?.state, reportTo: "", startDate: "", rank: "", salary: "", location: selRole?.location, salWords: ""}} onSubmit={(value) => {
-                
+              <Formik validationSchema={AcceptanceInfoValidation} initialValues={{state: selctCandidate?.state ?? "Lagos", reportTo: "", startDate: "", rank: "", salary: "", location: selRole?.location, salWords: ""}} onSubmit={(value) => {
                 if(selctCandidate?.status != "Hired") {
                   setLoading(true);
                   let body = {
@@ -294,7 +340,8 @@ export const Finalists = () => {
                     location: value.location,
                     salWords: value.salWords,
                     sendMail: metaData?.sendMail,
-                    id:selctCandidate?.id
+                    id:selctCandidate?.id,
+                    jobType: selRole.jobType
                   }
                   // console.log(body)
                   axios.post(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
@@ -336,6 +383,7 @@ export const Finalists = () => {
                 onChange={handleChange("state")}
                 className="bg-white h-[40px] w-[240px] px-2"
                 placeholder='city'
+                readOnly
               />
               <div className="text-red-600 text-[10px] ml-4">
                 {errors.state as any}
@@ -374,10 +422,10 @@ export const Finalists = () => {
               </FormControl>
 
               <FormControl>
-              <InputLabel>
+              <InputLabel className=''>
                 Location
               </InputLabel>
-              <Input
+              {/* <Input
                 value={values.location}
                 onChange={handleChange("location")}
                 className="bg-white h-[40px] w-[240px] px-2"
@@ -385,7 +433,18 @@ export const Finalists = () => {
               />
               <div className="text-red-600 text-[10px] ml-4">
                 {errors.location as any}
-              </div>
+              </div> */}
+              <Select
+              value={selRole?.location}
+              onChange={changeLocation}
+              className="bg-white h-[40px] w-[240px] px-2 mt-[15px]"
+              >
+                {locations.map((item: string, idx: number) => (
+                  <MenuItem value={item} key={idx}>
+                  {item}
+                  </MenuItem>
+                ))}
+              </Select>
               </FormControl>
             </div>
             <div className='flex flex-row justify-between mt-6'>

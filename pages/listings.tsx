@@ -321,7 +321,7 @@ const handleCheckChange = (filter: string, filterType: string) => {
         </div>
       )}
       {step == 2 &&(
-        <div className="bg-green-100 w-[100%] md:h-[60px] h-[40px] justify-between flex flex-row md:p-4 p-2 fixed overflow-clip z-30">
+        <div className="bg-green-100 font-semibold text-xl w-[100%] md:h-[60px] h-[40px] justify-between flex flex-row md:p-4 p-2 fixed overflow-clip z-30">
           <p>
             {activeRole?.name}
           </p>

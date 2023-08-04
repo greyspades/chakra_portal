@@ -22,7 +22,8 @@ export type Candidate = {
   address?: string,
   maritalStatus?: string,
   state?: string,
-  lga?: string
+  lga?: string,
+  religion?: string
 }
 
 export type Comment = {

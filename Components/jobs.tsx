@@ -61,10 +61,10 @@ export const Jobs = () => {
       code: code,
       item: status
     }
-    console.log(body)
+    // console.log(body)
     axios.post(process.env.NEXT_PUBLIC_CHANGE_STATUS as string, body)
     .then((res: AxiosResponse) => {
-      console.log(res)
+      // console.log(res)
       if(res.data.code == 200) {
         setStatus({
           open: true,

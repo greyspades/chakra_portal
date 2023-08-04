@@ -31,6 +31,11 @@ import PhoneInput from "react-phone-input-2";
 import "react-phone-input-2/lib/style.css";
 import { Close } from "@mui/icons-material";
 import NaijaStates from 'naija-state-local-government';
+import { CustomInput } from "../customInput";
+import HomeIcon from '@mui/icons-material/Home';
+import { error } from "console";
+import Link from "next/link";
+import CryptoJs from "crypto-js"
 
 
 interface SignupProps {
@@ -103,9 +108,11 @@ export const Signup = ({
     router.push(`/${nextPage}`);
   };
 
-  useEffect(() => {
-    console.log(NaijaStates.lgas("Oyo"))
-  },[])
+  // useEffect(() => {
+  //   // console.log(NaijaStates.lgas("Oyo"))
+  //   console.log(NaijaStates.states())
+  //   setLocation({ ...location, location?.state:})
+  // },[location.state])
 
   //* handles phone number update
   const handlePhoneChange = (e: any) => {
@@ -116,6 +123,15 @@ export const Signup = ({
     let update = { ...location, [type]: e.target.value}
     setLocation(update)
   }
+
+  
+  //* renames the fct state to abuja
+  var updatedLoc = NaijaStates.states().map((item) => {
+    if(item == "Federal Capital Territory") {
+      item = "Abuja"
+    }
+    return item;
+  })
 
   return (
     <div>
@@ -186,6 +202,8 @@ export const Signup = ({
 
                   let sessionData = JSON.stringify(sessionBody);
 
+                  let encrypted = CryptoJs.AES.encrypt(sessionData, process.env.NEXT_PUBLIC_AES_KEY).toString()
+
                   Axios.post(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body, {
                     headers: {
                       "Access-Control-Allow-Origin": "*",
@@ -194,7 +212,7 @@ export const Signup = ({
                     .then((res: AxiosResponse) => {
                       setLoading(false);
                       if (res.data.code == 200) {
-                        sessionStorage.setItem("cred", sessionData);
+                        sessionStorage.setItem("cred", encrypted);
                         setLoggedIn(true);
                         setStatus({
                           open: true,
@@ -219,98 +237,54 @@ export const Signup = ({
                 {({ handleSubmit, handleChange, values, errors }) => (
                   <div className="grid justify-items-center">
                     <div className="flex md:flex-row flex-col gap-3">
-                      <FormControl>
-                        <InputLabel className="w-[100%] flex flex-row">
-                          <p className="mr-2 text-red-700 text-[20px]">*</p>
-                          First Name
-                        </InputLabel>
-                        <Input
-                          placeholder="First name"
-                          required
-                          disableUnderline
-                          value={values.firstName}
-                          onChange={handleChange("firstName")}
-                          className="h-[40px] md:w-[270px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          startAdornment={
-                            <InputAdornment position="start">
-                              <PersonIcon className="text-green-700" />
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.firstName as any}
-                        </div>
-                      </FormControl>
-
-                      <FormControl>
-                        <InputLabel className="w-[100%] flex flex-row">
-                          Other Name
-                        </InputLabel>
-                        <Input
-                          placeholder="Other Name"
-                          required
-                          disableUnderline
-                          value={values.otherName}
-                          onChange={handleChange("otherName")}
-                          className="h-[40px] w-[320px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          startAdornment={
-                            <InputAdornment position="start">
-                              <PersonIcon className="text-green-700" />
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.otherName as any}
-                        </div>
-                      </FormControl>
-
-                      <FormControl>
-                        <InputLabel className="w-[100%] flex flex-row">
-                          <p className="mr-2 text-red-700 text-[20px]">*</p>
-                          Last Name
-                        </InputLabel>
-                        <Input
-                          placeholder="Last name"
-                          required
-                          disableUnderline
-                          value={values.lastName}
-                          onChange={handleChange("lastName")}
-                          className="h-[40px] w-[320px] md:w-[270px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          startAdornment={
-                            <InputAdornment position="start">
-                              <PersonIcon className="text-green-700" />
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.lastName as any}
-                        </div>
-                      </FormControl>
+                      <CustomInput
+                        value={values.firstName}
+                        onChange={handleChange("firstName")}
+                        component={"text"}
+                        placeHolder="First name"
+                        classes="h-[40px] md:w-[270px] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        error={errors.firstName}
+                        icon={<PersonIcon className="text-green-700" />}
+                        fitWidth
+                        required
+                      />
+                      <CustomInput
+                        value={values.otherName}
+                        onChange={handleChange("otherName")}
+                        component={"text"}
+                        placeHolder="Other name"
+                        classes="h-[40px] w-[320px] md:w-[300px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        error={errors.otherName}
+                        icon={<PersonIcon className="text-green-700" />}
+                        fitWidth
+                      />
+                      <CustomInput
+                        value={values.lastName}
+                        onChange={handleChange("lastName")}
+                        component={"text"}
+                        placeHolder="Last name"
+                        classes="h-[40px] w-[320px] md:w-[270px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        error={errors.lastName}
+                        icon={<PersonIcon className="text-green-700" />}
+                        fitWidth
+                        required
+                      />
                     </div>
 
                     <div className="flex md:flex-row flex-col mt-4 gap-4">
-                      <FormControl>
-                        <InputLabel className="w-[100%] flex flex-row">
-                          <p className="mr-2 text-red-700 text-[20px]">*</p>
-                          Email
-                        </InputLabel>
-                        <Input
-                          placeholder="Email Address"
-                          required
-                          disableUnderline
-                          value={values.email}
-                          onChange={handleChange("email")}
-                          className="h-[40px] w-[320px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          startAdornment={
-                            <InputAdornment position="start">
-                              <EmailIcon className="text-green-700" />
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.email as any}
-                        </div>
-                      </FormControl>
+                      <CustomInput
+                        value={values.email}
+                        onChange={handleChange("email")}
+                        component={"text"}
+                        placeHolder="Email"
+                        type="email"
+                        classes="h-[40px] w-[320px] md:w-[300px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        error={errors.email}
+                        icon={<EmailIcon className="text-green-700" />}
+                        fitWidth
+                        required
+                      />
+
                       <FormControl className="mt-[-5px]">
                         <div className="w-[100%] flex flex-row mb-[5px]">
                           <p className="mr-2 text-red-700 text-[14px] mt-[-5px]">
@@ -319,7 +293,7 @@ export const Signup = ({
                           <p className="text-[11px]">Phone Number</p>
                         </div>
                         <PhoneInput
-                         inputClass="h-[40px] w-[320px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline shadow-lg"
+                         inputClass="h-[40px] w-[320px] md:w-[300px] bg-gray-100 rounded-md no-underline shadow-md"
                           country={"ng"}
                           value={phone}
                           onChange={(phone) => handlePhoneChange(phone)}
@@ -332,56 +306,33 @@ export const Signup = ({
                           }}
                         />
                       </FormControl>
-
-                      <FormControl className="mt-[-6px]">
-                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                          <p className="mr-2 text-red-700 text-[13px]">*</p>
-                          Date of Birth
-                        </div>
-                        <Input
-                          placeholder="Date of Birth"
-                          required
-                          value={values.dob}
-                          type="date"
-                          disableUnderline
-                          onChange={handleChange("dob")}
-                          className="h-[40px] md:w-[200px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          startAdornment={
-                            <InputAdornment position="start">
-                              <CalendarTodayIcon className="text-green-700" />
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.dob as any}
-                        </div>
-                      </FormControl>
+                      <CustomInput
+                        value={values.dob}
+                        onChange={handleChange("dob")}
+                        component={"text"}
+                        type="date"
+                        placeHolder="Date of birth"
+                        classes="h-[40px] md:w-[200px] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        error={errors.dob}
+                        // icon={<CalendarTodayIcon className="text-green-700" />}
+                        fitWidth
+                        required
+                      />
                     </div>
 
                     <div className="flex md:flex-row flex-col gap-4 mt-4">
-                      <FormControl className="mt-[-8px]">
-                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                          <p className="mr-2 text-red-700 text-[13px]">*</p>
-                          Gender
-                        </div>
-                        <Select
-                          value={gender}
-                          onChange={(e) => setGender(e.target.value)}
-                          className="h-[40px] md:w-[150px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
-                          label="Experience"
-                          placeholder="Gender"
-                          size="small"
-                          disableUnderline
-                        >
-                          {genders.map((item: string, idx: number) => (
-                            <MenuItem key={idx} className="text-black" value={item}>
-                              {item}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <CustomInput
+                        value={gender}
+                        onChange={(e: any) => setGender(e.target.value)}
+                        component={"select"}
+                        placeHolder="Gender"
+                        selValues={genders}
+                        classes="h-[40px] md:w-[150px] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md mt-4"
+                        fitWidth
+                        required
+                      />
 
-                      <FormControl className="mt-[-8px]">
+                      {/* <FormControl className="mt-[-8px]">
                         <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
                           <p className="mr-2 text-red-700 text-[13px]">*</p>
                           Marital Status
@@ -401,126 +352,90 @@ export const Signup = ({
                             </MenuItem>
                           ))}
                         </Select>
-                      </FormControl>
-
-                      <FormControl>
-                        <InputLabel>Address</InputLabel>
-                        <Input
-                          value={values.address}
-                          onChange={handleChange("address")}
-                          disableUnderline
-                          placeholder="Residential Address"
-                          className="h-[40px] w-[320px] md:w-[500px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          startAdornment={
-                            <InputAdornment position="start">
-                              <CalendarTodayIcon className="text-green-700" />
-                            </InputAdornment>
-                          }
-                        />
-                      </FormControl>
+                      </FormControl> */}
+                      <CustomInput
+                        value={maritalStatus}
+                        onChange={(e: any) => setMaritalStatus(e.target.value)}
+                        component={"select"}
+                        placeHolder="Marital Status"
+                        selValues={maritalStatuses}
+                        classes="h-[40px] md:w-[150px] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md mt-4"
+                        fitWidth
+                        required
+                      />
+                      <CustomInput
+                        value={values.address}
+                        onChange={handleChange("address")}
+                        component={"text"}
+                        placeHolder="Residential address"
+                        classes="h-[40px] w-[320px] md:w-[500px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        fitWidth
+                        required
+                        icon={<HomeIcon className="text-green-700" />}
+                        error={errors.address}
+                      />
                     </div>
 
-                    <div className="flex md:flex-row flex-col md:mt-[20px] mt-2 justify-start md:gap-4 gap-2">
-                      <FormControl className="mt-[-4px]">
-                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                          <p className="mr-2 text-red-700 text-[13px]">*</p>
-                          State
-                        </div>
-                        <Select
-                          value={location.state}
-                          className="h-[40px] w-[320px] md:w-[150px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
-                          label="State"
-                          placeholder="State"
-                          size="small"
-                          disableUnderline
-                          onChange={(e) => handleLocationChange(e, "state")}
-                        >
-                          {NaijaStates.states().map((item: string, idx: number) => (
-                            <MenuItem value={item} key={idx}>
-                              {item}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <FormControl className="mt-[-4px]">
-                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                          <p className="mr-2 text-red-700 text-[13px]">*</p>
-                          City
-                        </div>
-                        <Select
-                          // disabled={location.state == "" ? true : false}
-                          value={location.lga}
-                          className="h-[40px] w-[320px] md:w-[150px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg mt-1"
-                          label="State"
-                          placeholder="State"
-                          size="small"
-                          disableUnderline
-                          onChange={(e) => handleLocationChange(e, "lga")}
-                        >
-                          {NaijaStates.lgas(location?.state)?.lgas?.map((item: string, idx: number) => (
-                            <MenuItem value={item} key={idx}>
-                              {item}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
-                      <FormControl className="">
-                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                          <p className="mr-2 text-red-700 text-[13px]">*</p>
-                          Password
-                        </div>
-                        <Input
-                          placeholder="Password"
-                          disableUnderline
-                          value={values.password}
-                          type={visible ? "text" : "password"}
-                          onChange={handleChange("password")}
-                          className="h-[40px] w-[280px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          endAdornment={
-                            <InputAdornment position="end">
-                              <IconButton onClick={() => setVisible(!visible)}>
-                                {visible ? (
-                                  <VisibilityIcon />
-                                ) : (
-                                  <VisibilityOffIcon />
-                                )}
-                              </IconButton>
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.password as any}
-                        </div>
-                      </FormControl>
+                    <div className="flex md:flex-row flex-col md:mt-[30px] mt-2 justify-start md:gap-4 gap-2">
+                      <CustomInput
+                        value={location.state}
+                        onChange={(e) => handleLocationChange(e, "state")}
+                        component={"select"}
+                        selValues={updatedLoc}
+                        placeHolder="State"
+                        classes="h-[40px] w-[320px] md:w-[150px] bg-gray-100 rounded-md no-underline px-4 shadow-md mt-4"
+                        fitWidth
+                        required
+                      />
+                      <CustomInput
+                        value={location.lga}
+                        onChange={(e) => handleLocationChange(e, "lga")}
+                        component={"select"}
+                        selValues={NaijaStates.lgas(location?.state)?.lgas}
+                        placeHolder="City"
+                        classes="h-[40px] w-[320px] md:w-[150px] bg-gray-100 rounded-md no-underline px-4 shadow-md mt-4"
+                        fitWidth
+                        required
+                      />
+                      <CustomInput
+                        value={values.password}
+                        onChange={handleChange("password")}
+                        component={"text"}
+                        placeHolder="Password"
+                        type={visible ? "text" : "password"}
+                        classes="h-[40px] w-[280px] md:w-[300px] bg-gray-100 rounded-md no-underline px-4 shadow-lg"
+                        icon={        <IconButton onClick={() => setVisible(!visible)}>
+                        {visible ? (
+                          <VisibilityIcon />
+                        ) : (
+                          <VisibilityOffIcon />
+                        )}
+                      </IconButton>}
+                      error={errors.password}
+                        endAdornment
+                        fitWidth
+                        required
+                      />
 
-                      <FormControl className="">
-                        <div className="w-[100%] ml-3 flex flex-row text-[12px] place-items-center">
-                          <p className="mr-2 text-red-700 text-[13px]">*</p>
-                          Confirm Password
-                        </div>
-                        <Input
-                          disableUnderline
-                          placeholder="Confirm Password"
-                          value={values.validPassword}
-                          type={visible ? "text" : "password"}
-                          onChange={handleChange("validPassword")}
-                          className="h-[40px] w-[280px] md:w-[300px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          endAdornment={
-                            <InputAdornment position="end">
-                              <IconButton onClick={() => setVisible(!visible)}>
-                                {visible ? (
-                                  <VisibilityIcon />
-                                ) : (
-                                  <VisibilityOffIcon />
-                                )}
-                              </IconButton>
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.validPassword as any}
-                        </div>
-                      </FormControl>
+                      <CustomInput
+                        value={values.validPassword}
+                        onChange={handleChange("validPassword")}
+                        component={"text"}
+                        placeHolder="Password"
+                        type={visible ? "text" : "password"}
+                        classes="h-[40px] w-[280px] md:w-[300px] bg-gray-100 rounded-md no-underline px-4 shadow-lg"
+                        icon={        <IconButton onClick={() => setVisible(!visible)}>
+                        {visible ? (
+                          <VisibilityIcon />
+                        ) : (
+                          <VisibilityOffIcon />
+                        )}
+                      </IconButton>}
+                        error={errors.validPassword}
+                        endAdornment
+                        fitWidth
+                        required
+                      />
                     </div>
                     <p>
                       Already Have an Account?{" "}
@@ -582,9 +497,10 @@ export const Signup = ({
                       .post(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
                       .then((res: AxiosResponse) => {
                         if (res.data.code == 200) {
+                          let encrypted = CryptoJs.AES.encrypt(JSON.stringify({...res.data.data, password: null}), process.env.NEXT_PUBLIC_AES_KEY).toString()
                           sessionStorage.setItem(
                             "cred",
-                            JSON.stringify({...res.data.data, password: null})
+                            encrypted
                           );
                           setLoggedIn(true);
                           setStatus({
@@ -630,49 +546,41 @@ export const Signup = ({
                 {({ handleSubmit, handleChange, values, errors }) => (
                   <div className="flex justify-center flex-col place-items-center">
                     <div className="mt-[20px]">
-                      <FormControl>
-                        <InputLabel>Email Address</InputLabel>
-                        <Input
-                          value={values.email}
-                          disableUnderline
-                          onChange={handleChange("email")}
-                          placeholder="Email Address"
-                          className="h-[40px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.email as any}
-                        </div>
-                      </FormControl>
+                      <CustomInput
+                        value={values.email}
+                        onChange={handleChange("email")}
+                        component={"text"}
+                        placeHolder="Email address"
+                        classes="h-[40px] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        fitWidth
+                        required
+                        error={errors.email}
+                        icon={<EmailIcon className="text-green-700" />}
+                      />
                     </div>
 
                     <div className="mt-[20px]">
-                      <FormControl>
-                        <InputLabel>Your Password</InputLabel>
-                        <Input
-                          placeholder="Password"
-                          value={values.password}
-                          disableUnderline
-                          type={visible ? "text" : "password"}
-                          onChange={handleChange("password")}
-                          className="h-[40px] w-[320px] bg-white border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-                          endAdornment={
-                            <InputAdornment position="end">
-                              <IconButton onClick={() => setVisible(!visible)}>
-                                {visible ? (
-                                  <VisibilityIcon />
-                                ) : (
-                                  <VisibilityOffIcon />
-                                )}
-                              </IconButton>
-                            </InputAdornment>
-                          }
-                        />
-                        <div className="text-red-600 text-[10px] ml-4">
-                          {errors.password as any}
-                        </div>
-                      </FormControl>
+                      <CustomInput
+                        value={values.password}
+                        onChange={handleChange("password")}
+                        component={"text"}
+                        type={visible ? "text" : "password"}
+                        placeHolder="Password"
+                        classes="h-[40px] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+                        fitWidth
+                        required
+                        error={errors.password}
+                        icon={<IconButton onClick={() => setVisible(!visible)}>
+                        {visible ? (
+                          <VisibilityIcon />
+                        ) : (
+                          <VisibilityOffIcon />
+                        )}
+                      </IconButton>}
+                        endAdornment
+                      />
                     </div>
-                    <div className="flex place-items-center mt-4 gap-2">
+                    <div className="flex place-items-center mt-4 gap-2 text-[14px]">
                     <p>
                       Dont have an Account?{" "}
                       
@@ -684,17 +592,16 @@ export const Signup = ({
                         Sign Up
                       </button>
                     </div>
-        
-                    <div className="flex place-items-center mt-2 gap-2">
+                    <div className="flex place-items-center mt-2 gap-2 text-[14px]">
                       <p>
                       Forgot your password? click
                       </p>
-                      <button
-                        onClick={() => router.push("reset")}
+                      <Link
+                        href="/reset"
                         className="text-green-700"
                       >
                         here
-                      </button>
+                      </Link>
                     </div>
                     <div className="mt-[30px]">
                       <Button

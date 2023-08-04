@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Paper,
   FormControl,
@@ -19,6 +19,10 @@ import {
   TableRow,
   TableFooter,
   CircularProgress,
+  Popover,
+  Typography,
+  Button,
+  Menu,
 } from "@mui/material";
 import Axios, { AxiosError, AxiosResponse } from "axios";
 import { Candidate } from "../types/candidate";
@@ -26,6 +30,10 @@ import { Role } from "../types/roles";
 import { Applicant } from "./applicant";
 import AddIcon from "@mui/icons-material/Add";
 import RefreshIcon from "@mui/icons-material/Refresh";
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import { CustomInput } from "./customInput";
+import { CustomMenu } from "./customMenu";
+
 
 export const Applications = () => {
   const [id, setId] = useState<string>("");
@@ -50,6 +58,31 @@ export const Applications = () => {
     status: "",
     unit: "",
   });
+  const [menuOpen, setMenuOpen] = useState<{[key: string]: any}>({
+    open: false,
+    field: []
+  })
+  const [filterOpen, setFilterOpen] = useState<boolean>(false)
+
+  const anchorRef = useRef(null);
+
+  const handleClose = () => {
+    // setPopperOpen({open: false, fields: ""})
+  };
+
+  // useEffect(() => {
+  //   if(!popperOpen.open) {
+  //     setFilterOpen(false)
+  //   }
+  //   console.log("that ran")
+  // },[popperOpen.open])
+
+  const openFilters = () => setFilterOpen(true);
+
+  // const closeFilters = () => popperOpen.open ? setFilterOpen(false) : null;
+  const closeFilters = () => {
+    // setFilterOpen(false)
+  }
 
   //* fetches all applicants by job role
   const getApplicants = (nextPage?: number, take?: number, jobId?: string) => {
@@ -118,7 +151,7 @@ export const Applications = () => {
   };
 
   //* filters the list based on conditions
-  const handleFilterChange = (event: SelectChangeEvent) => {
+  const handleFilterChange = (event: any) => {
     setFilter(event.target.value);
     if (event.target.value == "Status") {
       let update = candidates?.sort((a, b) => (a.status == "Pending" ? -1 : 1));
@@ -137,6 +170,13 @@ export const Applications = () => {
       });
       setCandidates(update);
     }
+    // let value = event.target.value;
+    // let field = filterFields.find((item) => item.value == value);
+    // console.log("it changed")
+    // console.log(field)
+    // event.stopPropagation();
+    // event.preventDefault()
+    // setPopperOpen({open: true, fields: field.nested ? field.nestedFields : null});
   };
 
   //* switches the view to the applicants information
@@ -144,7 +184,6 @@ export const Applications = () => {
     var item: Role = roles?.find(
       (item: Role) => item.id == candidate?.roleId
     ) as Role;
-
     setRole(item);
     setApplicant(candidate);
     setViewing(true);
@@ -228,6 +267,38 @@ export const Applications = () => {
   //* fields for filtering candidates
   const filterFields = ["Status", "Stage", "Date"];
 
+  // const filterFields = [
+  //   {
+  //     value: "Status",
+  //     nested: true,
+  //     nestedFields: [
+  //       "Status",
+  //       "Pending",
+  //       "Canceled",
+  //       "Hired"
+  //     ]
+  //   },
+  //   {
+  //     value: "Stage",
+  //     nested: true,
+  //     nestedFields: [
+  //       "Stage",
+  //       "1",
+  //       "2",
+  //       "3"
+  //     ]
+  //   },
+  //   {
+  //     value: "Date",
+  //     nested: false,
+  //     // nestedFields: [
+  //     //   "Pending",
+  //     //   "Canceled",
+  //     //   "Hired"
+  //     // ]
+  //   }
+  // ]
+
   //* candidate application flags
   const flags: { [key: string]: string }[] = [
     {
@@ -269,8 +340,34 @@ export const Applications = () => {
     getApplicants(page, takeVal);
   };
 
+  const handleFilter = () => {
+
+  }
+
   return (
     <div>
+      {/* <Popover
+        // id={popperId}
+        open={popperOpen.open}
+        anchorEl={anchorRef.current}
+        anchorOrigin={{
+          vertical: 'top',
+          horizontal: 'right',
+        }}
+        // transformOrigin={{
+        //   vertical: 'top',
+        //   horizontal: 'left',
+        // }}
+        onClose={handleClose}
+      >
+        <div className="flex justify-center">
+          {popperOpen.fields?.map((item: string, idx: number) => (
+            <Button key={idx} value={item}>
+              {item}
+            </Button>
+          ))}
+        </div>
+      </Popover> */}
       <Dialog open={false}>
         <div className="h-[400px] w-[400px]">
           <div className="p-4">
@@ -283,7 +380,7 @@ export const Applications = () => {
           {renderSkillForm()}
         </div>
       </Dialog>
-      <Paper className=" md:h-[80vh] bg-slate-100 p-6 align-middle md:mt-[30px] w-[97%]">
+      <Paper className=" md:h-[100%] bg-slate-100 p-6 align-middle md:mt-[30px] w-[97%]">
         {!viewing && (
           <div>
             <div className="flex flex-row">
@@ -349,12 +446,14 @@ export const Applications = () => {
                   label="Experience"
                   placeholder="Experience"
                   size="small"
-                >
-                  {filterFields?.map((item: string, idx: number) => (
-                    <MenuItem key={idx} className="text-black" value={item}>
-                      {item}
-                    </MenuItem>
-                  ))}
+                  // open={filterOpen}
+                  // onOpen={openFilters}
+                  // onClose={closeFilters}
+                >{filterFields?.map((item: string, idx: number) => (
+                  <MenuItem value={item} key={idx}>
+                    {item}
+                  </MenuItem>
+                ))}
                 </Select>
               </FormControl>
               <IconButton

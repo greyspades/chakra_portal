@@ -187,7 +187,7 @@ export const JobList = ({ roles, setRole, apply, getRoles, currentStep, refresh,
                 {item?.qualification}
             </div>
             <div className="flex justify-center mt-6">
-                <Button className="bg-green-700 h-[40px] w-[30%] capitalize text-white" onClick={() => apply(item)}>
+                <Button className="bg-green-700 h-[40px] md:w-[30%] w-[90%] capitalize text-white" onClick={() => apply(item)}>
                   Apply
                 </Button>
               </div>

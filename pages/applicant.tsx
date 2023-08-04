@@ -26,6 +26,8 @@ import ChromeReaderModeIcon from "@mui/icons-material/ChromeReaderMode";
 import TableViewIcon from "@mui/icons-material/TableView";
 import GridViewIcon from "@mui/icons-material/GridView";
 import Footer from "../components/footer";
+import CryptoJS from "crypto-js";
+
 
 const Applicant = () => {
   const { candidates, setCandidates } = useContext(
@@ -42,26 +44,26 @@ const Applicant = () => {
   });
 
   //* fixes navigation bug due to global contex being cleared by navigation
-  useEffect(() => {
-    router.beforePopState(({ as }) => {
-      if (as !== router.asPath) {
-        router.push("/");
-      }
-      return false;
-    });
+  // useEffect(() => {
+  //   router.beforePopState(({ as }) => {
+  //     if (as !== router.asPath) {
+  //       router.push("/");
+  //     }
+  //     return false;
+  //   });
 
-    return () => {
-      router.beforePopState(() => true);
-    };
-  }, [router]);
+  //   return () => {
+  //     router.beforePopState(() => true);
+  //   };
+  // }, [router]);
 
   //* fetches candidate application status data
   useEffect(() => {
-    let data;
     let cred = sessionStorage.getItem("cred");
-    if (cred) data = JSON?.parse(cred ?? "");
-
-    if (data) {
+    if (cred) {
+      let bytes = CryptoJS.AES.decrypt(cred ?? "", process.env.NEXT_PUBLIC_AES_KEY);
+      let data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      // console.log(data)
       let body = {
         email: data.email,
       };
@@ -87,6 +89,32 @@ const Applicant = () => {
           });
         });
     }
+    // if (data) {
+    //   let body = {
+    //     email: data.email,
+    //   };
+    //   axios
+    //     .post(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
+    //     .then((res: AxiosResponse) => {
+    //       if (res.data.code == 200 && res.data.data.length > 0) {
+    //         setCandidates(res.data.data);
+    //       } else if (res.data.code != 200 && res.data.length < 1) {
+    //         setStatus({
+    //           open: true,
+    //           topic: "Unsuccessful",
+    //           content: res.data.message,
+    //         });
+    //       }
+    //     })
+    //     .catch((err: AxiosError) => {
+    //       console.log(err.message);
+    //       setStatus({
+    //         open: true,
+    //         topic: "Unsuccessful",
+    //         content: err.message,
+    //       });
+    //     });
+    // }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -146,6 +174,11 @@ const Applicant = () => {
       });
   };
 
+  const startOnBoarding = (id: string) => {
+    let url = `/onboarding/${id}`;
+    router.push(url);
+  }
+
   //* displays cancel button to cancel the pending uperation
   const cancelPrompt = (id: string) => {
     setCancelId(id);
@@ -161,7 +194,7 @@ const Applicant = () => {
   const renderApplications = () => {
     return candidates?.map((item: Candidate, idx: number) => (
       <div key={idx} className="flex justify-center">
-        <Paper className="md:h-[400px] bg-white p-4 w-[90%] place-items-center">
+        <Paper className="md:h-[400px] bg-white p-4 w-[99%] place-items-center">
           <div className="flex flex-row text-green-700 font-semibold md:text-2xl text-xl">
             {item.firstName} {item.lastName}
           </div>
@@ -249,12 +282,20 @@ const Applicant = () => {
         <TableCell className="">{candidate.stage}</TableCell>
         <TableCell className="">{candidate.status}</TableCell>
         <TableCell className="">
-          {candidate?.status == "pending" && (
-            <IconButton onClick={() => cancelPrompt(candidate?.id as string)}>
-              <ChromeReaderModeIcon className="w-[30-px] h-[30px] text-green-700" />
-            </IconButton>
+          {candidate?.status == "Pending" && (
+            <Button onClick={() => cancelPrompt(candidate?.id as string)} className="bg-green-700 h-[30px] w-[90px] text-white capitalize text-[12px]">
+            Cancel
+          </Button>
           )}
         </TableCell>
+        <TableCell>
+        {candidate?.status == "Hired" && (
+            <Button onClick={() => startOnBoarding(candidate?.id as string)} className="bg-green-700 h-[30px] w-[90px] text-white capitalize text-[12px]">
+            onBoard
+          </Button>
+          )}
+        </TableCell>
+        
       </TableRow>
     ));
   };

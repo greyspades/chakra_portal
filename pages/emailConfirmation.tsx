@@ -24,6 +24,8 @@ const EmailConfirmation = () => {
                 if(res.data.code == 200) {
                     setLoading(false);
                     setVerified(true);
+                } else {
+                    setLoading(false)
                 }
             }).catch((err: AxiosError) => {
                 console.log(err.message)
@@ -37,7 +39,8 @@ const EmailConfirmation = () => {
     <div>
         <Navbar />
         <div className='flex justify-center mt-[100px]'>
-            {verified ? <Paper className="flex flex-col w-[50%] justify-items-center md:h-[85%] bg-slate-100 overflow-y-scroll p-4 py-10">
+            {verified && (
+                <Paper className="flex flex-col w-[50%] justify-items-center md:h-[85%] bg-slate-100 overflow-y-scroll p-4 py-10">
                 <div>
                     <div className='flex justify-center'>
                     <VerifiedIcon className="text-green-700 w-[80px] h-[80px]" />
@@ -46,8 +49,12 @@ const EmailConfirmation = () => {
                         Congratulations your email has been verified successfully
                     </p>
                 </div>
-            </Paper> : <div><CircularProgress thickness={7} className="text-green-700" /></div>
+            </Paper>
+            )
             }
+            {loading && (
+                <CircularProgress thickness={7} className="text-green-700" />
+            )}
         </div>
         <div className='mt-[200px]'>
         <Footer />

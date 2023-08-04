@@ -77,10 +77,10 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
   };
 
   //* paths without a highlight on navbar
-  const pathsWithoutStatus = ["/admin"];
+  const pathsWithoutStatus = ["/admin", "/signin", "/reset"];
 
   //* paths with a highlight
-  const statusPages = ["/statusform", "/applicant"];
+  const statusPages = ["/statusform", "/applicant", "/reset"];
 
   //* clears the notifier state
   const clearStatus = () => setStatus({ open: false });
@@ -105,6 +105,7 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
         open={status?.open ? true : false}
         onClose={clearStatus}
       >
+        <div>
         <Notifier
           hasNext={status.hasNext}
           topic={status?.topic ?? ""}
@@ -112,6 +113,7 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
           close={clearStatus}
           other={() => logout()}
         />
+        </div>
       </Modal>
       <Box sx={{ flexGrow: 1 }}>
         <AppBar position="fixed" className="bg-white text-black max-h-[60px]">
@@ -154,7 +156,7 @@ export const Navbar = ({ handleNav, logOut, next }: NavProps) => {
                   Sign Out
                 </button>
               )}
-              {router.pathname != "/admin" && (
+              {!["/admin", "/signin", "/reset"].includes(router.pathname) && (
                 <div className="text-[12px]">
                   {loggedIn ? (
                     <button

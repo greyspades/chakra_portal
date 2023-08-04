@@ -15,6 +15,7 @@ import FlagIcon from "@mui/icons-material/Flag";
 import { useRouter } from "next/router";
 import { MainContext } from "../context";
 import { Notifier } from "../components/notifier";
+import AppMonitor from "../components/AppMonitor";
 
 const Admin = () => {
   const [currentIdx, setCurrentIdx] = useState<number>(0);
@@ -110,7 +111,8 @@ const Admin = () => {
   }
 
   return (
-    <div className="">
+    <AppMonitor time={300000}>
+      <div className="">
       <Navbar logOut={showNav} />
       <Modal
         className="flex justify-center"
@@ -151,6 +153,7 @@ const Admin = () => {
         </div>
       )}
     </div>
+    </AppMonitor>
   );
 };
 

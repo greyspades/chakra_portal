@@ -21,6 +21,7 @@ import { ExpandMore } from "@mui/icons-material";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import error from "next/error";
 import { Close } from "@mui/icons-material";
+import { CustomInput } from "../customInput";
 
 interface JobFilterProps {
   change: (e: any, f: string) => void,
@@ -65,18 +66,14 @@ export const JobFilters = ({
     {
       title: "Locations",
       field: (
-        <Input
-          value={fields.location}
-          onChange={(e) => change(e, "location")}
-          className="h-[50px] w-[100%] bg-gray-200 border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-          disableUnderline
-          placeholder="Lagos, Benin, Abuja"
-          startAdornment={
-            <InputAdornment position="start">
-              <LocationOnIcon />
-            </InputAdornment>
-          }
-        />
+        <CustomInput
+        value={fields.location}
+        onChange={(e) => change(e, "location")}
+        component={"text"}
+        placeHolder="Lagos, Benin, Abuja"
+        classes="h-[50px] w-[100%] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+        icon={<LocationOnIcon />}
+       />
       ),
     },
     // {
@@ -94,29 +91,34 @@ export const JobFilters = ({
     {
       title: "Degree",
       field: (
-        <Select
-          value={eduType}
-          onChange={eduTypeChange}
-          className="h-[50px] w-[100%] bg-gray-200 border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-          >{degrees.map((item: string, idx: number) => (
-            <MenuItem key={idx} value={item}>
-              {item}
-            </MenuItem>
-          ))}</Select>
+          <CustomInput
+        value={eduType}
+        onChange={eduTypeChange}
+        component={"select"}
+        selValues={degrees}
+        classes="h-[50px] w-[100%] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+       />
       ),
     },
     {
       title: "Job types",
       field: (
-        <Select
-          value={jobType}
-          onChange={jobTypeChange}
-          className="h-[50px] w-[100%] bg-gray-200 border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-          >{jobTypes.map((item: string, idx: number) => (
-            <MenuItem key={idx} value={item}>
-              {item}
-            </MenuItem>
-          ))}</Select>
+        // <Select
+        //   value={jobType}
+        //   onChange={jobTypeChange}
+        //   className="h-[50px] w-[100%] bg-gray-200 border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
+        //   >{jobTypes.map((item: string, idx: number) => (
+        //     <MenuItem key={idx} value={item}>
+        //       {item}
+        //     </MenuItem>
+        //   ))}</Select>
+        <CustomInput
+        value={jobType}
+        onChange={jobTypeChange}
+        component={"select"}
+        selValues={jobTypes}
+        classes="h-[50px] w-[100%] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+       />
       ),
     },
   ];
@@ -142,13 +144,13 @@ export const JobFilters = ({
   return (
     <div className="h-auto">
       <div className="flex flex-col md:flex-row md:justify-center justify-between bg-white p-3">
-        <Input
-          placeholder="Search for a job role"
-          className="h-[50px] w-[100%] bg-gray-100 border-green-700 border-solid border-2 rounded-md no-underline px-4 shadow-lg"
-          value={searchVal}
-          onChange={(e) => searchRole(e)}
-          disableUnderline
-        />
+        <CustomInput
+        value={searchVal}
+        onChange={(e) => searchRole(e)}
+        component={"text"}
+        placeHolder="Search for a job role"
+        classes="h-[50px] w-[100%] bg-gray-100 rounded-md no-underline px-4 shadow-md"
+       />
         {mobile &&(
           <div className="flex justify-end">
             <Button className="" onClick={hideFilter}>
