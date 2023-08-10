@@ -23,7 +23,10 @@ export type Candidate = {
   maritalStatus?: string,
   state?: string,
   lga?: string,
-  religion?: string
+  religion?: string,
+  staffId?: string,
+  hireDate?: string,
+  jobType?: string,
 }
 
 export type Comment = {
