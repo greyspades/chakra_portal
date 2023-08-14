@@ -29,6 +29,8 @@ import { Notifier } from "./notifier";
 import ArticleIcon from "@mui/icons-material/Article";
 import { CustomInput } from "./customInput";
 import CryptoJS from "crypto-js";
+import { postAsync, postCustom } from "../helpers/connection";
+import { lowerKey } from "../helpers/formating";
 
 
 export const Application: FC<Role> = ({ name, id }: Role) => {
@@ -80,9 +82,11 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   useEffect(() => {
     const bytes = CryptoJS.AES.decrypt(sessionStorage.getItem("cred") ?? "", process.env.NEXT_PUBLIC_AES_KEY);
     const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    const mainData = lowerKey(data) as Candidate
     if (data) {
-      setBasicInfo(data);
-      setGender(data?.gender);
+      // console.log(data)
+      setBasicInfo(mainData);
+      setGender(mainData?.gender);
     }
   }, []);
 
@@ -457,9 +461,9 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
             <Formik
               validationSchema={ApplicationValidation}
               initialValues={{
-                firstName: basicInfo?.firstName,
-                lastName: basicInfo?.lastName,
-                otherName: basicInfo?.otherName,
+                firstName: basicInfo.firstname,
+                lastName: basicInfo.lastname,
+                otherName: basicInfo.othername,
                 email: basicInfo?.email,
                 phone: basicInfo?.phone,
                 school: "",
@@ -496,12 +500,12 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
 
                 //* candidate object
                 const candidateObj: Candidate = {
-                  firstName: value.firstName,
-                  lastName: value.lastName,
+                  firstname: value.firstname,
+                  lastname: value.lastname,
                   email: value.email,
                   phone: value.phone.toString(),
                   dob: value.dob.toString(),
-                  roleId: id as string,
+                  roleid: id as string,
                 };
                 //* payload for updating the role
                 const roleObj: Role = {
@@ -544,14 +548,14 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 if (type == "pdf" && expResult && eduResult && expForm.length > 0 && eduField.length > 0) {
                   setGenError(false)
                   setLoading(true);
-                  Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION as string, body, {
-                    headers: {
-                      "Access-Control-Allow-Origin": "*",
-                      "Content-Type": "multipart/form-data",
-                    },
-                  })
+                  console.log(body)
+                  Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION as string, body, {headers: {
+                    "Access-Control-Allow-Origin": "*",
+                    "Content-Type": "multipart/form-data",
+                  }})
                     .then((res: AxiosResponse) => {
                       setLoading(false);
+                      console.log(res.data)
                       if (res.data.code == 200) {
                         setCandidate(candidateObj);
                         setRole(roleObj);
@@ -565,6 +569,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       }
                     })
                     .catch((err: AxiosError) => {
+                      console.log(err.message)
                       setLoading(false);
                       setStatus({
                         open: true,

@@ -9,6 +9,8 @@ import axios, { AxiosError, AxiosResponse } from "axios";
 import { Navbar } from "../components/navbar";
 import { Notifier } from "../components/notifier";
 import Footer from "../components/footer";
+import { postAsync } from "../helpers/connection";
+
 
 const Reset = () => {
     const [mail, setMail] = useState<string>()
@@ -51,13 +53,13 @@ const Reset = () => {
         }
         setSentMail(false)
         setCounting(false)
-        axios.post(process.env.NEXT_PUBLIC_SEND_PASS_RESET_MAIL as string, body)
-        .then((res: AxiosResponse) => {
-            if(res.data.code == 200) {
+        postAsync(process.env.NEXT_PUBLIC_SEND_PASS_RESET_MAIL as string, body)
+        .then((res) => {
+            if(res.code == 200) {
                 setStatus({
                     open: true,
                     topic: "Successful",
-                    content: res.data.message,
+                    content: res.message,
                     hasNext: false,
                 });
                 setCounting(true)
@@ -67,7 +69,7 @@ const Reset = () => {
                 setStatus({
                     open: true,
                     topic: "Unsuccessful",
-                    content: res.data.message,
+                    content: res.message,
                     hasNext: false,
                 });
             }

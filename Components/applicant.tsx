@@ -30,6 +30,7 @@ import { ScheduleInterview } from "./interviews/add";
 import { Notifier } from "./notifier";
 import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
 import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import { postAsync } from "../helpers/connection";
 
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.js`;
@@ -124,10 +125,10 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     let body = {
       id: data?.id
     }
-    Axios.post(process.env.NEXT_PUBLIC_GET_COMMENTS_BY_ID as string, body)
-    .then((res: AxiosResponse) => {
-      if(res.data.code == 200) {
-        setComments(res.data.data);
+    postAsync(process.env.NEXT_PUBLIC_GET_COMMENTS_BY_ID as string, body)
+    .then((res) => {
+      if(res.code == 200) {
+        setComments(res.data);
       }
     })
     .catch((err: AxiosError) => {
@@ -145,9 +146,9 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
    let body = {
     id: data.id
    }
-    Axios.post(process.env.NEXT_PUBLIC_GET_SKILLS as string, body).then(
-      (res: AxiosResponse) => {
-        setSkills(res.data);
+    postAsync(process.env.NEXT_PUBLIC_GET_SKILLS as string, body).then(
+      (res) => {
+        setSkills(res);
       }
     );
 
@@ -169,9 +170,9 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       roleName: role.name,
     };
 
-    Axios.post(`${process.env.NEXT_PUBLIC_FLAG_CANDIDATE}`, body)
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200) {
+    postAsync(`${process.env.NEXT_PUBLIC_FLAG_CANDIDATE}`, body)
+      .then((res) => {
+        if (res.code == 200) {
           setFlagLoading(false);
           setStatus({
             open: true,
@@ -195,9 +196,9 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     const body = {
       id: data?.id,
     };
-    Axios.post(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
+    postAsync(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
       .then((res) => {
-        if (res.data.code == 200) {
+        if (res.code == 200) {
           setStatus({
             open: true,
             topic: "Successful",
@@ -215,15 +216,15 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   const fields: { [key: string]: any }[] = [
     {
       name: "First Name",
-      value: data?.firstName,
+      value: data?.firstname,
     },
     {
       name: "Other Name",
-      value: data?.otherName,
+      value: data?.othername,
     },
     {
     name: "Last Name",
-      value: data?.lastName,
+      value: data?.lastname,
     },
     {
       name: "Gender",
@@ -235,11 +236,11 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
     {
       name: "Application Date",
-      value: data?.applDate?.split("T")[0],
+      value: data?.appldate?.split("T")[0],
     },
     {
       name: "Job Role Applied",
-      value: data?.jobName,
+      value: data?.jobname,
     },
     {
       name: "Phone Number",
@@ -255,7 +256,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
     {
       name: "Marital Status",
-      value: data?.maritalStatus
+      value: data?.maritalstatus
     },
     {
       name: "Application Stage",
@@ -271,7 +272,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     },
     {
       name: "Temporary Id",
-      value: `TSN${data?.tempId}` ?? "Not hired",
+      value: `TSN${data?.tempid}` ?? "Not hired",
     },
     {
       name: "State",
@@ -450,7 +451,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
         <div className="h-[170px] bg-white p-4">
           <p className="font-semibold text-xl">Cancel Application?</p>
           <p className="font-semibold mt-4">
-            Are you sure you want to cancel {data?.firstName}'s Application?
+            Are you sure you want to cancel {data?.firstname}'s Application?
           </p>
           <div className="flex justify-end">
             <div className="flex flex-row justify-between w-[50%] mt-6">
@@ -525,7 +526,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
           <p className="text-xl font-semibold mb-4">Cover Letter</p>
         </div>
         <div className="flex rounded-md bg-white p-4 w-[100%] h-auto overflow-y-scroll">
-          <p>{data?.coverLetter}</p>
+          <p>{data?.coverletter}</p>
         </div>
       </div>
       {/* skills */}

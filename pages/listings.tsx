@@ -21,7 +21,9 @@ import { JobFilters } from "../components/applicationStages/jobFilters";
 import { JobList } from "../components/applicationStages/jobList";
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 import { getRole } from "../store/slices/roleSlice";
-
+import CryptoJs from "crypto-js"
+import { getContent, postAsync, postContent } from "../helpers/connection";
+import { lowerKey, lowerKeyArray } from "../helpers/formating";
 
 const Listings = ({ data }: any) => {
   const [roles, setRoles] = useState<Role[]>([]);
@@ -48,6 +50,8 @@ const Listings = ({ data }: any) => {
   })
   const [jobType, setJobType] = useState<string>("")
   const [eduType, setEduType] = useState<string>("")
+
+  const [set, setSet] = useState<boolean>(false)
 
   const [showFilter, setShowFilter] = useState<boolean>(true)
   const [roleCount, setRoleCount] = useState<number>(0)
@@ -131,12 +135,23 @@ const handleCheckChange = (filter: string, filterType: string) => {
       filter: filterVal ?? "",
       filterType: filterTypeVal ?? ""
     }
-    // console.log(body)
-    Axios.post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
-      setRoles(res.data.data);
-      setActiveRole(res.data.data[0]);
-      setRoleCount(res.data?.count)
-      
+    // postAsync("http://localhost:5089/roles/Role/all" as string, body).then((res) => {
+    //   // console.log(res)
+    //   let data = res.data;
+    //   setRoles(data);
+    //   setActiveRole(data[0]);
+    //   setRoleCount(res.data?.count)
+    //   setSet(true)
+    // }).catch((err: AxiosError) => {
+    //   console.group(err.message)
+    // });
+
+    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
+      let data = res.data;
+      setRoles(data);
+      setActiveRole(data[0]);
+      setRoleCount(res?.count)
+      setSet(true)
     }).catch((err: AxiosError) => {
       console.group(err.message)
     });

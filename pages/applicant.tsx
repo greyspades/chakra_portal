@@ -27,6 +27,9 @@ import TableViewIcon from "@mui/icons-material/TableView";
 import GridViewIcon from "@mui/icons-material/GridView";
 import Footer from "../components/footer";
 import CryptoJS from "crypto-js";
+import { getContent, postAsync, postContent } from "../helpers/connection";
+import { lowerKey, lowerKeyArray } from "../helpers/formating";
+import { connect } from "http2";
 
 
 const Applicant = () => {
@@ -67,16 +70,15 @@ const Applicant = () => {
       let body = {
         email: data.email,
       };
-      axios
-        .post(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
-        .then((res: AxiosResponse) => {
-          if (res.data.code == 200 && res.data.data.length > 0) {
-            setCandidates(res.data.data);
-          } else if (res.data.code != 200 && res.data.length < 1) {
+      postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
+        .then((res) => {
+          if (res.code == 200 && res.data.length > 0) {
+            setCandidates(res.data);
+          } else if (res.code != 200 && res.length < 1) {
             setStatus({
               open: true,
               topic: "Unsuccessful",
-              content: res.data.message,
+              content: res.message,
             });
           }
         })
@@ -125,11 +127,10 @@ const Applicant = () => {
       page: 0,
       filter: ""
     }
-    axios
-      .post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200 && res.data.data.length > 0) {
-          setRoles(res.data.data);
+    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
+      .then((res) => {
+        if (res.code == 200 && res.data.length > 0) {
+          setRoles(res.data)
         }
       });
   }, []);
@@ -145,11 +146,10 @@ const Applicant = () => {
     const body = {
       id: cancelId,
     };
-    axios
-      .post(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
+    postAsync(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
       .then((res) => {
-        console.log(res.data);
-        if (res.data.code == 200) {
+        // console.log(res.data);
+        if (res.code == 200) {
           setStatus({
             open: true,
             topic: "Successful",
@@ -196,18 +196,18 @@ const Applicant = () => {
       <div key={idx} className="flex justify-center">
         <Paper className="md:h-[400px] bg-white p-4 w-[99%] place-items-center">
           <div className="flex flex-row text-green-700 font-semibold md:text-2xl text-xl">
-            {item.firstName} {item.lastName}
+            {item.firstname} {item.lastname}
           </div>
           <div className="flex flex-row place-items-center bg-slate-100 rounded-md mt-2">
             <div className="bg-slate-100 rounded-md p-1">Applied for:</div>
             <div className="bg-slate-100 rounded-md text-green-700 font-semibold truncate ... md:w-[250px] md:ml-1">
-              {roleData(item.roleId)?.name}
+              {roleData(item.roleid)?.name}
             </div>
           </div>
           <div className="flex flex-row place-items-center bg-slate-100 rounded-md mt-2">
             <div className="bg-slate-100 rounded-md p-1">Required Experience:</div>
             <div className="bg-slate-100 rounded-md  text-green-700 font-semibold ml-2">
-              {roleData(item.roleId)?.experience}
+              {roleData(item.roleid)?.experience}
             </div>
           </div>
           {/* <div className="flex flex-row place-items-center bg-slate-100 rounded-md mt-2">
@@ -276,9 +276,9 @@ const Applicant = () => {
   const displayApplicantsTable = () => {
     return candidates?.map((candidate: Candidate, idx: number) => (
       <TableRow key={idx} hover role="checkbox" tabIndex={-1} className="">
-        <TableCell className="">{candidate?.jobName}</TableCell>
+        <TableCell className="">{candidate?.jobname}</TableCell>
         {/* <TableCell className="">{roleData(candidate.roleId)?.unit}</TableCell> */}
-        <TableCell className="">{candidate.applDate?.split("T")[0]}</TableCell>
+        <TableCell className="">{candidate.appldate?.split("T")[0]}</TableCell>
         <TableCell className="">{candidate.stage}</TableCell>
         <TableCell className="">{candidate.status}</TableCell>
         <TableCell className="">
@@ -289,11 +289,11 @@ const Applicant = () => {
           )}
         </TableCell>
         <TableCell>
-        {candidate?.status == "Hired" && (
+        {/* {candidate?.status == "Hired" && (
             <Button onClick={() => startOnBoarding(candidate?.id as string)} className="bg-green-700 h-[30px] w-[90px] text-white capitalize text-[12px]">
             onBoard
           </Button>
-          )}
+          )} */}
         </TableCell>
         
       </TableRow>

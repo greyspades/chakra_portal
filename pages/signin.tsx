@@ -19,6 +19,7 @@ import { AdminForm } from "../helpers/validation";
 import { Notifier } from "../components/notifier";
 import { MainContext } from "../context";
 import CryptoJS from "crypto-js";
+import { postAsync } from "../helpers/connection";
 
 
 const Signin = () => {
@@ -61,10 +62,11 @@ const Signin = () => {
                     id: value.userId,
                     password: value.password
                 }
-                axios.post(process.env.NEXT_PUBLIC_ADMIN_AUTH as string, body)
-                .then((res: AxiosResponse) => {
+                postAsync(process.env.NEXT_PUBLIC_ADMIN_AUTH as string, body)
+                .then((res) => {
                     setLoading(false);
-                    if(res.data.code == 200) {
+                  // console.log(res)
+                    if(res.code == 200) {
                         setAdmin(res.data.data)
                         sessionStorage.setItem("auth", "True")
                         router.push('/admin')
@@ -73,7 +75,7 @@ const Signin = () => {
                         setStatus({
                           open: true,
                           topic: "Unsuccessful",
-                          content: res.data.message
+                          content: res.message
                         })
                     }
                 })

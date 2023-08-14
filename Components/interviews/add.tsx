@@ -17,6 +17,7 @@ import { Meeting } from "../../types/meetings";
 import { InterviewForm } from "../../helpers/validation";
 import { Notifier } from "../notifier";
 import { Close } from "@mui/icons-material";
+import { postAsync } from "../../helpers/connection";
 
 interface ScheduleProps {
   candidate: Candidate;
@@ -78,29 +79,26 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
                   time: value.time,
                   topic: value.topic,
                   participantId: candidate.id,
-                  firstName: candidate.firstName,
-                  lastName: candidate.lastName,
+                  firstName: candidate.firstname,
+                  lastName: candidate.lastname,
                   email: candidate.email,
                   jobTitle: role.name,
                   jobId: role.id,
                 };
                 setLoading(true);
-                console.log(body)
-
                 //* creates a new online meeting
-                axios
-                  .post(process.env.NEXT_PUBLIC_CREATE_MEETING as string, body)
-                  .then((res: AxiosResponse) => {
+                postAsync(process.env.NEXT_PUBLIC_CREATE_MEETING as string, body)
+                  .then((res) => {
                     //* if operation is successful
-                    if (res.data.code == 200) {
-                      setMeetingInfo(res.data.data);
+                    if (res.code == 200) {
+                      setMeetingInfo(res.data);
                       setLoading(false);
-                    } else if (res.data.code == 401) {
+                    } else if (res.code == 401) {
                       setLoading(false)
                       setStatus({
                         open: true,
                         topic: "Unsuccessful",
-                        content: res.data.message,
+                        content: res.message,
                       });
                     }
                   })
@@ -184,7 +182,7 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
             <div className="flex flex-row bg-white rounded-md p-0.5 px-2 mt-2 gap-2">
               <p>MeetingId:</p>
               <p className="text-green-700 font-semibold">
-                {meetingInfo?.meetingId}
+                {meetingInfo?.meetingid}
               </p>
             </div>
 

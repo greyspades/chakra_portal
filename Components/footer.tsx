@@ -18,34 +18,34 @@ const Footer = () => {
         <div className='flex justify-between flex-wrap md:gap-0 gap-4'>
             <div className='flex flex-col gap-2'>
                 <p className='text-black text-[16px] font-bold mb-2'>About LAPO</p>
-                <a>About Us</a>
-                <a>Our Impact</a>
+                <a href='https://www.lapo-nigeria.org/about-us'>About Us</a>
+                <a href='https://www.lapo-nigeria.org/about/our-impact'>Our Impact</a>
             </div>
 
             <div className='flex flex-col gap-2'>
                 <p className='text-black text-[16px] font-bold mb-2'>Digital Services</p>
-                <a>Mobile Banking</a>
-                <a>SME Online</a>
-                <a>Public sector Online</a>
+                <a href='https://play.google.com/store/apps/details?id=com.ofss.lapobank'>Mobile Banking</a>
+                <a href='https://sme.lapo-nigeria.org'>SME Online</a>
+                <a href='https://ps.lapo-nigeria.org'>Public sector Online</a>
             </div>
 
             <div className='flex flex-col gap-2'>
                 <p className='text-black text-[16px] font-bold mb-2'>Products</p>
-                <a>Regular Loan</a>
-                <a>SME Loan</a>
-                <a>Educational Loan</a>
-                <a>Agricultural Loan</a>
-                <a>Regular Savings</a>
-                <a>My Pikin Savings</a>
+                <a href='https://www.lapo-nigeria.org/loans/regular'>Regular Loan</a>
+                <a href='https://www.lapo-nigeria.org/loans/sme'>SME Loan</a>
+                <a href='https://www.lapo-nigeria.org/loans/education'>Educational Loan</a>
+                <a href=' https://www.lapo-nigeria.org/loans/agric'>Agricultural Loan</a>
+                <a href='https://www.lapo-nigeria.org/loans/education'>Regular Savings</a>
+                <a href='https://www.lapo-nigeria.org/savings/my-pikin'>My Pikin Savings</a>
             </div>
 
             <div className='flex flex-col gap-2'>
                 <p className='text-black text-[16px] font-bold mb-2'>Quick Links</p>
-                <a>Customer Service</a>
-                <a>Privacy Policy</a>
-                <a>ISMS Policy</a>
-                <a>BVN Consent Term</a>
-                <a>LAPO Logo</a>
+                <a href='https://www.lapo-nigeria.org/customer-services'>Customer Service</a>
+                <a href=' https://www.lapo-nigeria.org/Whistleblow'>Whistleblow Policy</a>
+                <a href=' https://www.lapo-nigeria.org/lapo-privacy-policy'>Privacy Policy</a>
+                <a href='https://www.lapo-nigeria.org/bvn-consent-terms'>BVN Consent Term</a>
+                <a href='https://www.lapo-nigeria.org/lapo-logo'>LAPO Logo</a>
             </div>
 
             <div className='flex flex-col gap-2'>

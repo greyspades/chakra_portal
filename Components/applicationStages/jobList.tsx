@@ -79,6 +79,10 @@ export const JobList = ({ roles, setRole, apply, getRoles, currentStep, refresh,
     window.scrollTo(0,0)
   }
 
+  // useEffect(() => {
+  //   console.log(roles)
+  // },[])
+
     
     //* parses and maps through the job descriptions
     const parseDesc = (desc: string) => {
@@ -122,7 +126,7 @@ export const JobList = ({ roles, setRole, apply, getRoles, currentStep, refresh,
 
   const renderRoles = () => {
     return roles.map((item: Role, idx: number) => {
-      if(item.status == "active") {
+      // if(item.status == "active") {
         return <div key={idx} className="mb-8">
         <Paper className={currentStep == 1 ? "bg-white p-2 md:px-8 px-2" : "bg-white p-2 md:px-4 px-2"}>
             <div className="">
@@ -143,7 +147,7 @@ export const JobList = ({ roles, setRole, apply, getRoles, currentStep, refresh,
                     </div>
                     <div className="flex flex-row place-items-center">
                         <BadgeIcon className="text-green-700 w-[17px] h-[17px]" />
-                        {item?.jobType ?? "Full time"}
+                        {item?.jobtype ?? "Full time"}
                     </div>
               </div>
                 {/* <div className="flex flex-row gap-8">
@@ -201,7 +205,7 @@ export const JobList = ({ roles, setRole, apply, getRoles, currentStep, refresh,
             </div>
         </Paper>
       </div>
-      }
+      // }
     });
   };
 

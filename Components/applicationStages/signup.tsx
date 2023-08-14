@@ -36,6 +36,8 @@ import HomeIcon from '@mui/icons-material/Home';
 import { error } from "console";
 import Link from "next/link";
 import CryptoJs from "crypto-js"
+import { lowerKey, lowerKeyArray } from "../../helpers/formating";
+import { postAsync, getContent } from "../../helpers/connection";
 
 
 interface SignupProps {
@@ -204,14 +206,10 @@ export const Signup = ({
 
                   let encrypted = CryptoJs.AES.encrypt(sessionData, process.env.NEXT_PUBLIC_AES_KEY).toString()
 
-                  Axios.post(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body, {
-                    headers: {
-                      "Access-Control-Allow-Origin": "*",
-                    },
-                  })
-                    .then((res: AxiosResponse) => {
+                  postAsync(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body)
+                    .then((res) => {
                       setLoading(false);
-                      if (res.data.code == 200) {
+                      if (res.code == 200) {
                         sessionStorage.setItem("cred", encrypted);
                         setLoggedIn(true);
                         setStatus({
@@ -224,7 +222,7 @@ export const Signup = ({
                         setStatus({
                           open: true,
                           topic: "Unsuccessful",
-                          content: res.data.message,
+                          content: res.message,
                         });
                       }
                     })
@@ -421,7 +419,7 @@ export const Signup = ({
                         value={values.validPassword}
                         onChange={handleChange("validPassword")}
                         component={"text"}
-                        placeHolder="Password"
+                        placeHolder="Confirm Password"
                         type={visible ? "text" : "password"}
                         classes="h-[40px] w-[280px] md:w-[300px] bg-gray-100 rounded-md no-underline px-4 shadow-lg"
                         icon={        <IconButton onClick={() => setVisible(!visible)}>
@@ -484,7 +482,7 @@ export const Signup = ({
             <form>
               <Formik
                 validationSchema={SignInValidation}
-                initialValues={{ email: "", password: ""}}
+                initialValues={{ email: "", password: ""}} 
                 onSubmit={(value, { validateForm }) => {;
                   validateForm(value);
                   setLoading(true);
@@ -493,11 +491,10 @@ export const Signup = ({
                     password: value.password,
                   };
                   if (!isStatus) {
-                    axios
-                      .post(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
-                      .then((res: AxiosResponse) => {
-                        if (res.data.code == 200) {
-                          let encrypted = CryptoJs.AES.encrypt(JSON.stringify({...res.data.data, password: null}), process.env.NEXT_PUBLIC_AES_KEY).toString()
+                    postAsync(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
+                      .then((res) => {
+                        if (res.code == 200) {
+                          let encrypted = CryptoJs.AES.encrypt(JSON.stringify({...res.data, password: null}), process.env.NEXT_PUBLIC_AES_KEY).toString()
                           sessionStorage.setItem(
                             "cred",
                             encrypted
@@ -512,7 +509,7 @@ export const Signup = ({
                           setStatus({
                             open: true,
                             topic: "Unsuccessful",
-                            content: res.data.message,
+                            content: res.message,
                           });
                         }
                       })
@@ -525,18 +522,17 @@ export const Signup = ({
                         });
                       });
                   } else {
-                    axios
-                      .post(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
-                      .then((res: AxiosResponse) => {
+                    postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
+                      .then((res) => {
                         setLoading(false);
-                        if (res.data.code == 200 && res.data.data.length > 0) {
-                          setCandidates(res.data.data);
+                        if (res.code == 200 && res.data.length > 0) {
+                          setCandidates(res.data);
                           router.push("/applicant");
-                        } else if (res.data.code != 200) {
+                        } else if (res.code != 200) {
                           setStatus({
                             open: true,
                             topic: "Unsuccessful",
-                            content: res.data.message,
+                            content: res.message,
                           });
                         }
                       });

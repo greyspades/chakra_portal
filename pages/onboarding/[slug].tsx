@@ -130,7 +130,7 @@ const Onboarding = () => {
           setLocation({ lga: data.lga, state: data.state });
           setLoaded(true);
           setMeta({
-            marital: data?.maritalStatus,
+            marital: data?.maritalstatus,
             gender: data?.gender,
             religion: "Christian",
           });
@@ -237,9 +237,9 @@ const Onboarding = () => {
               <form>
                 <Formik
                   initialValues={{
-                    firstName: userData?.firstName ?? "",
-                    lastName: userData?.lastName ?? "",
-                    otherName: userData?.otherName ?? "",
+                    firstName: userData?.firstname ?? "",
+                    lastName: userData?.lastname ?? "",
+                    otherName: userData?.othername ?? "",
                     email: userData?.email ?? "",
                     dob: userData?.dob.split("T")[0] ?? "",
                     currentAddress: userData?.address ?? "",
@@ -250,8 +250,8 @@ const Onboarding = () => {
                     currentCity: "",
                     permanentCity: "",
                     permanentState: "",
-                    staffId: userData?.tempId ?? "",
-                    hireDate: userData?.hireDate ?? "",
+                    staffId: userData?.tempid ?? "",
+                    hireDate: userData?.hiredate ?? "",
                     cityBirth: "",
                     stateBirth: "",
                     state: userData?.state ?? "",
@@ -280,7 +280,7 @@ const Onboarding = () => {
                     fEmployerPhone: "",
                     fEmployerEmail: "",
                     fEmployerAddress: "",
-                    jobType: userData?.jobType
+                    jobType: userData?.jobtype
                   }}
                   onSubmit={(value) => {}}
                 >
@@ -1189,7 +1189,7 @@ const Onboarding = () => {
                                   onChange={handleChange("fEmployerAddress")}
                                   component={"text"}
                                   // selValues={NaijaStates.lgas(location?.state)?.lgas}
-                                  placeHolder="Permanent Address"
+                                  placeHolder="Former Employer"
                                   classes=" grid h-[40px] w-[320px] md:w-[100%] bg-gray-100 rounded-md no-underline px-4 shadow-md mt-4"
                                   error={errors.fEmployerAddress}
                                   fitWidth

@@ -17,6 +17,7 @@ import {
 import { AddRole } from "./addRole";
 import { Role } from "../types/roles";
 import { Notifier } from "./notifier";
+import { postAsync } from "../helpers/connection";
 
 interface Job {
   code: string;
@@ -45,12 +46,11 @@ export const Jobs = () => {
       page: page,
       take: take,
     };
-    axios
-      .post(process.env.NEXT_PUBLIC_GET_ALL_JOB_ROLES as string, body)
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200) {
-          setJobs(res.data.data);
-          setDataCount(res.data.count);
+    postAsync(process.env.NEXT_PUBLIC_GET_ALL_JOB_ROLES as string, body)
+      .then((res) => {
+        if (res.code == 200) {
+          setJobs(res.data);
+          setDataCount(res.count);
           setSearchVal(null)
         }
       });
@@ -62,10 +62,10 @@ export const Jobs = () => {
       item: status
     }
     // console.log(body)
-    axios.post(process.env.NEXT_PUBLIC_CHANGE_STATUS as string, body)
-    .then((res: AxiosResponse) => {
+    postAsync(process.env.NEXT_PUBLIC_CHANGE_STATUS as string, body)
+    .then((res) => {
       // console.log(res)
-      if(res.data.code == 200) {
+      if(res.code == 200) {
         setStatus({
           open: true,
           topic: "Successful",
@@ -91,11 +91,10 @@ export const Jobs = () => {
       page: 0,
       filter: ""
     }
-    axios
-      .post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200) {
-          setActiveJobs(res.data.data);
+    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
+      .then((res) => {
+        if (res.code == 200) {
+          setActiveJobs(res.data);
         }
       })
       .catch((err: AxiosError) => {
@@ -129,7 +128,7 @@ export const Jobs = () => {
           </Button>
           </TableCell>
       </TableRow>
-    ));
+  ));
   };
 
   //* moves to the next page
@@ -164,11 +163,10 @@ export const Jobs = () => {
       let body = {
         value: e.target.value,
       };
-      axios
-        .post(process.env.NEXT_PUBLIC_SEARCH_JOB_ROLES as string, body)
-        .then((res: AxiosResponse) => {
-          if (res.data.length > 0) {
-            setJobs(res.data);
+      postAsync(process.env.NEXT_PUBLIC_SEARCH_JOB_ROLES as string, body)
+        .then((res) => {
+          if (res.length > 0) {
+            setJobs(res);
           }
         });
     }

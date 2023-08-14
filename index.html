@@ -1,39 +1,38 @@
 <!DOCTYPE html>
 <html>
 <body style="padding: 10px; color: black; font-size: 14px; font-weight: normal;">
-    <!-- <div>
-        <p>20th March 2023</p>
+    <div>
+        <p>{payload.Date}</p>
     </div>
     <div>
-        <p>ANITA ENOMWENGHO</p>
-        <p>11, Walter Carrington Crescent
-            Victoria Island
-            Lagos
-            </p>
-    </div> -->
+        <p>{payload.FirstName, payload.LastName}</p>
+        <p>{payload.Address}</p>
+        <p>{payload.City}</p>
+        <p>{payload.State}</p>
+    </div>
 
     <div style="text-decoration: underline; font-weight: 600;">
         Provisional Offer of Employment 
     </div>
     <div>
         <p>
-            Dear dave
+            Dear {payload.FirstName}
         </p>
     </div>
     <div>
         Welcome to LAPO Microfinance Bank! We are pleased to offer you provisional employment to bring you on board our mission to improve lives.
     </div>
     <div style="margin-top: 20px;">
-        Your full-time employment as <span>Client Support Officer</span> (if you accept our offer) will be according to the terms set out in the contracts of employment and other documentation and as stated in the attached document.
+        Your {payload.JobType} employment as <span>{payload.JobName}</span> (if you accept our offer) will be according to the terms set out in the contracts of employment and other documentation and as stated in the attached document.
     </div>
     <div>
         <p style="font-weight: bold;">1.	Job Description and commencement:</p>
         <ul>
-            <li>Your position: 	-Client Support Officer (CSO) </li>
-            <li>Rank:	-Senior Programme Assistant (Grade Level: 4-1)</li>
-            <li>Reports to:	 -Mega Branch Manager </li>
-            <li>Workplace location: 	-Benin City</li>
-            <li>Expected start date: 	-5th April 2023. You are required to complete the documentation procedure which forms part of this offer.</li>
+            <li>Your position: 	-{payload.JobName} </li>
+            <li>Rank:	-{payload.Rank}</li>
+            <li>Reports to:	 -{payload.ReportTo} </li>
+            <li>Workplace location:  -{payload.}</li>
+            <li>Expected start date: -{payload.StartDate}. You are required to complete the documentation procedure which forms part of this offer.</li>
         </ul>
     </div>
     <div>
@@ -43,7 +42,7 @@
     <div>
         <p style="font-weight: bold;">3. Remuneration and benefits</p>
         <ul>
-            <li><p>Salary</p style="font-weight: bold;">o	The current annual gross salary for this position is N1,200,000.00 (One million, two hundred-thousand-naira, zero kobo only).</li>
+            <li><p>Salary</p style="font-weight: bold;">o	The current annual gross salary for this position is N{payload.Salary} (One million, two hundred-thousand-naira, zero kobo only).</li>
             <li><p style="font-weight: bold;">Deductions</p>o	Statutory deductions such as Contributory Pension, tax, NHF, etc. would be made monthly on your gross salary stated above.</li>
             <li><p style="font-weight: bold;">Other benefits</p><p>o	13th Month: Subject to company policy</p>
             <p>o	Leave Transport Grant: 7% of annual basic salary per annum</p>

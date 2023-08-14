@@ -20,12 +20,17 @@ export const CandidateValidation = Yup.object().shape({
   password: Yup.string()
     .min(8, 'The password is too short')
     .max(50, 'The password is too long')
+    .matches(/^(?=.*[a-z])(?=.*[A-Z])(?=.*[0-9])(?=.*[!@#\$%\^&\*])(?=.{8,})/, 'must contain at least one uppercase, one number, and one special character')
     .required('This field is required'),
   firstName: Yup.string()
+  .max(30, "Maximum of 30 characters")
   .required('this field is required'),
   lastName: Yup.string()
+  .max(30, "Maximum of 30 characters")
   .required('this field is required'),
-  otherName: Yup.string(),
+  otherName: Yup.string()
+  .max(30, "Maximum of 30 characters")
+  .required('this field is required'),
   dob: Yup.date().required('this field is required').test("birthday", "Must be upto 18 years of age", function(val) {
     return calculateAge(new Date(val)) > 18;
 },

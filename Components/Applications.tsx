@@ -33,6 +33,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import { CustomInput } from "./customInput";
 import { CustomMenu } from "./customMenu";
+import { postAsync } from "../helpers/connection";
 
 
 export const Applications = () => {
@@ -94,12 +95,13 @@ export const Applications = () => {
       page: nextPage,
       take
     }
-    Axios.post(
+    postAsync(
       process.env.NEXT_PUBLIC_GET_APPLICATIONS_BY_JOB as string, body
     )
       .then((res) => {
-        setCandidates(res.data.data);
-        setDataCount(res.data.count);
+        // console.log(res.data)
+        setCandidates(res.data);
+        setDataCount(res.count);
       })
       .catch((e: AxiosError) => {
         console.log(e.message);
@@ -118,9 +120,9 @@ export const Applications = () => {
       value: "",
       page: 0,
     }
-    Axios.post(
+    postAsync(
       process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
-      setRoles(res.data.data);
+      setRoles(res.data);
     });
   }, []);
 
@@ -163,8 +165,8 @@ export const Applications = () => {
       setCandidates(update);
     } else if (event.target.value == "Date") {
       let update = candidates?.sort((a, b) => {
-        var dateA = new Date(a.applDate as string).getTime() as number;
-        var dateB = new Date(b.applDate as string).getTime() as number;
+        var dateA = new Date(a.appldate as string).getTime() as number;
+        var dateB = new Date(b.appldate as string).getTime() as number;
 
         return dateB - dateA;
       });
@@ -182,7 +184,7 @@ export const Applications = () => {
   //* switches the view to the applicants information
   const handleViewChange = (candidate: Candidate) => {
     var item: Role = roles?.find(
-      (item: Role) => item.id == candidate?.roleId
+      (item: Role) => item.id == candidate?.roleid
     ) as Role;
     setRole(item);
     setApplicant(candidate);
@@ -233,7 +235,7 @@ export const Applications = () => {
   const displayCandidates = () => {
     return candidates
       ?.filter((item: Candidate) =>
-        item.lastName.toLowerCase().includes(searchVal?.toLowerCase())
+        item?.lastname.toLowerCase().includes(searchVal?.toLowerCase())
       )
       .map((candidate: Candidate, idx) => (
         <TableRow
@@ -244,10 +246,10 @@ export const Applications = () => {
       className=""
       onClick={() => handleViewChange(candidate)}
     >
-      <TableCell className="">{candidate?.firstName}</TableCell>
-      <TableCell className="">{candidate?.lastName}</TableCell>
+      <TableCell className="">{candidate?.firstname}</TableCell>
+      <TableCell className="">{candidate?.lastname}</TableCell>
       <TableCell className="">
-        {candidate.applDate?.split("T")[0]}
+        {candidate.appldate?.split("T")[0]}
       </TableCell>
       <TableCell className="">{candidate.stage}</TableCell>
       <TableCell className="">{candidate.status}</TableCell>
@@ -322,10 +324,10 @@ export const Applications = () => {
       roleId: id,
       flag: e.target.value,
     };
-    Axios.post(process.env.NEXT_PUBLIC_GET_APPLICANTS_BY_FLAG as string, body)
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200) {
-          setCandidates(res.data.data);
+    postAsync(process.env.NEXT_PUBLIC_GET_APPLICANTS_BY_FLAG as string, body)
+      .then((res) => {
+        if (res.code == 200) {
+          setCandidates(res.data);
         }
       })
       .catch((e: AxiosError) => {

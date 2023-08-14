@@ -25,6 +25,8 @@ import { CreateJobValidation } from "../helpers/validation";
 import { Update } from "@mui/icons-material";
 import { error } from "console";
 import Listings from "../pages/listings";
+import { postAsync } from "../helpers/connection";
+
 
 interface Props {
   name: string;
@@ -81,11 +83,11 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
     let body = {
       code,
     };
-    axios
-      .post(process.env.NEXT_PUBLIC_GET_JOB_DESCRIPTION as string, body)
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200) {
-          setDesc(res.data.data);
+    postAsync(process.env.NEXT_PUBLIC_GET_JOB_DESCRIPTION as string, body)
+      .then((res) => {
+        // console.log(res)
+        if (res.code == 200) {
+          setDesc(res.data);
         }
       })
       .catch((err: AxiosError) => {
@@ -231,9 +233,9 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
   const displayDesc = () => {
     return desc?.map((item: { [key: string]: string }, idx: number) => (
       <div key={idx} className="flex flex-row gap-4 mt-2">
-        <p>{item?.["RowNum~~Blnk"]}</p>
+        <p>{item?.["rownum~~blnk"]}</p>
         <p className="capitalize">
-          {item?.["Job responsibility~~Sentc"].toLowerCase()}
+          {item?.["job responsibility~~sentc"]?.toLowerCase()}
         </p>
       </div>
     ));
@@ -309,26 +311,18 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                     location,
                     skills: JSON.stringify(skill?.split(",")),
                     qualification: `${qualification} in ${value.course}`,
-                    jobType
+                    jobtype: jobType
                   };
                   // console.log(body)
                   setLoading(true);
-                  axios
-                  .post(
+                  postAsync(
                     process.env.NEXT_PUBLIC_CREATE_NEW_JOB_ROLE as string,
                     body,
-                    {
-                      headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Content-Type": "application/json",
-                      },
-                      withCredentials: false,
-                    }
                   )
-                  .then((res: AxiosResponse) => {
+                  .then((res) => {
                     setLoading(false);
                                     
-                    if (res.data.code == 200) {
+                    if (res.code == 200) {
                       resetForm();
                       setSalary("");
                       setExperience("");
@@ -342,7 +336,7 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                       setStatus({
                         open: true,
                         topic: "Unsuccessful",
-                        content: res.data.message,
+                        content: res.message,
                       });
                     }
                   })

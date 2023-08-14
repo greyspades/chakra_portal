@@ -14,6 +14,7 @@ import { Formik } from "formik";
 import { PasswordReset } from "../helpers/validation";
 import { useRouter } from "next/router";
 import Footer from "../components/footer";
+import { postAsync } from "../helpers/connection";
 
 const Password = () => {
   const [loading, setLoading] = useState<boolean>(false);
@@ -84,14 +85,14 @@ const Password = () => {
                   password: value.password
                 }
 
-                axios.post(process.env.NEXT_PUBLIC_RESET_PASSWORD as string, body)
-                .then((res: AxiosResponse) => {
-                  if(res.data.code == 200) {
+                postAsync(process.env.NEXT_PUBLIC_RESET_PASSWORD as string, body)
+                .then((res) => {
+                  if(res.code == 200) {
                     setLoading(false)
                     setStatus({
                       open: true,
                       topic: "Successful",
-                      content: res.data.message,
+                      content: res.message,
                       hasNext: false,
                   });
                   router.replace("/")
@@ -100,7 +101,7 @@ const Password = () => {
                     setStatus({
                       open: true,
                       topic: "Unsuccessful",
-                      content: res.data.message,
+                      content: res.message,
                       hasNext: false,
                   });
                   }

@@ -8,6 +8,7 @@ import { Applicant } from './applicant';
 import { Notifier } from './notifier';
 import { Formik } from 'formik';
 import { AcceptanceInfoValidation } from '../helpers/validation';
+import { postAsync } from '../helpers/connection';
 
 export const Finalists = () => {
     const [candidates, setCandidates] = useState<Candidate[]>();
@@ -94,8 +95,8 @@ export const Finalists = () => {
         value: "",
         page: 0,
       }
-        axios.post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res: AxiosResponse) => {
-          setRoles(res.data.data);
+        postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
+          setRoles(res.data);
         }).catch((err: AxiosError) => {
           console.log(err.message)
         });
@@ -111,11 +112,11 @@ export const Finalists = () => {
         take
     }
     // console.log(body)
-    axios.post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_STAGE as string, body)
-    .then((res: AxiosResponse) => {
-        if(res.data.code == 200) {
-            setCandidates(res.data.data);
-            setDataCount(res.data.count);
+    postAsync(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_STAGE as string, body)
+    .then((res) => {
+        if(res.code == 200) {
+            setCandidates(res.data);
+            setDataCount(res.count);
         }
     }).catch((err: AxiosError) => {
       console.log(err.message)
@@ -140,7 +141,7 @@ export const Finalists = () => {
 
       const handleCandidateSelc = (item: Candidate) => {
         setSelctCandidate(item);
-        let role = roles?.find((r: Role) => r.id == item.roleId);
+        let role = roles?.find((r: Role) => r.id == item.roleid);
         setSelRole(role);
         setModalOpen("applicant");
       }
@@ -154,15 +155,15 @@ export const Finalists = () => {
             ...metaData,
             id:selctCandidate?.id
           }
-          axios.post(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
-          .then((res: AxiosResponse) => {
-            if(res.data.code == 200) {
-              setTempId(res.data.data);
+          postAsync(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
+          .then((res) => {
+            if(res.code == 200) {
+              setTempId(res.data);
               setLoading(false);
               setStatus({
                 open: true,
                 topic: "Successful",
-                content: res.data.message,
+                content: res.message,
                 hasNext: false,
               });
               closeModal()
@@ -170,8 +171,6 @@ export const Finalists = () => {
           })
           .catch((err: AxiosError) => {
             setLoading(false);
-            console.log(err.message)
-            console.log(err.cause);
             setStatus({
               open: true,
               topic: "Unsuccessful",
@@ -184,7 +183,7 @@ export const Finalists = () => {
 
       //* renders the candidates
       const displayCandidates = () => {
-        return candidates?.filter((item: Candidate) => item.lastName.toLowerCase().includes(searchVal?.toLowerCase() as string))
+        return candidates?.filter((item: Candidate) => item.lastname.toLowerCase().includes(searchVal?.toLowerCase() as string))
         .map((item: Candidate, idx: number) => (
           <TableRow
           key={idx}
@@ -193,13 +192,13 @@ export const Finalists = () => {
           onClick={() => handleCandidateSelc(item)}
         >
           <TableCell className = "">
-            {item?.firstName}
+            {item?.firstname}
           </TableCell>
           <TableCell className = "">
-            {item?.lastName}
+            {item?.lastname}
           </TableCell>
           <TableCell className = "">
-            {item.applDate?.split("T")[0]}
+            {item.appldate?.split("T")[0]}
           </TableCell>
           <TableCell className = "">
             {item.stage}
@@ -218,11 +217,11 @@ export const Finalists = () => {
         let body = {
           id: selctCandidate?.id
         }
-        axios.post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
-        .then((res: AxiosResponse) => {
-          if(res.data.code == 200) {
-            setSelctCandidate(res.data.data[0]);
-            let role = roles?.find((item: Role) => item.id == res.data.data[0]?.roleId);
+        postAsync(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
+        .then((res) => {
+          if(res.code == 200) {
+            setSelctCandidate(res.data[0]);
+            let role = roles?.find((item: Role) => item.id == res.data[0]?.roleId);
             setRole(role);
             setModalOpen("");
             setViewing(true);
@@ -315,7 +314,7 @@ export const Finalists = () => {
           }
           {tempId && (
             <div className='mt-[40px] font-semibold'>
-            <p>{selctCandidate?.firstName} {selctCandidate?.lastName} has successfully been hired with a temporary staff Id of {tempId}</p>
+            <p>{selctCandidate?.firstname} {selctCandidate?.lastname} has successfully been hired with a temporary staff Id of {tempId}</p>
           </div>
           )}
         </div>
@@ -341,18 +340,19 @@ export const Finalists = () => {
                     salWords: value.salWords,
                     sendMail: metaData?.sendMail,
                     id:selctCandidate?.id,
-                    jobType: selRole.jobType
+                    jobType: selRole.jobtype
                   }
                   // console.log(body)
-                  axios.post(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
-                  .then((res: AxiosResponse) => {
-                    if(res.data.code == 200) {
-                      setTempId(res.data.data);
+                  postAsync(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
+                  .then((res) => {
+                    // console.log(res.data)
+                    if(res.code == 200) {
+                      setTempId(res.data);
                       setLoading(false);
                       setStatus({
                         open: true,
                         topic: "Successful",
-                        content: res.data.message,
+                        content: res.message,
                         hasNext: false,
                       });
                       closeModal()

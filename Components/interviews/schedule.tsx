@@ -29,7 +29,7 @@ import { MainContext } from "../../context";
 import { Admin } from "../../types/admin";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
-
+import { postAsync } from "../../helpers/connection";
 
 
 export const Schedule = () => {
@@ -65,10 +65,9 @@ export const Schedule = () => {
       page: 0,
       filter: ""
     }
-    axios
-      .post(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
-      .then((res: AxiosResponse) => {
-        setRoles(res.data.data);
+    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
+      .then((res) => {
+        setRoles(res.data);
       });
   }, []);
 
@@ -79,11 +78,10 @@ export const Schedule = () => {
       page,
       take: 10
     }
-    axios
-      .post(process.env.NEXT_PUBLIC_GET_MEETINGS as string, body)
-      .then((res: AxiosResponse) => {
-        if (res.data.code == 200) {
-          let sortedMeetings = res.data.data.sort(
+    postAsync(process.env.NEXT_PUBLIC_GET_MEETINGS as string, body)
+      .then((res) => {
+        if (res.code == 200) {
+          let sortedMeetings = res.data.sort(
             (a: Meeting, b: Meeting) =>
               new Date(a.date).getDate() - new Date(b.date).getDate()
           );
@@ -107,11 +105,10 @@ export const Schedule = () => {
   const handleComment = () => {
     setLoading(true);
     let body = { ...comment };
-    axios
-      .post(process.env.NEXT_PUBLIC_CREATE_COMMENT as string, body)
-      .then((res: AxiosResponse) => {
+    postAsync(process.env.NEXT_PUBLIC_CREATE_COMMENT as string, body)
+      .then((res) => {
         setLoading(false);
-        if (res.data.code == 200) {
+        if (res.code == 200) {
           setComment({
             id: "",
             comment: "",
@@ -173,12 +170,11 @@ export const Schedule = () => {
     let body = {
       id
     }
-    axios
-      .post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
-      .then((res: AxiosResponse) => {
-        console.log(res.data)
-        if (res.data.code == 200) {
-          setCandidate(res.data.data[0]);
+    postAsync(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
+      .then((res) => {
+        // console.log(res.data)
+        if (res.code == 200) {
+          setCandidate(res.data[0]);
           let role = roles?.find((item: Role) => item.id == job);
           setRole(role);
           setViewing(true);
@@ -202,7 +198,7 @@ export const Schedule = () => {
           <AccordionSummary>
             <div className="flex flex-row gap-2 justify-between w-[100%] text-[14px]">
               <div className="flex flex-row gap-1 w-[270px] text-ellipsis overflow-hidden ...">
-                role:<p className="text-green-700">{item.jobTitle ?? "null"}</p>
+                role:<p className="text-green-700">{item.jobtitle ?? "null"}</p>
               </div>
               <div className="flex flex-row gap-1">
                 date:
@@ -215,11 +211,11 @@ export const Schedule = () => {
               </div>
               <div className="flex flex-row gap-1 w-[150px] text-ellipsis overflow-hidden ...">
                 firstname:
-                <p className="text-green-700">{item.firstName ?? "null"}</p>
+                <p className="text-green-700">{item.firstname ?? "null"}</p>
               </div>
               <div className="flex flex-row gap-1 w-[150px] text-ellipsis overflow-hidden ...">
                 lastname:
-                <p className="text-green-700">{item.lastName ?? "null"}</p>
+                <p className="text-green-700">{item.lastname ?? "null"}</p>
               </div>
               {/* <div className="flex flex-row gap-1">
                 status:
@@ -237,7 +233,7 @@ export const Schedule = () => {
             <div className="flex flex-col gap-2">
               <div className="flex flex-row text-[14px] gap-1">
                 <p className="">Meeting Id:</p>
-                <p className="text-green-700">{item.meetingId}</p>
+                <p className="text-green-700">{item.meetingid}</p>
               </div>
               <div className="flex flex-row text-[14px] gap-1">
                 <p className="">Meeting PassCode:</p>
@@ -250,7 +246,7 @@ export const Schedule = () => {
               <div className="flex flex-row gap-4">
                 <Button
                   onClick={() =>
-                    handleViewChange(item.participantId, item.jobId)
+                    handleViewChange(item.participantid, item.jobid)
                   }
                   className="h-[30px] bg-green-700 text-white capitalize"
                 >
@@ -263,7 +259,7 @@ export const Schedule = () => {
                   Start Meeting
                 </Button>
                 <Button
-                  onClick={() => handleCommentOpen(item.participantId)}
+                  onClick={() => handleCommentOpen(item.participantid)}
                   className="h-[30px] bg-green-700 text-white capitalize"
                 >
                   {loading ? (
@@ -273,7 +269,7 @@ export const Schedule = () => {
                   )}
                 </Button>
                 <Button
-                  onClick={() => moveToNextStage(item?.participantId)}
+                  onClick={() => moveToNextStage(item?.participantid)}
                   className="h-[30px] bg-green-700 text-white capitalize"
                 >
                   {loading ? (
@@ -297,21 +293,20 @@ export const Schedule = () => {
       id: id,
       stage: "3",
     };
-    axios
-      .post(process.env.NEXT_PUBLIC_MOVE_TO_NEXT_STAGE as string, body)
-      .then((res: AxiosResponse) => {
+    postAsync(process.env.NEXT_PUBLIC_MOVE_TO_NEXT_STAGE as string, body)
+      .then((res) => {
         setLoading(false);
-        if (res.data.code == 200) {
+        if (res.code == 200) {
           setStatus({
             open: true,
             topic: "Successful",
-            content: res.data.message,
+            content: res.message,
           });
-        } else if (res.data.code) {
+        } else if (res.code) {
           setStatus({
             open: true,
             topic: "Unsuccessful",
-            content: res.data.message,
+            content: res.message,
           });
         }
       })

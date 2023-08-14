@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Paper } from "@mui/material";
 import axios, { AxiosError, AxiosResponse } from 'axios';
+import { getContent, postAsync } from '../helpers/connection';
 
 interface Metrics {
     applications: number,
@@ -15,9 +16,9 @@ export const Dashboard = () => {
     const [height, setHeight] = useState<number>(170);
 
     useEffect(() => {
-        axios.get(process.env.NEXT_PUBLIC_GET_METRICS as string)
-        .then((res: AxiosResponse) => {
-            setMetrics(res.data.data);
+        getContent(process.env.NEXT_PUBLIC_GET_METRICS as string)
+        .then((res) => {
+            setMetrics(res.data);
         })
         .catch((err: AxiosError) => {
             console.log(err.message)
