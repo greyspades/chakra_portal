@@ -65,7 +65,9 @@ export const Signup = ({
     roleId: string;
   }>();
 
-  const [loading, setLoading] = useState<boolean>(false);
+  const [signInLoad, setsignInLoad] = useState<boolean>(false);
+
+  const [signupLoad, setSignupLoad] = useState<boolean>(false);
 
   const [visible, setVisible] = useState<boolean>(false);
 
@@ -185,7 +187,7 @@ export const Signup = ({
                 }}
                 onSubmit={(value) => {
                   // validateForm(value);
-                  setLoading(true);
+                  setSignupLoad(true);
                   var body = {
                     firstName: value.firstName,
                     lastName: value.lastName,
@@ -208,7 +210,7 @@ export const Signup = ({
 
                   postAsync(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body)
                     .then((res) => {
-                      setLoading(false);
+                      setSignupLoad(false);
                       if (res.code == 200) {
                         sessionStorage.setItem("cred", encrypted);
                         setLoggedIn(true);
@@ -228,7 +230,7 @@ export const Signup = ({
                     })
                     .catch((err: AxiosError) => {
                       console.log(err.message);
-                      setLoading(false);
+                      setSignupLoad(false);
                     });
                 }}
               >
@@ -448,7 +450,7 @@ export const Signup = ({
                       className="bg-green-700 text-white md:w-[60%] w-[85%] h-[40px]"
                       onClick={() => handleSubmit()}
                     >
-                      {loading ? (
+                      {signupLoad ? (
                         <CircularProgress
                           thickness={7}
                           className="text-white w-[40px] h-[40px] p-1"
@@ -485,7 +487,7 @@ export const Signup = ({
                 initialValues={{ email: "", password: ""}} 
                 onSubmit={(value, { validateForm }) => {;
                   validateForm(value);
-                  setLoading(true);
+                  setsignInLoad(true);
                   let body = {
                     email: value.email,
                     password: value.password,
@@ -524,7 +526,7 @@ export const Signup = ({
                   } else {
                     postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
                       .then((res) => {
-                        setLoading(false);
+                        setsignInLoad(false);
                         if (res.code == 200 && res.data.length > 0) {
                           setCandidates(res.data);
                           router.push("/applicant");

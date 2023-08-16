@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useRef } from "react";
 import {
   Button,
   Input,
@@ -35,10 +35,10 @@ interface CustomInputProps {
   error?: any;
   errorText?: string;
   helper?: string;
-  disabled?: boolean,
-  fitWidth?: true,
-  required?: true,
-  endAdornment?: true
+  disabled?: boolean;
+  fitWidth?: true;
+  required?: true;
+  endAdornment?: true;
 }
 
 export const CustomInput = ({
@@ -59,7 +59,7 @@ export const CustomInput = ({
   disabled,
   fitWidth,
   required,
-  endAdornment
+  endAdornment,
 }: CustomInputProps) => {
   const [focussed, setFocussed] = useState<boolean>(false);
 
@@ -67,12 +67,18 @@ export const CustomInput = ({
     setFocussed((focuss: boolean) => !focuss);
   };
 
-
   return (
     <FormControl className={!fitWidth ? "w-[100%]" : null}>
-      <InputLabel className="flex flex-row" shrink={true} >{placeHolder} <span className="mr-2 text-red-700 text-[13px] ml-6">{helper}</span>{required && (
-        <span className="text-[20px] text-red-500 ml-[-27px]">*</span>
-      )}</InputLabel>
+      <InputLabel className="flex flex-row" shrink={true}>
+        {(value || type == "date") && <>{placeHolder}</>}{" "}
+        <span className="mr-2 text-red-700 text-[13px] ml-6">{helper}</span>
+        {required && (
+          <div className="flex justify-items-center gap-2 flex-row md:ml-[-30px]">
+            <span className="text-[20px] text-red-500">*</span>
+            <p className="text-[16px]">{placeHolder}</p>
+          </div>
+        )}
+      </InputLabel>
       {component == "text" && (
         <Input
           disabled={disabled ?? false}
@@ -91,37 +97,43 @@ export const CustomInput = ({
           onBlur={changeFocus}
           //    className="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
           startAdornment={
-            icon && !endAdornment && <InputAdornment position="end">{icon}</InputAdornment>
+            icon &&
+            !endAdornment && (
+              <InputAdornment position="end">{icon}</InputAdornment>
+            )
           }
           endAdornment={
-            icon && endAdornment && <InputAdornment position="end">{icon}</InputAdornment>
+            icon &&
+            endAdornment && (
+              <InputAdornment position="end">{icon}</InputAdornment>
+            )
           }
         />
       )}
       {component == "field" && (
         <TextField
-          variant='filled'
+          variant="filled"
           value={value}
           onChange={(e: any) => onChange(e)}
           className={classes}
           inputProps={{
             disableUnderline: true,
             underline: {
-                "&&&:before": {
-                  borderBottom: "none"
-                },
-                "&&:after": {
-                  borderBottom: "none"
-                }
-              }
+              "&&&:before": {
+                borderBottom: "none",
+              },
+              "&&:after": {
+                borderBottom: "none",
+              },
+            },
           }}
           type={type ?? "text"}
           sx={{
             "& .MuiInputBase-root": {
-                backgroundColor: "#F3F4F6"
-              },
-            "& .MuiInputLabel-root": {color: 'green', border: "none"},
-         }}
+              backgroundColor: "#F3F4F6",
+            },
+            "& .MuiInputLabel-root": { color: "green", border: "none" },
+          }}
           style={{
             border: focussed ? "solid" : "none",
             borderColor: focussed ? "green" : "grey",
@@ -135,14 +147,14 @@ export const CustomInput = ({
       )}
       {component == "select" && (
         <Select
-        sx={{
-            '& .MuiOutlinedInput-notchedOutline': {
-                borderColor: '#F3F4F6'
+          sx={{
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: "#F3F4F6",
             },
-            '&.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                borderColor: 'green',
+            "&.Mui-focused .MuiOutlinedInput-notchedOutline": {
+              borderColor: "green",
             },
-        }}
+          }}
           className={classes}
           value={value}
           onChange={(e: any) => onChange(e)}
@@ -154,20 +166,20 @@ export const CustomInput = ({
           readOnly={readonly ? true : false}
         >
           {selValues?.map((item: string, idx: number) => (
-            <MenuItem key={idx} value={item}>{item}</MenuItem>
+            <MenuItem key={idx} value={item}>
+              {item}
+            </MenuItem>
           ))}
         </Select>
       )}
-            {/* <div className="md:mt-[-10px] md:ml-[-10px]">
+      {/* <div className="md:mt-[-10px] md:ml-[-10px]">
               {error && (
                 <div className="text-red-600 text-[10px] ml-4">
                   {errorText}
                 </div>
               )}
             </div> */}
-            <div className="text-red-600 text-[10px] ml-4">
-                {error}
-            </div>
+      <div className="text-red-600 text-[10px] ml-4">{error}</div>
     </FormControl>
   );
 };

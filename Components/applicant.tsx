@@ -169,6 +169,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
       flag: e.target.value,
       roleName: role.name,
     };
+    console.log(body)
 
     postAsync(`${process.env.NEXT_PUBLIC_FLAG_CANDIDATE}`, body)
       .then((res) => {

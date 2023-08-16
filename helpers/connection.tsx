@@ -8,7 +8,7 @@ interface ConnectionProps {
   body: { [key: string]: any };
 }
 
-var key = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY);
+var key = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY); 
 var iv = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_IV);
 
 export const getContent = async (url: string) => {
