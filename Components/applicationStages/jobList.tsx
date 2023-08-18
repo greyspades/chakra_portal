@@ -125,7 +125,7 @@ export const JobList = ({ roles, setRole, apply, getRoles, currentStep, refresh,
   }
 
   const renderRoles = () => {
-    return roles.map((item: Role, idx: number) => {
+    return roles?.map((item: Role, idx: number) => {
       // if(item.status == "active") {
         return <div key={idx} className="mb-8">
         <Paper className={currentStep == 1 ? "bg-white p-2 md:px-8 px-2" : "bg-white p-2 md:px-4 px-2"}>

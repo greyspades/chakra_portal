@@ -46,33 +46,38 @@ export const postContent = (
 };
 
 export const postAsync = async (url: string, body: { [key: string]: any }) => {
-  let encrypted = CryptoJs.AES.encrypt(JSON.stringify(body), key, {
+  let reqBody = CryptoJs.AES.encrypt(JSON.stringify(body), key, {
     iv: iv,
   }).toString();
-  let response = await axios
-    .post(url, encrypted, {
-      headers: {
-        "Content-Type": "application/x-payload",
-        Auth: CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
-          iv: iv,
-        }).toString(),
-      },
-    })
-    .then((res: AxiosResponse) => res.data);
-  if (response.data) {
-    let bytes = CryptoJs.AES.decrypt(response.data, key, { iv: iv });
-    let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
-    if (Array.isArray(resData)) {
-      response.data = lowerKeyArray(resData);
-    } else if (typeof resData === "object" && resData !== null) {
-      response.data = lowerKey(resData);
-    } else {
-      response.data = resData;
-    }
-    return response;
-  } else {
-    return response;
-  }
+  let reqHeader =  CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {iv: iv,}).toString()
+  const options = {
+    method: 'POST',
+    headers: {
+    'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      head: reqHeader,
+      body: reqBody,
+      url:url
+    }),
+    };
+  let response = await fetch("./api/connect", options)
+  let jsonRes = await response.json()
+    console.log(jsonRes)
+  // if (jsonRes) {
+  //   let bytes = CryptoJs.AES.decrypt(jsonRes.data, key, { iv: iv });
+  //   let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
+  //   if (Array.isArray(resData)) {
+  //     jsonRes.data = lowerKeyArray(resData);
+  //   } else if (typeof resData === "object" && resData !== null) {
+  //     jsonRes.data = lowerKey(resData);
+  //   } else {
+  //     jsonRes.data = resData;
+  //   }
+  //   return jsonRes;
+  // } else {
+  //   return jsonRes;
+  // }
 };
 
 export const postCustom = async (

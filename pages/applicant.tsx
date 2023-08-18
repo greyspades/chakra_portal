@@ -62,35 +62,36 @@ const Applicant = () => {
 
   //* fetches candidate application status data
   useEffect(() => {
-    let cred = sessionStorage.getItem("cred");
-    if (cred) {
-      let bytes = CryptoJS.AES.decrypt(cred ?? "", process.env.NEXT_PUBLIC_AES_KEY);
-      let data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-      // console.log(data)
-      let body = {
-        email: data.email,
-      };
-      postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
-        .then((res) => {
-          if (res.code == 200 && res.data.length > 0) {
-            setCandidates(res.data);
-          } else if (res.code != 200 && res.length < 1) {
-            setStatus({
-              open: true,
-              topic: "Unsuccessful",
-              content: res.message,
-            });
-          }
-        })
-        .catch((err: AxiosError) => {
-          console.log(err.message);
-          setStatus({
-            open: true,
-            topic: "Unsuccessful",
-            content: err.message,
-          });
-        });
-    }
+    // let cred = sessionStorage.getItem("cred");
+    // if (cred) {
+    //   let bytes = CryptoJS.AES.decrypt(cred ?? "", process.env.NEXT_PUBLIC_AES_KEY);
+    //   let data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+    //   // console.log(data)
+    //   let body = {
+    //     email: data.email,
+    //   };
+    //   console.log(body)
+    //   // postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
+    //   //   .then((res) => {
+    //   //     if (res.code == 200 && res.data.length > 0) {
+    //   //       setCandidates(res.data);
+    //   //     } else if (res.code != 200 && res.length < 1) {
+    //   //       setStatus({
+    //   //         open: true,
+    //   //         topic: "Unsuccessful",
+    //   //         content: res.message,
+    //   //       });
+    //   //     }
+    //   //   })
+    //   //   .catch((err: AxiosError) => {
+    //   //     console.log(err.message);
+    //   //     setStatus({
+    //   //       open: true,
+    //   //       topic: "Unsuccessful",
+    //   //       content: err.message,
+    //   //     });
+    //   //   });
+    // }
     // if (data) {
     //   let body = {
     //     email: data.email,
@@ -129,9 +130,10 @@ const Applicant = () => {
     }
     postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
       .then((res) => {
-        if (res.code == 200 && res.data.length > 0) {
-          setRoles(res.data)
-        }
+        console.log(res)
+        // if (res.code == 200 && res.data.length > 0) {
+        //   setRoles(res.data)
+        // }
       });
   }, []);
 
@@ -149,21 +151,21 @@ const Applicant = () => {
     postAsync(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
       .then((res) => {
         // console.log(res.data);
-        if (res.code == 200) {
-          setStatus({
-            open: true,
-            topic: "Successful",
-            content: "Application Cancelled Successfully",
-          });
-          var update = candidates?.map((item: Candidate) => {
-            if (item.id == cancelId) {
-              item.status = "Cancelled";
-            }
-            return item;
-          });
+        // if (res.code == 200) {
+        //   setStatus({
+        //     open: true,
+        //     topic: "Successful",
+        //     content: "Application Cancelled Successfully",
+        //   });
+        //   var update = candidates?.map((item: Candidate) => {
+        //     if (item.id == cancelId) {
+        //       item.status = "Cancelled";
+        //     }
+        //     return item;
+        //   });
 
-          setCandidates(update);
-        }
+        //   setCandidates(update);
+        // }
       })
       .catch((e) => {
         setStatus({

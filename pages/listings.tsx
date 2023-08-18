@@ -25,6 +25,7 @@ import CryptoJs from "crypto-js"
 import { getContent, postAsync, postContent } from "../helpers/connection";
 import { lowerKey, lowerKeyArray } from "../helpers/formating";
 
+
 const Listings = ({ data }: any) => {
   const [roles, setRoles] = useState<Role[]>([]);
   const [searchVal, setSearchVal] = useState<string>("");
@@ -36,7 +37,7 @@ const Listings = ({ data }: any) => {
     value: false
   });
   const [nav, setNav] = useState<string>("");
-  const [status, setStatus] = useState<{ [key: string]: any }>({
+  const [status, setStatus] = useState<{[key: string]: any }>({
     open: false,
   });
   const [filter, setFilter] = useState<string>("")
@@ -128,29 +129,18 @@ const handleCheckChange = (filter: string, filterType: string) => {
   }
 
   //* gets all active job roles
-  const getAllRoles = (pageVal: number, filterVal?: string, filterTypeVal?: string) => {
+  const getAllRoles = async(pageVal: number, filterVal?: string, filterTypeVal?: string) => {
     let body = {
       value: searchVal,
       page: pageVal,
       filter: filterVal ?? "",
       filterType: filterTypeVal ?? ""
     }
-    // postAsync("http://localhost:5089/roles/Role/all" as string, body).then((res) => {
-    //   // console.log(res)
-    //   let data = res.data;
-    //   setRoles(data);
-    //   setActiveRole(data[0]);
-    //   setRoleCount(res.data?.count)
-    //   setSet(true)
-    // }).catch((err: AxiosError) => {
-    //   console.group(err.message)
-    // });
-
     postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
       let data = res.data;
       setRoles(data);
       setActiveRole(data[0]);
-      setRoleCount(res?.count)
+      setRoleCount(res.data?.count)
       setSet(true)
     }).catch((err: AxiosError) => {
       console.group(err.message)
@@ -161,25 +151,6 @@ const handleCheckChange = (filter: string, filterType: string) => {
     getAllRoles(0, "", "");
 
   }, [searchVal]);
-
-  // useEffect(() => {
-  //   if(activeRole?.description) {
-  //   let data = JSON.parse(activeRole?.description as string)
-  //   console.log(data)
-  //   }
-  // }, [activeRole])
-
-  // useEffect(() => {
-  //   if (unit) {
-  //     Axios.get(`http://localhost:8070/roles/Role/byUnit/${unit}`).then(
-  //       (res) => {
-  //         setRoles(res.data);
-  //         console.log(res.data);
-  //         // setActiveRole(res.data.data[0])
-  //       }
-  //     );
-  //   }
-  // }, [unit]);
 
   //* search for a job role
   const searchRole = (e: any) => {
