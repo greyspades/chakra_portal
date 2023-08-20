@@ -32,7 +32,6 @@ import CryptoJS from "crypto-js";
 import { postAsync, postCustom } from "../helpers/connection";
 import { lowerKey } from "../helpers/formating";
 
-
 export const Application: FC<Role> = ({ name, id }: Role) => {
   const [info, setInfo] = useState<{
     firstName: string;
@@ -68,6 +67,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   const [status, setStatus] = useState<{ [key: string]: any }>({
     open: false,
   });
+  var key = CryptoJS.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY);
+  var iv = CryptoJS.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_IV);
 
   //* context hook holding global state
   const { setCandidate, setRole } = useContext(MainContext) as any;
@@ -80,9 +81,12 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
 
   //* gets basic user info from session storage
   useEffect(() => {
-    const bytes = CryptoJS.AES.decrypt(sessionStorage.getItem("cred") ?? "", process.env.NEXT_PUBLIC_AES_KEY);
+    const bytes = CryptoJS.AES.decrypt(
+      sessionStorage.getItem("cred") ?? "",
+      process.env.NEXT_PUBLIC_AES_KEY
+    );
     const data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    const mainData = lowerKey(data) as Candidate
+    const mainData = lowerKey(data) as Candidate;
     if (data) {
       // console.log(data)
       setBasicInfo(mainData);
@@ -166,7 +170,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               placeHolder="Employer"
               classes="h-[40px] md:w-[100%] w-[100%] bg-gray-100 rounded-md no-underline px-1 shadow-md"
               icon={<BusinessIcon className="text-green-700" />}
-             />
+            />
             <CustomInput
               value={item.title}
               onChange={(e) => handleExpChange("title", idx, e)}
@@ -174,40 +178,40 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               placeHolder="Title"
               classes="h-[40px] md:w-[95%] w-[100%] bg-gray-100 rounded-md no-underline px-1 shadow-md"
               icon={<WorkOutlineIcon className="text-green-700" />}
-             />
+            />
             <div className="flex flex-row md:gap-2 gap-2 md:mt-0 mt-2">
-            <CustomInput
-              value={item.startDate}
-              onChange={(e) => handleExpChange("startDate", idx, e)}
-              component={"text"}
-              placeHolder="Start Date"
-              type="date"
-              classes="h-[40px] md:w-[95%] w-[140px] bg-gray-100 rounded-md no-underline px-1 shadow-md"
-              // icon={<CalendarTodayIcon className="text-green-700" />}
-             />
-            <CustomInput
-              disabled={item?.isCurrent ? true : false}
-              value={item.endDate}
-              onChange={(e) => handleExpChange("endDate", idx, e)}
-              component={"text"}
-              type="date"
-              placeHolder="End Date"
-              classes="h-[40px] md:w-[100%] w-[140px] bg-gray-100 rounded-md no-underline px-1 shadow-md"
-              // icon={<CalendarTodayIcon className="text-green-700" />}
-             />
-            <FormControl className="flex flex-col md:ml-4">
-              <p className="text-[11px] mt-[-10px]">Current</p>
-              <Radio
-                name="isCurrent"
-                className="text-green-700"
-                checked={item?.isCurrent === true}
-                value={item?.isCurrent}
-                onClick={(e) => handleExpChange("isCurrent", idx, e)}
+              <CustomInput
+                value={item.startDate}
+                onChange={(e) => handleExpChange("startDate", idx, e)}
+                component={"text"}
+                placeHolder="Start Date"
+                type="date"
+                classes="h-[40px] md:w-[95%] w-[140px] bg-gray-100 rounded-md no-underline px-1 shadow-md"
+                // icon={<CalendarTodayIcon className="text-green-700" />}
               />
-            </FormControl>
+              <CustomInput
+                disabled={item?.isCurrent ? true : false}
+                value={item.endDate}
+                onChange={(e) => handleExpChange("endDate", idx, e)}
+                component={"text"}
+                type="date"
+                placeHolder="End Date"
+                classes="h-[40px] md:w-[100%] w-[140px] bg-gray-100 rounded-md no-underline px-1 shadow-md"
+                // icon={<CalendarTodayIcon className="text-green-700" />}
+              />
+              <FormControl className="flex flex-col md:ml-4">
+                <p className="text-[11px] mt-[-10px]">Current</p>
+                <Radio
+                  name="isCurrent"
+                  className="text-green-700"
+                  checked={item?.isCurrent === true}
+                  value={item?.isCurrent}
+                  onClick={(e) => handleExpChange("isCurrent", idx, e)}
+                />
+              </FormControl>
             </div>
           </div>
-            <div className="mt-4">
+          <div className="mt-4">
             <CustomInput
               value={item.description}
               onChange={(e) => handleExpChange("description", idx, e)}
@@ -216,16 +220,12 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               placeHolder="Description"
               classes="w-[100%] bg-gray-100 rounded-md no-underline shadow-md mt-[7px]"
               rows={4}
-             />
-            </div>
+            />
+          </div>
           <div className="mb-[30px] text-[11px]">
-            {
-              item?.hasError &&(
-                <p className="text-red-600">
-              Please fill out the information 
-            </p>
-              )
-            }
+            {item?.hasError && (
+              <p className="text-red-600">Please fill out the information</p>
+            )}
           </div>
         </div>
       );
@@ -238,7 +238,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
     if (type == "degree" && e.target.value == "Other") {
       let update = eduField?.map((item: { [key: string]: any }, idx) => {
         if (idx == index) {
-          item.hasCert = true
+          item.hasCert = true;
         }
         return item;
       });
@@ -275,7 +275,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
     let update = eduField?.map((item: { [key: string]: any }, idx) => {
       if (idx == index) {
         item.hasCert = false;
-        item.certification = ""
+        item.certification = "";
       }
       return item;
     });
@@ -296,24 +296,23 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
         </div>
         <div className="grid md:grid-cols-2 mt-[-10px]">
           <CustomInput
-              value={item.school}
-              onChange={(e) => addEdu("school", e, idx)}
-              component={"text"}
-              placeHolder="School Attended"
-              classes="h-[40px] md:w-[350px] w-[100%] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
-              icon={<BookIcon className="text-green-700" />}
-             />
+            value={item.school}
+            onChange={(e) => addEdu("school", e, idx)}
+            component={"text"}
+            placeHolder="School Attended"
+            classes="h-[40px] md:w-[350px] w-[100%] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
+            icon={<BookIcon className="text-green-700" />}
+          />
           <CustomInput
-              value={item.course}
-              onChange={(e) => addEdu("course", e, idx)}
-              component={"text"}
-              placeHolder="Course of study"
-              classes="h-[40px] md:w-[350px] w-[100%] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
-              icon={<BookIcon className="text-green-700" />}
-             />
-        <div className="flex flex-row gap-2 md:mt-4">
-              
-          <CustomInput
+            value={item.course}
+            onChange={(e) => addEdu("course", e, idx)}
+            component={"text"}
+            placeHolder="Course of study"
+            classes="h-[40px] md:w-[350px] w-[100%] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
+            icon={<BookIcon className="text-green-700" />}
+          />
+          <div className="flex flex-row gap-2 md:mt-4">
+            <CustomInput
               value={item.graduationDate}
               onChange={(e) => addEdu("graduationDate", e, idx)}
               component={"text"}
@@ -322,7 +321,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               classes="h-[40px] md:w-[180px] w-[170px] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
               // icon={<CalendarTodayIcon className="text-green-700" />}
               error={gradError ? "Please select a past date" : null}
-             />
+            />
 
             <CustomInput
               value={item.degree}
@@ -333,18 +332,18 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               classes="h-[40px] w-[150px] bg-gray-100 rounded-md no-underline px-2 shadow-md mt-4"
               icon={<CalendarTodayIcon className="text-green-700" />}
               // error={gradError ? "Please select a past date" : null}
-             />
-              </div>
+            />
+          </div>
           {item?.hasCert && (
             <div className="mt-[15px] flex flex-row">
-            <CustomInput
-              value={item.certification}
-              onChange={(e) => addEdu("certification", e, idx)}
-              component={"text"}
-              placeHolder="Certification"
-              classes="h-[40px] md:w-[350px] w-[280px] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
-              icon={<ArticleIcon className="text-green-700" />}
-             />
+              <CustomInput
+                value={item.certification}
+                onChange={(e) => addEdu("certification", e, idx)}
+                component={"text"}
+                placeHolder="Certification"
+                classes="h-[40px] md:w-[350px] w-[280px] bg-gray-100 rounded-md no-underline px-2 shadow-md mb-4"
+                icon={<ArticleIcon className="text-green-700" />}
+              />
 
               <IconButton
                 className="bg-green-300 h-[25px] w-[25px]"
@@ -367,7 +366,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
       startDate: "",
       endDate: "",
       isCurrent: false,
-      hasError: false
+      hasError: false,
     };
     var update = [...expForm, newField];
     setExpForm(update);
@@ -381,7 +380,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
       graduationDate: "",
       degree: "BSC",
       certification: "",
-      hasCert: false
+      hasCert: false,
     };
     var update = [...eduField, newField];
     setEdufield(update);
@@ -420,12 +419,12 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
     return skillForm?.map((item: any, idx) => (
       <div key={idx} className="flex flex-row align-middle">
         <CustomInput
-              value={item}
-              onChange={(e) => addKill(e, idx)}
-              component={"text"}
-              placeHolder="Skill"
-              classes="md:w-[200px] w-[160px] h-[40px] bg-gray-100 rounded-md no-underline shadow-md mb-4 px-2"
-             />
+          value={item}
+          onChange={(e) => addKill(e, idx)}
+          component={"text"}
+          placeHolder="Skill"
+          classes="md:w-[200px] w-[160px] h-[40px] bg-gray-100 rounded-md no-underline shadow-md mb-4 px-2"
+        />
         <IconButton
           className="mt-[-11px] ml-[-7px] mr-[35px] bg-green-300 h-[10px] w-[10px]"
           onClick={() => removeSkill(idx)}
@@ -475,12 +474,12 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 coverLetter: "",
               }}
               //* called once the submit button is clicked
-              onSubmit={(value: any, { validateForm }) => {
+              onSubmit={async (value: any, { validateForm }) => {
                 //* validates the form against the schema
                 validateForm(value);
-                
+
                 //* request body
-                var body = {
+                var req = {
                   firstName: value.firstName,
                   lastName: value.lastName,
                   otherName: value.otherName,
@@ -491,7 +490,6 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   skills: skillForm,
                   dob: value.dob.toString(),
                   roleId: id,
-                  cv: file,
                   gender: gender,
                   password: value.password,
                   jobName: name,
@@ -515,47 +513,113 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 let typeArr = file?.name.split(".");
                 let type = typeArr?.[typeArr?.length - 1];
 
-                expForm.forEach((item: {[key: string]: any}, idx: number) => {
-                  if(!item.title || !item.startDate || !item.employer) {
-                    let update = expForm.map((exp: {[key: string]: any}, index: number) => {
-                      if(idx == index) {
-                        exp.hasError = true
+                expForm.forEach((item: { [key: string]: any }, idx: number) => {
+                  if (!item.title || !item.startDate || !item.employer) {
+                    let update = expForm.map(
+                      (exp: { [key: string]: any }, index: number) => {
+                        if (idx == index) {
+                          exp.hasError = true;
+                        }
+                        return exp;
                       }
-                      return exp
-                    })
-                    setExpForm(update)
-                    setGenError(true)
+                    );
+                    setExpForm(update);
+                    setGenError(true);
                   }
-                })
+                });
 
-                eduField.forEach((item: {[key: string]: any}, idx: number) => {
-                  if(!item.course || !item.graduationDate || !item.degree || !item.school) {
-                    let update = eduField.map((edu: {[key: string]: any}, index: number) => {
-                      if(idx == index) {
-                        edu.hasError = true
-                      }
-                      return edu
-                    })
-                    setEdufield(update)
-                    setGenError(true)
+                eduField.forEach(
+                  (item: { [key: string]: any }, idx: number) => {
+                    if (
+                      !item.course ||
+                      !item.graduationDate ||
+                      !item.degree ||
+                      !item.school
+                    ) {
+                      let update = eduField.map(
+                        (edu: { [key: string]: any }, index: number) => {
+                          if (idx == index) {
+                            edu.hasError = true;
+                          }
+                          return edu;
+                        }
+                      );
+                      setEdufield(update);
+                      setGenError(true);
+                    }
                   }
-                })
+                );
 
-                let expResult = expForm.every((item: {[key: string]: string}) => item.title != "" && item.startDate != "" && item.employer != "")
+                let expResult = expForm.every(
+                  (item: { [key: string]: string }) =>
+                    item.title != "" &&
+                    item.startDate != "" &&
+                    item.employer != ""
+                );
 
-                let eduResult = eduField.every((item: {[key: string]: string}) => item.course != "" && item.graduationDate != "" && item.degree != "" && item.school != "")
+                let eduResult = eduField.every(
+                  (item: { [key: string]: string }) =>
+                    item.course != "" &&
+                    item.graduationDate != "" &&
+                    item.degree != "" &&
+                    item.school != ""
+                );
 
-                if (type == "pdf" && expResult && eduResult && expForm.length > 0 && eduField.length > 0) {
-                  setGenError(false)
+                if (
+                  type == "pdf" &&
+                  expResult &&
+                  eduResult &&
+                  expForm.length > 0 &&
+                  eduField.length > 0
+                ) {
+                  setGenError(false);
                   setLoading(true);
-                  console.log(body)
-                  Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION as string, body, {headers: {
-                    "Access-Control-Allow-Origin": "*",
-                    "Content-Type": "multipart/form-data",
-                  }})
+                  // console.log(body)
+                  // let reqBody = CryptoJS.AES.encrypt(JSON.stringify(req), key, {
+                  //   iv: iv,
+                  // }).toString();
+                  let reqHeader = CryptoJS.AES.encrypt(
+                    process.env.NEXT_PUBLIC_TOKEN,
+                    key,
+                    {
+                      iv: iv,
+                    }
+                  ).toString();
+
+                  // var body = {
+                  //   data: reqBody,
+                  //   cv: file
+                  // }
+                  // const options = {
+                  //   method: "POST",
+                  //   headers: {
+                  //     "Content-Type": "application/json",
+                  //   },
+                  //   body: JSON.stringify({
+                  //     head: reqHeader,
+                  //     body: reqBody,
+                  //     url: process.env.NEXT_PUBLIC_CREATE_APPLICATION,
+                  //     method: "POST"
+                  //   }),
+                  // };
+                  // // console.log(req)
+                  // var response = await fetch("/api/connect", options);
+                  // var jsonRes = await response.json();
+                  // console.log(jsonRes)
+
+                  Axios.post(
+                    process.env.NEXT_PUBLIC_CREATE_APPLICATION as string,
+                    req,
+                    {
+                      headers: {
+                        "Access-Control-Allow-Origin": "*",
+                        "Content-Type": "multipart/form-data",
+                        Auth: reqHeader,
+                      },
+                    }
+                  )
                     .then((res: AxiosResponse) => {
                       setLoading(false);
-                      console.log(res.data)
                       if (res.data.code == 200) {
                         setCandidate(candidateObj);
                         setRole(roleObj);
@@ -569,7 +633,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       }
                     })
                     .catch((err: AxiosError) => {
-                      console.log(err.message)
+                      console.log(err.message);
                       setLoading(false);
                       setStatus({
                         open: true,
@@ -577,26 +641,28 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                         content: err.message,
                       });
                     });
-                } else if(type != "pdf"){
+                } else if (type != "pdf") {
                   setFileError("Please Select a pdf file for your resume");
-                } else if(!eduResult || !expResult) {
+                } else if (!eduResult || !expResult) {
                   setStatus({
                     open: true,
                     topic: "Unsuccessful",
-                    content: "Please fill in the missing fields in your application",
+                    content:
+                      "Please fill in the missing fields in your application",
                   });
-                } else if(expForm.length < 1) {
+                } else if (expForm.length < 1) {
                   setStatus({
-                            open: true,
-                            topic: "Unsuccessful",
-                            content: "Please add some work experience to your application",
-                          });
-                } else if(eduField.length < 1) {
+                    open: true,
+                    topic: "Unsuccessful",
+                    content:
+                      "Please add some work experience to your application",
+                  });
+                } else if (eduField.length < 1) {
                   setStatus({
-                            open: true,
-                            topic: "Unsuccessful",
-                            content: "Please add some education to your application",
-                          });
+                    open: true,
+                    topic: "Unsuccessful",
+                    content: "Please add some education to your application",
+                  });
                 }
               }}
             >
@@ -612,7 +678,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
                       icon={<PersonIcon className="text-green-700" />}
                       error={errors.firstName}
-                      />
+                    />
 
                     <CustomInput
                       value={values.otherName}
@@ -623,7 +689,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
                       icon={<PersonIcon className="text-green-700" />}
                       error={errors.otherName}
-                      />
+                    />
                     <CustomInput
                       value={values.lastName}
                       onChange={handleChange("lastName")}
@@ -633,10 +699,10 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
                       icon={<PersonIcon className="text-green-700" />}
                       error={errors.lastName}
-                      />
+                    />
                   </div>
                   <div className="flex md:flex-row flex-col gap-6 mt-[30px]">
-                  <CustomInput
+                    <CustomInput
                       value={values.email}
                       onChange={handleChange("email")}
                       component={"text"}
@@ -645,8 +711,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
                       icon={<EmailIcon className="text-green-700" />}
                       error={errors.email}
-                      />
-                      <CustomInput
+                    />
+                    <CustomInput
                       value={values.phone}
                       onChange={handleChange("phone")}
                       component={"text"}
@@ -655,7 +721,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
                       icon={<PhoneIcon className="text-green-700" />}
                       error={errors.phone}
-                      />
+                    />
                   </div>
                   <div className="flex md:flex-row flex-col gap-2 mt-[30px]">
                     <CustomInput
@@ -668,7 +734,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
                       icon={<CalendarTodayIcon className="text-green-700" />}
                       error={errors.dob}
-                      />
+                    />
                     <CustomInput
                       value={values.gender}
                       onChange={handleChange("otherName")}
@@ -678,8 +744,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md mt-[15px]"
                       selValues={genders}
                       error={errors.gender}
-                      />
-   
+                    />
+
                     <CustomInput
                       onChange={handleFileChange}
                       component={"text"}
@@ -690,7 +756,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
                       selValues={genders}
                       error={fileError}
-                      />
+                    />
                   </div>
 
                   {/* <FormControl className="w-[93%] my-[20px]">
@@ -712,7 +778,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                     </div>
                   </FormControl> */}
                   <div className="w-[98%] my-[20px]">
-                  <CustomInput
+                    <CustomInput
                       value={values.coverLetter}
                       onChange={handleChange("coverLetter")}
                       component={"field"}
@@ -766,24 +832,26 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                     </Button>
                   </div>
                   <div className="md:mt-[30px] mt-[50px]">
-                  <Button
-                    className="bg-green-700 text-white w-[150px]"
-                    onClick={() => handleSubmit()}
-                  >
-                    {loading ? (
-                      <CircularProgress
-                        thickness={7}
-                        className="text-white w-[40px] h-[40px] p-1"
-                      />
-                    ) : (
-                      <p>Submit</p>
-                    )}
-                  </Button>
+                    <Button
+                      className="bg-green-700 text-white w-[150px]"
+                      onClick={() => handleSubmit()}
+                    >
+                      {loading ? (
+                        <CircularProgress
+                          thickness={7}
+                          className="text-white w-[40px] h-[40px] p-1"
+                        />
+                      ) : (
+                        <p>Submit</p>
+                      )}
+                    </Button>
                   </div>
                   {genError && (
                     <div className="p-4">
-                    <p className="text-red-600 text-[11px]">Please fill out the missing fields</p>
-                  </div>
+                      <p className="text-red-600 text-[11px]">
+                        Please fill out the missing fields
+                      </p>
+                    </div>
                   )}
                 </div>
               )}

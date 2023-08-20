@@ -8,27 +8,34 @@ interface ConnectionProps {
   body: { [key: string]: any };
 }
 
-var key = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY); 
+var key = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY);
 var iv = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_IV);
 
 export const getContent = async (url: string) => {
-  let response = await axios
-    .get(url, {
-      headers: {
-        "Content-Type": "application/x-payload",
-        Auth: CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
-          iv: iv,
-        }).toString(),
-      },
-    })
-    .then((res: AxiosResponse) => res.data);
+  let reqHeader = CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
+    iv: iv,
+  }).toString();
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      head: reqHeader,
+      // body: reqBody,
+      url: url,
+      method: "GET"
+    }),
+  };
+  var response = await fetch("/api/connect", options);
+  var jsonRes = await response.json();
 
-  if (response.data) {
-    let bytes = CryptoJs.AES.decrypt(response.data, key, { iv: iv });
+  if (jsonRes) {
+    let bytes = CryptoJs.AES.decrypt(jsonRes.data, key, { iv: iv });
     let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
-    response.data = resData;
+    jsonRes.data = resData;
   }
-  return response;
+  return jsonRes;
 };
 
 export const postContent = (
@@ -49,53 +56,55 @@ export const postAsync = async (url: string, body: { [key: string]: any }) => {
   let reqBody = CryptoJs.AES.encrypt(JSON.stringify(body), key, {
     iv: iv,
   }).toString();
-  let reqHeader =  CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {iv: iv,}).toString()
+  let reqHeader = CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
+    iv: iv,
+  }).toString();
   const options = {
-    method: 'POST',
+    method: "POST",
     headers: {
-    'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify({
       head: reqHeader,
       body: reqBody,
-      url:url
+      url: url,
+      method: "POST"
     }),
-    };
-  let response = await fetch("./api/connect", options)
-  let jsonRes = await response.json()
-    console.log(jsonRes)
-  // if (jsonRes) {
-  //   let bytes = CryptoJs.AES.decrypt(jsonRes.data, key, { iv: iv });
-  //   let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
-  //   if (Array.isArray(resData)) {
-  //     jsonRes.data = lowerKeyArray(resData);
-  //   } else if (typeof resData === "object" && resData !== null) {
-  //     jsonRes.data = lowerKey(resData);
-  //   } else {
-  //     jsonRes.data = resData;
-  //   }
-  //   return jsonRes;
-  // } else {
-  //   return jsonRes;
-  // }
+  };
+  var response = await fetch("/api/connect", options);
+  var jsonRes = await response.json();
+  if (jsonRes?.data) {
+    let bytes = CryptoJs.AES.decrypt(jsonRes.data, key, { iv: iv });
+    let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
+    if (Array.isArray(resData)) {
+      jsonRes.data = lowerKeyArray(resData);
+    } else if (typeof resData === "object" && resData !== null) {
+      jsonRes.data = lowerKey(resData);
+    } else {
+      jsonRes.data = resData;
+    }
+    return jsonRes;
+  } else {
+    return jsonRes;
+  }
 };
 
 export const postCustom = async (
   url: string,
   body: { [key: string]: any },
-  header: { [key: string]: any }
+  // header: { [key: string]: any }
 ) => {
   let encrypted = CryptoJs.AES.encrypt(JSON.stringify(body), key, {
     iv: iv,
   }).toString();
   let response = await axios
-    .post(url, encrypted, { headers: header })
+    .post(url, encrypted, { headers: {Auth: CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
+      iv: iv,
+    }).toString()} })
     .then((res: AxiosResponse) => res.data);
   if (response.data) {
-    // console.log(res.data)
     let bytes = CryptoJs.AES.decrypt(response.data, key, { iv: iv });
     let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
-    // response.data = resData
     if (Array.isArray(resData)) {
       response.data = lowerKeyArray(resData);
     } else if (typeof resData === "object" && resData !== null) {

@@ -345,7 +345,6 @@ export const Finalists = () => {
                   // console.log(body)
                   postAsync(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
                   .then((res) => {
-                    // console.log(res.data)
                     if(res.code == 200) {
                       setTempId(res.data);
                       setLoading(false);

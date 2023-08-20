@@ -15,17 +15,20 @@ export default async function handler(
   res: NextApiResponse
 ) {
   const options = {
-    method: "POST",
+    method: req.body.method,
     headers: {
       "Content-Type": "application/json",
       Auth: req.body.head
     },
     body: req.body.body,
   };
-  let response = await fetch("http://localhost:5089/roles/Role/all", options).then((res) => {
+  console.log(req.body.body)
+  let response = await fetch(req.body.url, options).then((res) => {
     let resData = res.json();
-    console.log("response na")
     return resData;
+  }).catch((err) => {
+    console.log(err)
   });
+  // console.log(response)
   res.status(200).json(response)
 }

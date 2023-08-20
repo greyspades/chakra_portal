@@ -62,67 +62,37 @@ const Applicant = () => {
 
   //* fetches candidate application status data
   useEffect(() => {
-    // let cred = sessionStorage.getItem("cred");
-    // if (cred) {
-    //   let bytes = CryptoJS.AES.decrypt(cred ?? "", process.env.NEXT_PUBLIC_AES_KEY);
-    //   let data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
-    //   // console.log(data)
-    //   let body = {
-    //     email: data.email,
-    //   };
-    //   console.log(body)
-    //   // postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
-    //   //   .then((res) => {
-    //   //     if (res.code == 200 && res.data.length > 0) {
-    //   //       setCandidates(res.data);
-    //   //     } else if (res.code != 200 && res.length < 1) {
-    //   //       setStatus({
-    //   //         open: true,
-    //   //         topic: "Unsuccessful",
-    //   //         content: res.message,
-    //   //       });
-    //   //     }
-    //   //   })
-    //   //   .catch((err: AxiosError) => {
-    //   //     console.log(err.message);
-    //   //     setStatus({
-    //   //       open: true,
-    //   //       topic: "Unsuccessful",
-    //   //       content: err.message,
-    //   //     });
-    //   //   });
-    // }
-    // if (data) {
-    //   let body = {
-    //     email: data.email,
-    //   };
-    //   axios
-    //     .post(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
-    //     .then((res: AxiosResponse) => {
-    //       if (res.data.code == 200 && res.data.data.length > 0) {
-    //         setCandidates(res.data.data);
-    //       } else if (res.data.code != 200 && res.data.length < 1) {
-    //         setStatus({
-    //           open: true,
-    //           topic: "Unsuccessful",
-    //           content: res.data.message,
-    //         });
-    //       }
-    //     })
-    //     .catch((err: AxiosError) => {
-    //       console.log(err.message);
-    //       setStatus({
-    //         open: true,
-    //         topic: "Unsuccessful",
-    //         content: err.message,
-    //       });
-    //     });
-    // }
+    let cred = sessionStorage.getItem("cred");
+    if (cred) {
+      let bytes = CryptoJS.AES.decrypt(cred ?? "", process.env.NEXT_PUBLIC_AES_KEY);
+      let data = JSON.parse(bytes.toString(CryptoJS.enc.Utf8));
+      let body = {
+        email: data.email,
+      };
+      postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
+        .then((res) => {
+          if (res.code == 200 && res.data.length > 0) {
+            setCandidates(res.data);
+          } else if (res.code != 200 && res.length < 1) {
+            setStatus({
+              open: true,
+              topic: "Unsuccessful",
+              content: res.message,
+            });
+          }
+        })
+        .catch((err: AxiosError) => {
+          console.log(err.message);
+          setStatus({
+            open: true,
+            topic: "Unsuccessful",
+            content: err.message,
+          });
+        });}
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  //* gets the roles
-  useEffect(() => {
+  const getJobRoles = () => {
     let body = {
       value: "",
       page: 0,
@@ -131,10 +101,15 @@ const Applicant = () => {
     postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
       .then((res) => {
         console.log(res)
-        // if (res.code == 200 && res.data.length > 0) {
-        //   setRoles(res.data)
-        // }
+        if (res.code == 200 && res.data.length > 0) {
+          setRoles(res.data)
+        }
       });
+  }
+
+  //* gets the roles
+  useEffect(() => {
+    getJobRoles()
   }, []);
 
   //* gets the role information based on id
