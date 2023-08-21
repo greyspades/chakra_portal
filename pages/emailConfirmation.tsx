@@ -6,7 +6,8 @@ import { useRouter } from "next/router";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import Footer from "../components/footer";
 import { getContent, postAsync, postContent } from "../helpers/connection";
-import { lowerKey, lowerKeyArray } from "../helpers/formating";
+// import { lowerKey, lowerKeyArray } from "../helpers/formating";
+
 
 const EmailConfirmation = () => {
   const router = useRouter();

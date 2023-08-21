@@ -6,9 +6,7 @@ import VerifiedIcon from "@mui/icons-material/Verified";
 import Footer from "../components/footer";
 
 const Confirmation = () => {
-  const { candidate, role, } = useContext(
-    MainContext
-  ) as any;
+  const { candidate, role } = useContext( MainContext ) as any;
 
   return (
     <div className="grid w-[100%] bg-slate-100 h-[100vh]">
