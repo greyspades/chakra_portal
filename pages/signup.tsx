@@ -41,7 +41,6 @@ const Signup = () => {
                   }
                 />
               </div>
-
               <div >
                 <Input
                   placeholder = 'Lastname'

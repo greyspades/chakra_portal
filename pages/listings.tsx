@@ -143,7 +143,7 @@ const handleCheckChange = (filter: string, filterType: string) => {
       setRoleCount(res.data?.count)
       setSet(true)
     }).catch((err: AxiosError) => {
-      console.group(err.message)
+      // console.log(err.message)
     });
   };
 

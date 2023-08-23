@@ -493,6 +493,8 @@ export const Signup = ({
                     password: value.password,
                   };
                   if (!isStatus) {
+                    // console.log(process.env.NEXT_PUBLIC_SIGN_USER_IN)
+                    // console.log("na eeem naaaa")
                     postAsync(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
                       .then((res) => {
                         if (res.code == 200) {

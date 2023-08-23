@@ -15,6 +15,17 @@ export const Dashboard = () => {
 
     const [height, setHeight] = useState<number>(170);
 
+    const [dummy, setDummy] = useState<{[key: string]: string}[]>([{}])
+
+    useEffect(() => {
+      // let update = [ ...dummy,]
+      let update = dummy.map((item: {[key: string]: string}, idx: number) => {
+        // let updatedObj = { ...item, item["fwff"]}
+        return item;
+      })
+      setDummy(update)
+    },[])
+
     useEffect(() => {
         getContent(process.env.NEXT_PUBLIC_GET_METRICS as string)
         .then((res) => {
