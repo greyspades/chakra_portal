@@ -38,18 +38,34 @@ export const getContent = async (url: string) => {
   return jsonRes;
 };
 
-export const postContent = (
+export const postContent = async(
   url: string,
   body: { [key: string]: any }
-): Promise<AxiosResponse> => {
+) => {
   let encrypted = CryptoJs.AES.encrypt(JSON.stringify(body), key, {
     iv: iv,
   }).toString();
-  return axios.post(url, encrypted, {
+  let reqHeader = CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
+    iv: iv,
+  }).toString();
+  const options = {
+    method: "POST",
     headers: {
-      "Content-Type": "application/x-payload",
+      "Content-Type": "application/json",
     },
-  });
+    body: JSON.stringify({
+      head: reqHeader,
+      body: body,
+      url: url,
+      method: "POST"
+    }),
+  };
+  var response = await fetch("/api/create", options);
+  var jsonRes = await response.json();
+  console.log(jsonRes)
+  if(jsonRes.data) {
+    return jsonRes
+  }
 };
 
 export const postAsync = async (url: string, body: { [key: string]: any }) => {

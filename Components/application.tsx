@@ -29,7 +29,7 @@ import { Notifier } from "./notifier";
 import ArticleIcon from "@mui/icons-material/Article";
 import { CustomInput } from "./customInput";
 import CryptoJS from "crypto-js";
-import { postAsync, postCustom } from "../helpers/connection";
+import { postAsync, postContent, postCustom } from "../helpers/connection";
 import { lowerKey } from "../helpers/formating";
 
 export const Application: FC<Role> = ({ name, id }: Role) => {
@@ -479,7 +479,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 validateForm(value);
 
                 //* request body
-                var req = {
+                var body = {
                   firstName: value.firstName,
                   lastName: value.lastName,
                   otherName: value.otherName,
@@ -494,6 +494,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   password: value.password,
                   jobName: name,
                   coverLetter: value.coverLetter,
+                  cv: file
                 };
 
                 //* candidate object
@@ -574,10 +575,6 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 ) {
                   setGenError(false);
                   setLoading(true);
-                  // console.log(body)
-                  // let reqBody = CryptoJS.AES.encrypt(JSON.stringify(req), key, {
-                  //   iv: iv,
-                  // }).toString();
                   let reqHeader = CryptoJS.AES.encrypt(
                     process.env.NEXT_PUBLIC_TOKEN,
                     key,
@@ -585,62 +582,68 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       iv: iv,
                     }
                   ).toString();
-
-                  // var body = {
-                  //   data: reqBody,
-                  //   cv: file
-                  // }
+                  const options = {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "*",
+                      "Auth": reqHeader
+                    },
+                    body: JSON.stringify({
+                      body
+                    }),
+                  };
+                  
                   // const options = {
-                  //   method: "POST",
-                  //   headers: {
-                  //     "Content-Type": "application/json",
-                  //   },
-                  //   body: JSON.stringify({
                   //     head: reqHeader,
-                  //     body: reqBody,
+                  //     body: req,
                   //     url: process.env.NEXT_PUBLIC_CREATE_APPLICATION,
-                  //     method: "POST"
-                  //   }),
-                  // };
-                  // // console.log(req)
-                  // var response = await fetch("/api/connect", options);
-                  // var jsonRes = await response.json();
-                  // console.log(jsonRes)
+                  // }
 
-                  Axios.post(
-                    process.env.NEXT_PUBLIC_CREATE_APPLICATION as string,
-                    req,
-                    {
-                      headers: {
-                        "Access-Control-Allow-Origin": "*",
-                        "Content-Type": "multipart/form-data",
-                        Auth: reqHeader,
-                      },
-                    }
-                  )
-                    .then((res: AxiosResponse) => {
-                      setLoading(false);
-                      if (res.data.code == 200) {
-                        setCandidate(candidateObj);
-                        setRole(roleObj);
-                        router.push("/confirmation");
-                      } else {
-                        setStatus({
-                          open: true,
-                          topic: "Unsuccessful",
-                          content: res.data.message,
-                        });
-                      }
-                    })
-                    .catch((err: AxiosError) => {
-                      console.log(err.message);
-                      setLoading(false);
-                      setStatus({
-                        open: true,
-                        topic: "Unsuccessful",
-                        content: err.message,
-                      });
-                    });
+                  var response = await fetch(process.env.NEXT_PUBLIC_CREATE_APPLICATION, options);
+                  var jsonRes = await response.json();
+                  console.log(jsonRes)
+
+                  // console.log(body)
+
+                  // Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION, body, {headers: {
+                  //   "Content-Type": "application/json",
+                  //    "Auth": reqHeader
+                  // }})
+                  // .then((res: AxiosResponse) => {
+                  //   console.log(res.data)
+                  // })
+                  // .catch((err: AxiosError) => {
+                  //   console.log(err.message)
+                  // })
+
+                  // postContent(
+                  //   process.env.NEXT_PUBLIC_CREATE_APPLICATION,
+                  //   req,
+                  // )
+                  //   .then((res) => {
+                  //     console.log(res)
+                  //     setLoading(false)
+                  //     if (res.data.code == 200) {
+                  //       setCandidate(candidateObj);
+                  //       setRole(roleObj);
+                  //       router.push("/confirmation");
+                  //     } else {
+                  //       setStatus({
+                  //         open: true,
+                  //         topic: "Unsuccessful",
+                  //         content: res.data.message,
+                  //       });
+                  //     }
+                  //   })
+                  //   .catch((err: AxiosError) => {
+                  //     console.log(err.message);
+                  //     setLoading(false);
+                  //     setStatus({
+                  //       open: true,
+                  //       topic: "Unsuccessful",
+                  //       content: err.message,
+                  //     });
+                  //   });
                 } else if (type != "pdf") {
                   setFileError("Please Select a pdf file for your resume");
                 } else if (!eduResult || !expResult) {

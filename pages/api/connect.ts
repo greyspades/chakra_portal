@@ -23,12 +23,12 @@ export default async function handler(
     body: req.body.body,
   };
   // console.log(req.body.body)
+  // console.log(req.body)
   let response = await fetch(req.body.url, options).then((res) => {
     let resData = res.json();
     return resData;
   }).catch((err) => {
     console.log(err)
   });
-  // console.log(response)
   res.status(200).json(response)
 }
