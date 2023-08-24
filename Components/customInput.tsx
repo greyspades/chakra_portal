@@ -75,7 +75,7 @@ export const CustomInput = ({
         {required && (
           <div className="flex justify-items-center gap-2 flex-row md:ml-[-30px]">
             <span className="text-[20px] text-red-500">*</span>
-            <p className="text-[16px]">{placeHolder}</p>
+            {/* <p className="text-[16px]">{placeHolder}</p>m */}
           </div>
         )}
       </InputLabel>

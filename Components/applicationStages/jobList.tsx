@@ -185,7 +185,7 @@ export const JobList = ({
                 <p className="font-semibold text-[20px]">Job description:</p>
               </div>
 
-              <div className={!item.expanded ? "h-[70px] overflow-hidden" : ""}>
+              <div className={!item.expanded ? "h-[10px] overflow-hidden" : ""}>
                 <div>{parseDesc(item.description as string)}</div>
                 <div className="mt-4">
                   <p className="font-semibold text-[20px]">Required Skills:</p>

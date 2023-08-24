@@ -93,6 +93,7 @@ export const Jobs = () => {
     }
     postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
       .then((res) => {
+        // console.log(res)
         if (res.code == 200) {
           setActiveJobs(res.data);
         }

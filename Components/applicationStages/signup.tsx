@@ -187,7 +187,6 @@ export const Signup = ({
                 }}
                 onSubmit={(value) => {
                   // validateForm(value);
-                  setSignupLoad(true);
                   var body = {
                     firstName: value.firstName,
                     lastName: value.lastName,
@@ -208,7 +207,9 @@ export const Signup = ({
 
                   let encrypted = CryptoJs.AES.encrypt(sessionData, process.env.NEXT_PUBLIC_AES_KEY).toString()
 
-                  postAsync(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body)
+                  if(phone.length >= 11) {
+                    setSignupLoad(true);
+                    postAsync(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body)
                     .then((res) => {
                       setSignupLoad(false);
                       if (res.code == 200) {
@@ -232,6 +233,13 @@ export const Signup = ({
                       console.log(err.message);
                       setSignupLoad(false);
                     });
+                  } else {
+                    setStatus({
+                      open: true,
+                      topic: "Unsuccessful",
+                      content: "Please enter a valid phone number",
+                    });
+                  }
                 }}
               >
                 {({ handleSubmit, handleChange, values, errors }) => (

@@ -582,68 +582,43 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       iv: iv,
                     }
                   ).toString();
-                  const options = {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "*",
-                      "Auth": reqHeader
-                    },
-                    body: JSON.stringify({
-                      body
-                    }),
-                  };
                   
-                  // const options = {
-                  //     head: reqHeader,
-                  //     body: req,
-                  //     url: process.env.NEXT_PUBLIC_CREATE_APPLICATION,
-                  // }
+                  const options = {
+                      head: reqHeader,
+                      body: body,
+                      url: process.env.NEXT_PUBLIC_CREATE_APPLICATION,
+                  }
 
-                  var response = await fetch(process.env.NEXT_PUBLIC_CREATE_APPLICATION, options);
-                  var jsonRes = await response.json();
-                  console.log(jsonRes)
-
-                  // console.log(body)
-
-                  // Axios.post(process.env.NEXT_PUBLIC_CREATE_APPLICATION, body, {headers: {
-                  //   "Content-Type": "application/json",
-                  //    "Auth": reqHeader
-                  // }})
-                  // .then((res: AxiosResponse) => {
-                  //   console.log(res.data)
-                  // })
-                  // .catch((err: AxiosError) => {
-                  //   console.log(err.message)
-                  // })
-
-                  // postContent(
-                  //   process.env.NEXT_PUBLIC_CREATE_APPLICATION,
-                  //   req,
-                  // )
-                  //   .then((res) => {
-                  //     console.log(res)
-                  //     setLoading(false)
-                  //     if (res.data.code == 200) {
-                  //       setCandidate(candidateObj);
-                  //       setRole(roleObj);
-                  //       router.push("/confirmation");
-                  //     } else {
-                  //       setStatus({
-                  //         open: true,
-                  //         topic: "Unsuccessful",
-                  //         content: res.data.message,
-                  //       });
-                  //     }
-                  //   })
-                  //   .catch((err: AxiosError) => {
-                  //     console.log(err.message);
-                  //     setLoading(false);
-                  //     setStatus({
-                  //       open: true,
-                  //       topic: "Unsuccessful",
-                  //       content: err.message,
-                  //     });
-                  //   });
+                  Axios.post(
+                    "/api/create",
+                    options,{headers: {
+                      "Content-Type": "application/json",
+                       "Auth": reqHeader
+                    }}
+                  ) 
+                    .then((res) => {
+                      setLoading(false)
+                      if (res.data.code == 200) {
+                        setCandidate(candidateObj);
+                        setRole(roleObj);
+                        router.push("/confirmation");
+                      } else {
+                        setStatus({
+                          open: true,
+                          topic: "Unsuccessful",
+                          content: res.data.message,
+                        });
+                      }
+                    })
+                    .catch((err: AxiosError) => {
+                      console.log(err.message);
+                      setLoading(false);
+                      setStatus({
+                        open: true,
+                        topic: "Unsuccessful",
+                        content: err.message,
+                      });
+                    });
                 } else if (type != "pdf") {
                   setFileError("Please Select a pdf file for your resume");
                 } else if (!eduResult || !expResult) {

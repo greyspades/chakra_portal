@@ -90,9 +90,12 @@ export const postAsync = async (url: string, body: { [key: string]: any }) => {
     };
     var response = await fetch("/api/connect", options);
     var jsonRes = await response.json();
+    // console.log(jsonRes)
     if (jsonRes?.data) {
       let bytes = CryptoJs.AES.decrypt(jsonRes.data, key, { iv: iv });
       let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
+      // console.log(resData)
+      // console.log(url)
       if (Array.isArray(resData)) {
         jsonRes.data = lowerKeyArray(resData);
       } else if (typeof resData === "object" && resData !== null) {
