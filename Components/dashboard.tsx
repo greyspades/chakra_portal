@@ -27,7 +27,7 @@ export const Dashboard = () => {
     },[])
 
     useEffect(() => {
-        getContent(process.env.NEXT_PUBLIC_GET_METRICS as string)
+        getContent("getMetrics")
         .then((res) => {
             setMetrics(res.data);
         })

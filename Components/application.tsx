@@ -67,7 +67,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
   const [status, setStatus] = useState<{ [key: string]: any }>({
     open: false,
   });
-  var key = CryptoJS.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY);
+  var aesKey = CryptoJS.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY);
   var iv = CryptoJS.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_IV);
 
   //* context hook holding global state
@@ -475,6 +475,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
               }}
               //* called once the submit button is clicked
               onSubmit={async (value: any, { validateForm }) => {
+
                 //* validates the form against the schema
                 validateForm(value);
 
@@ -494,7 +495,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   password: value.password,
                   jobName: name,
                   coverLetter: value.coverLetter,
-                  cv: file
+                  // cv: file
                 };
 
                 //* candidate object
@@ -567,7 +568,8 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                 );
 
                 if (
-                  type == "pdf" &&
+                  type == "pdf" 
+                  &&
                   expResult &&
                   eduResult &&
                   expForm.length > 0 &&
@@ -577,26 +579,46 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                   setLoading(true);
                   let reqHeader = CryptoJS.AES.encrypt(
                     process.env.NEXT_PUBLIC_TOKEN,
-                    key,
+                    aesKey,
                     {
                       iv: iv,
                     }
                   ).toString();
-                  
+
                   const options = {
-                      head: reqHeader,
-                      body: body,
-                      url: process.env.NEXT_PUBLIC_CREATE_APPLICATION,
-                  }
+                    head: reqHeader,
+                    body: {
+                      cv: file,
+                      body: CryptoJS.AES.encrypt(JSON.stringify(body), aesKey, {
+                        iv: iv,
+                      }).toString(),
+                    },
+                  };
+
+                  const formData = new FormData();
+
+                  formData.append("cv", file);
+
+                  Object.keys(body).forEach((key) => {
+                    formData.append(key, body[key])
+                    // console.log(key, body[key]);
+                    // formData.append(key, CryptoJS.AES.encrypt(body[key].toString(), aesKey, {
+                    //   iv: iv,
+                    // }).toString());
+                  });
+
+                  const encryptedForm = CryptoJS.AES.encrypt(JSON.stringify(formData), aesKey, {
+                    iv: iv,
+                  }).toString();
 
                   Axios.post(
                     "/api/create",
-                    options,{headers: {
-                      "Content-Type": "application/json",
+                    formData,{headers: {
+                      "Content-Type": "multipart/form-data",
                        "Auth": reqHeader
                     }}
-                  ) 
-                    .then((res) => {
+                  ).then((res) => {
+                    console.log(res.data)
                       setLoading(false)
                       if (res.data.code == 200) {
                         setCandidate(candidateObj);
@@ -730,9 +752,7 @@ export const Application: FC<Role> = ({ name, id }: Role) => {
                       helper="Pdf only"
                       type={"file"}
                       placeHolder="Resume"
-                      readonly
                       classes="h-[40px] md:w-[100%] w-[320px] bg-gray-100 rounded-md no-underline px-4 shadow-md"
-                      selValues={genders}
                       error={fileError}
                     />
                   </div>

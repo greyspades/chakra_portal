@@ -53,7 +53,7 @@ const Reset = () => {
         }
         setSentMail(false)
         setCounting(false)
-        postAsync(process.env.NEXT_PUBLIC_SEND_PASS_RESET_MAIL as string, body)
+        postAsync("sendResetMail", body)
         .then((res) => {
             if(res.code == 200) {
                 setStatus({

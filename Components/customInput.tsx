@@ -68,7 +68,7 @@ export const CustomInput = ({
   };
 
   return (
-    <FormControl className={!fitWidth ? "w-[100%]" : null}>
+    <FormControl className={!fitWidth ? "w-[100%]" : null as any}>
       <InputLabel className="flex flex-row" shrink={true}>
         {(value || type == "date") && <>{placeHolder}</>}{" "}
         <span className="mr-2 text-red-700 text-[13px] ml-6">{helper}</span>

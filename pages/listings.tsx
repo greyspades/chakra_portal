@@ -12,6 +12,7 @@ import {
 } from "@mui/material";
 import { Role } from "../types/roles";
 import LensIcon from "@mui/icons-material/Lens";
+// import { Application } from "../components/application";
 import { Application } from "../components/application";
 import { Signup } from "../components/applicationStages/signup";
 import { Navbar } from "../components/navbar";
@@ -136,8 +137,9 @@ const handleCheckChange = (filter: string, filterType: string) => {
       filter: filterVal ?? "",
       filterType: filterTypeVal ?? ""
     }
-    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
+    postAsync("getJobRoles", body).then((res) => {
       let data = res.data;
+      // console.log(data)
       setRoles(data);
       setActiveRole(data[0]);
       setRoleCount(res.data?.count)

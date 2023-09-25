@@ -85,7 +85,7 @@ const Password = () => {
                   password: value.password
                 }
 
-                postAsync(process.env.NEXT_PUBLIC_RESET_PASSWORD as string, body)
+                postAsync("resetPassword", body)
                 .then((res) => {
                   if(res.code == 200) {
                     setLoading(false)

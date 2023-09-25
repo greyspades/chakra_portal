@@ -87,7 +87,7 @@ export const ScheduleInterview: React.FC<ScheduleProps> = ({
                 };
                 setLoading(true);
                 //* creates a new online meeting
-                postAsync(process.env.NEXT_PUBLIC_CREATE_MEETING as string, body)
+                postAsync("createMeeting" as string, body)
                   .then((res) => {
                     //* if operation is successful
                     if (res.code == 200) {

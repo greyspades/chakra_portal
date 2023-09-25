@@ -46,7 +46,7 @@ export const Jobs = () => {
       page: page,
       take: take,
     };
-    postAsync(process.env.NEXT_PUBLIC_GET_ALL_JOB_ROLES as string, body)
+    postAsync("getAllJobRoles", body)
       .then((res) => {
         if (res.code == 200) {
           setJobs(res.data);
@@ -62,7 +62,7 @@ export const Jobs = () => {
       item: status
     }
     // console.log(body)
-    postAsync(process.env.NEXT_PUBLIC_CHANGE_STATUS as string, body)
+    postAsync("changeStatus", body)
     .then((res) => {
       // console.log(res)
       if(res.code == 200) {
@@ -91,7 +91,7 @@ export const Jobs = () => {
       page: 0,
       filter: ""
     }
-    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
+    postAsync("getJobRoles" as string, body)
       .then((res) => {
         // console.log(res)
         if (res.code == 200) {
@@ -164,7 +164,7 @@ export const Jobs = () => {
       let body = {
         value: e.target.value,
       };
-      postAsync(process.env.NEXT_PUBLIC_SEARCH_JOB_ROLES as string, body)
+      postAsync("searchJobRoles", body)
         .then((res) => {
           if (res.length > 0) {
             setJobs(res);

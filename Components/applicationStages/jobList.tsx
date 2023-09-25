@@ -92,9 +92,9 @@ export const JobList = ({
         (item: { [key: string]: string }, idx: number) => (
           <div key={idx}>
             <div className="flex flex-row gap-4 mt-2">
-              <p>{item?.["RowNum~~Blnk"]}</p>
+              <p>{item?.["RowNum~~Blnk"] ?? item?.["rownum~~blnk"]}</p>
               <p className="capitalize">
-                {item?.["Job responsibility~~Sentc"]?.toLowerCase()}
+                {item?.["Job responsibility~~Sentc"]?.toLowerCase() ?? item?.["job responsibility~~sentc"]?.toLowerCase()}
               </p>
             </div>
           </div>

@@ -55,6 +55,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
   const [comments, setComments] = useState<Comment[]>()
   const [numPages, setNumPages] = useState<number>(0)
   const [statusCode, setStatusCode] = useState<number>();
+  const [resumeData, setResumeData] = useState()
   const [status, setStatus] = useState<{[key: string]: any}>({
     open: false
   })
@@ -107,6 +108,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
 
   //* parses the education and experience data from JSON
   useEffect(() => {
+    console.log(process.env.NEXT_PUBLIC_GET_RESUME)
     const edu = JSON.parse(data?.education as string);
     const exp = JSON.parse(data?.experience as string);
     setEducation(edu);
@@ -125,7 +127,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     let body = {
       id: data?.id
     }
-    postAsync(process.env.NEXT_PUBLIC_GET_COMMENTS_BY_ID as string, body)
+    postAsync("getComments", body)
     .then((res) => {
       if(res.code == 200) {
         setComments(res.data);
@@ -146,7 +148,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
    let body = {
     id: data.id
    }
-    postAsync(process.env.NEXT_PUBLIC_GET_SKILLS as string, body).then(
+    postAsync("getSkills", body).then(
       (res) => {
         setSkills(res);
       }
@@ -158,6 +160,38 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     return;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  useEffect(() => {
+    // Axios({
+    //   url: `/api/resume/${data?.id}`,
+    //   method: 'GET',
+    //   responseType: 'arraybuffer', // This is important to handle binary data
+    // })
+    //   .then(response => {
+    //     // Process the file data here
+    //     const fileData = response.data;
+    //     // For example, you can create a Blob from the data
+    //     // const blob = new Blob([fileData], { type: 'application/pdf' });
+        
+    //   //   return blob
+    //       console.log(fileData)
+    //       setResumeData(fileData)
+    //   })
+    //   .catch(error => {
+    //     console.error('Error fetching the file:', error);
+    //   });
+
+
+    Axios.get(`/api/resume/${data?.id}`, {responseType: 'arraybuffer'})
+    .then((res: AxiosResponse) => {
+      console.log(res.data)
+      let arr = new Uint8Array(res.data);
+      setResumeData(res.data)
+    })
+    .catch((err: AxiosError) => {
+      console.log(err.message)
+    })
+  },[])
 
   //* flags candidate
   const handleFlag = (e: SelectChangeEvent) => {
@@ -171,7 +205,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     };
     console.log(body)
 
-    postAsync(`${process.env.NEXT_PUBLIC_FLAG_CANDIDATE}`, body)
+    postAsync("flagCandidate", body)
       .then((res) => {
         if (res.code == 200) {
           setFlagLoading(false);
@@ -197,7 +231,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
     const body = {
       id: data?.id,
     };
-    postAsync(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
+    postAsync("cancelApplication", body)
       .then((res) => {
         if (res.code == 200) {
           setStatus({
@@ -495,7 +529,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             <Document
               className=""
               onLoadError={(e) => console.log(e)}
-              file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data?.id}`}
+              file={{data: resumeData}}
               onLoadSuccess={onDocumentLoadSuccess}
             >
               <Page ref={printerRef} pageNumber={page} height={200} />
@@ -609,7 +643,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             className="h-[200px]"
             onLoadError={(e) => console.log(e)}
             onSourceError={(e) => console.log(e)}
-            file={`${process.env.NEXT_PUBLIC_GET_RESUME}/${data?.id}`}
+            file={`getResume/${data?.id}`}
             onLoadSuccess={onDocumentLoadSuccess}
           >
             <Page pageNumber={page} height={800} />

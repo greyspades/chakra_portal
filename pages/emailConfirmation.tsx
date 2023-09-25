@@ -21,7 +21,7 @@ const EmailConfirmation = () => {
       let body = {
         email,
       };
-      postAsync(process.env.NEXT_PUBLIC_VALIDATE_EMAIL as string, body)
+      postAsync("validateEmail", body)
         .then((res) => {
           if (res.code == 200) {
             setLoading(false);

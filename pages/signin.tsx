@@ -62,10 +62,9 @@ const Signin = () => {
                     id: value.userId,
                     password: value.password
                 }
-                postAsync(process.env.NEXT_PUBLIC_ADMIN_AUTH as string, body)
+                postAsync("adminAuth", body)
                 .then((res) => {
                     setLoading(false);
-                  // console.log(res)
                     if(res.code == 200) {
                         setAdmin(res.data.data)
                         sessionStorage.setItem("auth", "True")

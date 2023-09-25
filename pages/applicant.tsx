@@ -69,7 +69,7 @@ const Applicant = () => {
       let body = {
         email: data.email,
       };
-      postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
+      postAsync("getStatus", body)
         .then((res) => {
           if (res.code == 200 && res.data.length > 0) {
             setCandidates(res.data);
@@ -98,7 +98,7 @@ const Applicant = () => {
       page: 0,
       filter: ""
     }
-    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
+    postAsync("getJobRoles", body)
       .then((res) => {
         console.log(res)
         if (res.code == 200 && res.data.length > 0) {
@@ -123,7 +123,7 @@ const Applicant = () => {
     const body = {
       id: cancelId,
     };
-    postAsync(process.env.NEXT_PUBLIC_CANCEL_APPLICATION as string, body)
+    postAsync("cancelApplication", body)
       .then((res) => {
         // console.log(res.data);
         // if (res.code == 200) {

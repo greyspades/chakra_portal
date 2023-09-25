@@ -209,7 +209,7 @@ export const Signup = ({
 
                   if(phone.length >= 11) {
                     setSignupLoad(true);
-                    postAsync(process.env.NEXT_PUBLIC_CREATE_NEW_USER as string, body)
+                    postAsync("createUser", body)
                     .then((res) => {
                       setSignupLoad(false);
                       if (res.code == 200) {
@@ -503,7 +503,7 @@ export const Signup = ({
                   if (!isStatus) {
                     // console.log(process.env.NEXT_PUBLIC_SIGN_USER_IN)
                     // console.log("na eeem naaaa")
-                    postAsync(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
+                    postAsync("signIn", body)
                       .then((res) => {
                         if (res.code == 200) {
                           let encrypted = CryptoJs.AES.encrypt(JSON.stringify({...res.data, password: null}), process.env.NEXT_PUBLIC_AES_KEY).toString()
@@ -534,7 +534,7 @@ export const Signup = ({
                         });
                       });
                   } else {
-                    postAsync(process.env.NEXT_PUBLIC_GET_STATUS as string, body)
+                    postAsync("getStatus", body)
                       .then((res) => {
                         setsignInLoad(false);
                         if (res.code == 200 && res.data.length > 0) {

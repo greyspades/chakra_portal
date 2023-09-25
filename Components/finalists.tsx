@@ -95,7 +95,7 @@ export const Finalists = () => {
         value: "",
         page: 0,
       }
-        postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
+        postAsync("getJobRoles", body).then((res) => {
           setRoles(res.data);
         }).catch((err: AxiosError) => {
           console.log(err.message)
@@ -112,7 +112,7 @@ export const Finalists = () => {
         take
     }
     // console.log(body)
-    postAsync(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_STAGE as string, body)
+    postAsync("getCandidateByStage", body)
     .then((res) => {
         if(res.code == 200) {
             setCandidates(res.data);
@@ -155,7 +155,7 @@ export const Finalists = () => {
             ...metaData,
             id:selctCandidate?.id
           }
-          postAsync(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
+          postAsync("hireCandidate", body)
           .then((res) => {
             if(res.code == 200) {
               setTempId(res.data);
@@ -217,7 +217,7 @@ export const Finalists = () => {
         let body = {
           id: selctCandidate?.id
         }
-        postAsync(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
+        postAsync("getCandidateById", body)
         .then((res) => {
           if(res.code == 200) {
             setSelctCandidate(res.data[0]);
@@ -343,7 +343,7 @@ export const Finalists = () => {
                     jobType: selRole.jobtype
                   }
                   // console.log(body)
-                  postAsync(process.env.NEXT_PUBLIC_HIRE_CANDIDATE as string, body)
+                  postAsync("hireCandidate", body)
                   .then((res) => {
                     if(res.code == 200) {
                       setTempId(res.data);

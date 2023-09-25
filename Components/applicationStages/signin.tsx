@@ -43,7 +43,7 @@ export const SignIn = () => {
 
               //* posts user information
               axios
-                .post(process.env.NEXT_PUBLIC_SIGN_USER_IN as string, body)
+                .post("signIn", body)
                 .then((res: AxiosResponse) => {
                   if (res.data.code == 200) {
                     sessionStorage.setItem(

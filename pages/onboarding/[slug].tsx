@@ -120,7 +120,7 @@ const Onboarding = () => {
       id,
     };
     axios
-      .post(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
+      .post("getCandidateById", body)
       .then((res: AxiosResponse) => {
         if (res.data.code == 200) {
           // console.log(res.data.data)

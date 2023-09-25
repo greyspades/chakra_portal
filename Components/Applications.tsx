@@ -96,7 +96,7 @@ export const Applications = () => {
       take
     }
     postAsync(
-      process.env.NEXT_PUBLIC_GET_APPLICATIONS_BY_JOB as string, body
+      "getCandidatesByJob", body
     )
       .then((res) => {
         // console.log(res.data)
@@ -121,7 +121,7 @@ export const Applications = () => {
       page: 0,
     }
     postAsync(
-      process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body).then((res) => {
+      "getJobRoles", body).then((res) => {
       setRoles(res.data);
     });
   }, []);
@@ -324,7 +324,7 @@ export const Applications = () => {
       roleId: id,
       flag: e.target.value,
     };
-    postAsync(process.env.NEXT_PUBLIC_GET_APPLICANTS_BY_FLAG as string, body)
+    postAsync("getByFlag", body)
       .then((res) => {
         if (res.code == 200) {
           setCandidates(res.data);

@@ -65,7 +65,7 @@ export const Schedule = () => {
       page: 0,
       filter: ""
     }
-    postAsync(process.env.NEXT_PUBLIC_GET_JOB_ROLES as string, body)
+    postAsync("getJobRoles" as string, body)
       .then((res) => {
         setRoles(res.data);
       });
@@ -78,7 +78,7 @@ export const Schedule = () => {
       page,
       take: 10
     }
-    postAsync(process.env.NEXT_PUBLIC_GET_MEETINGS as string, body)
+    postAsync("getMeetings", body)
       .then((res) => {
         if (res.code == 200) {
           let sortedMeetings = res.data.sort(
@@ -105,7 +105,7 @@ export const Schedule = () => {
   const handleComment = () => {
     setLoading(true);
     let body = { ...comment };
-    postAsync(process.env.NEXT_PUBLIC_CREATE_COMMENT as string, body)
+    postAsync("createComment" as string, body)
       .then((res) => {
         setLoading(false);
         if (res.code == 200) {
@@ -170,7 +170,7 @@ export const Schedule = () => {
     let body = {
       id
     }
-    postAsync(process.env.NEXT_PUBLIC_GET_CANDIDATE_BY_ID as string, body)
+    postAsync("getCandidateById", body)
       .then((res) => {
         // console.log(res.data)
         if (res.code == 200) {

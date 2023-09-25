@@ -13,6 +13,17 @@ module.exports = {
   }
 }
 
+module.exports = {
+  async rewrites() {
+		return [
+			{
+				source: '/api/create',
+				destination: 'http://localhost:5048/api/Candidate/create',
+			},
+		]
+	},
+}
+
 
 const nextConfig = {
   reactStrictMode: true,
@@ -22,6 +33,9 @@ const nextConfig = {
     unoptimized: true,
   },
   trailingSlash: true,
+  experimental: {
+    serverActions: true,
+  },
 }
 
 module.exports = nextConfig

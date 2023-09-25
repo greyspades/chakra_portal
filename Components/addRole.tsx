@@ -16,7 +16,6 @@ import {
   TextField,
 } from "@mui/material";
 import { Formik } from "formik";
-import "../node_modules/react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
 import axios, { AxiosError, AxiosResponse } from "axios";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import { Role } from "../types/roles";
@@ -83,7 +82,7 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
     let body = {
       code,
     };
-    postAsync(process.env.NEXT_PUBLIC_GET_JOB_DESCRIPTION as string, body)
+    postAsync("getJobDescription", body)
       .then((res) => {
         // console.log(res)
         if (res.code == 200) {
@@ -316,7 +315,7 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                   // console.log(body)
                   setLoading(true);
                   postAsync(
-                    process.env.NEXT_PUBLIC_CREATE_NEW_JOB_ROLE as string,
+                    "createJob",
                     body,
                   )
                   .then((res) => {

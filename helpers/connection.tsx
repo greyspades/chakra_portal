@@ -12,17 +12,12 @@ var key = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_KEY);
 var iv = CryptoJs.enc.Utf8.parse(process.env.NEXT_PUBLIC_AES_IV);
 
 export const getContent = async (url: string) => {
-  let reqHeader = CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
-    iv: iv,
-  }).toString();
   const options = {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      head: reqHeader,
-      // body: reqBody,
       url: url,
       method: "GET"
     }),
@@ -38,14 +33,29 @@ export const getContent = async (url: string) => {
   return jsonRes;
 };
 
+export const getResume = async(url: string) => {
+  const options = {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      url: url,
+      method: "GET",
+      id: ""
+    }),
+  };
+  var response = await fetch("/api/connect", options);
+  var jsonRes = await response.json();
+  return jsonRes;
+}
+
+
 export const postContent = async(
   url: string,
   body: { [key: string]: any }
 ) => {
   let encrypted = CryptoJs.AES.encrypt(JSON.stringify(body), key, {
-    iv: iv,
-  }).toString();
-  let reqHeader = CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
     iv: iv,
   }).toString();
   const options = {
@@ -54,7 +64,6 @@ export const postContent = async(
       "Content-Type": "application/json",
     },
     body: JSON.stringify({
-      head: reqHeader,
       body: body,
       url: url,
       method: "POST"
@@ -73,16 +82,15 @@ export const postAsync = async (url: string, body: { [key: string]: any }) => {
     let reqBody = CryptoJs.AES.encrypt(JSON.stringify(body), key, {
       iv: iv,
     }).toString();
-    let reqHeader = CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
-      iv: iv,
-    }).toString();
+    // let reqHeader = CryptoJs.AES.encrypt(process.env.NEXT_PUBLIC_TOKEN, key, {
+    //   iv: iv,
+    // }).toString();
     const options = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        head: reqHeader,
         body: reqBody,
         url: url,
         method: "POST"
@@ -90,12 +98,9 @@ export const postAsync = async (url: string, body: { [key: string]: any }) => {
     };
     var response = await fetch("/api/connect", options);
     var jsonRes = await response.json();
-    // console.log(jsonRes)
     if (jsonRes?.data) {
       let bytes = CryptoJs.AES.decrypt(jsonRes.data, key, { iv: iv });
       let resData = JSON.parse(bytes.toString(CryptoJs.enc.Utf8));
-      // console.log(resData)
-      // console.log(url)
       if (Array.isArray(resData)) {
         jsonRes.data = lowerKeyArray(resData);
       } else if (typeof resData === "object" && resData !== null) {
