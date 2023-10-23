@@ -8,7 +8,7 @@ module.exports = {
       args: 'start',
       env_local: {
         APP_ENV: 'local',
-        PORT: '80' // APP_ENV=local
+        PORT: '8012' // APP_ENV=local
       },
       env_development: {
         APP_ENV: 'dev',

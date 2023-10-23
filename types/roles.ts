@@ -15,7 +15,8 @@ export type Role = {
     skills?: string[] | string,
     qualification?: string,
     expanded?: boolean,
-    jobtype?: string
+    jobtype?: string,
+    knowledges?: string[] | string
 }
 
 export type Fields = {

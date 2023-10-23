@@ -33,6 +33,13 @@ import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrow
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
 import KeyboardArrowLeftIcon from "@mui/icons-material/KeyboardArrowLeft";
 import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
+import {stateFromHTML} from 'draft-js-import-html';
+import { ContentState, EditorState, convertFromHTML, convertFromRaw, convertToRaw } from "draft-js";
+import { convertToHTML, stateToText } from "draft-convert";
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import dynamic from "next/dynamic";
+import { JobDescription } from "../jobDescription";
+
 
 interface JobListProps {
   roles: Role[];
@@ -44,6 +51,10 @@ interface JobListProps {
   count: number;
 }
 
+const Editor = dynamic(() => import("react-draft-wysiwyg").then((mod) => mod.Editor), {
+  ssr: false
+});
+
 export const JobList = ({
   roles,
   setRole,
@@ -54,6 +65,7 @@ export const JobList = ({
   count,
 }: JobListProps) => {
   const [page, setPage] = useState<number>(0);
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
 
   const nextPage = () => {
     if (roles.length > 0) {
@@ -186,12 +198,20 @@ export const JobList = ({
               </div>
 
               <div className={!item.expanded ? "h-[10px] overflow-hidden" : ""}>
-                <div>{parseDesc(item.description as string)}</div>
+                {/* <div>{parseDesc(item.description as string)}</div> */}
+                {/* <div dangerouslySetInnerHTML={{ __html: item.description }} /> */}
+                <JobDescription desc={item.description} />
                 <div className="mt-4">
-                  <p className="font-semibold text-[20px]">Required Skills:</p>
+                  <p className="font-semibold text-[20px]">Required Skills and Competencies:</p>
                 </div>
                 <div className="flex flex-row gap-4 mt-2 flex-wrap">
                   {parseSkills(item.skills as string)}
+                </div>
+                <div className="mt-4">
+                  <p className="font-semibold text-[20px]">Required Knowledges:</p>
+                </div>
+                <div className="flex flex-row gap-4 mt-2 flex-wrap">
+                  {parseSkills(item?.knowledges as string)}
                 </div>
                 <div className="mt-4">
                   <p className="font-semibold text-[20px]">Qualifications:</p>

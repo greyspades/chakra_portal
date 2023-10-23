@@ -24,8 +24,22 @@ import { CreateJobValidation } from "../helpers/validation";
 import { Update } from "@mui/icons-material";
 import { error } from "console";
 import Listings from "../pages/listings";
-import { postAsync } from "../helpers/connection";
+import { postAsync, searchAsync } from "../helpers/connection";
+import { ContentState, EditorState, convertFromHTML, convertFromRaw, convertToRaw } from "draft-js";
+import { convertToHTML, stateToText } from "draft-convert";
+import "react-draft-wysiwyg/dist/react-draft-wysiwyg.css";
+import dynamic from "next/dynamic";
+let htmlToDraft = null;
+if (typeof window === 'object') {
+    htmlToDraft = require('html-to-draftjs').default;}
+// import htmlToDraft from 'html-to-draftjs';
+// import { convertFromHTML } from 'draft-js-import-html';
+// import { convertFromHTML } from 'draft-js-import-html';
+import {stateFromHTML} from 'draft-js-import-html';
 
+const Editor = dynamic(() => import("react-draft-wysiwyg").then((mod) => mod.Editor), {
+  ssr: false
+});
 
 interface Props {
   name: string;
@@ -43,7 +57,7 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
 
   const [statusCode, setStatusCode] = useState<number | null>();
 
-  const [desc, setDesc] = useState<{ [key: string]: string }[] | null>();
+  const [desc, setDesc] = useState<string>();
 
   const [addDesc, setAddDesc] = useState<string>("");
 
@@ -56,6 +70,8 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
   });
   const [skill, setSkill] = useState<string>()
 
+  const [knowledge, setKnowledge] = useState<string>()
+
   const [reqSkills, setReqSkills] = useState<string[]>([])
 
   const [course, setCourse] = useState<string>("")
@@ -64,6 +80,14 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
 
   const [fieldType, setFieldType] = useState<string>("text")
 
+  const [descState, setDescState] = useState<string>()
+
+  const [roleMeta, setRoleMeta] = useState<{[key: string]: any}>({})
+
+  const [jobFetchError, setJobFetchError] = useState<boolean>()
+
+  const [roleId, setRoleId] = useState()
+
   const [fieldErrors, setFieldErrors] = useState<{[key: string]: boolean}>({
     reqSkills: false,
     jobType: false,
@@ -71,14 +95,20 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
     location: false,
     experience: false
   })
+  const [isEditing, setIsEditing] = useState<boolean>(false)
 
   const degrees = ["BSC", "MSC", "MBA", "PHD", "HND", "OND", "Other"];
 
   const jobTypes = ["Full time", "Part time", "Internship", "Contract"]
-  
 
-  //* gets the job description
-  useEffect(() => {
+  const convertPlainTextToEditorState = (plainText: string) => {
+    if(plainText) {
+      const contentState = ContentState.createFromText(plainText);
+    return EditorState.createWithContent(contentState);
+    }
+  };
+
+  const getJobDescription = () => {
     let body = {
       code,
     };
@@ -86,19 +116,76 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
       .then((res) => {
         // console.log(res)
         if (res.code == 200) {
-          setDesc(res.data);
+          setJobFetchError(false)
+          var result = []
+          res.data.forEach((item) => result.push(item["job responsibility~~sentc"]+"\n"))
+          setDesc(result.join());
+          // console.log(result.join())
+          const edit = convertPlainTextToEditorState(result.join())
+          setEditorState(edit)
         }
       })
       .catch((err: AxiosError) => {
         console.log(err.message);
-        // setStatus({
-        //   open: true,
-        //   topic: "Usuccessful",
-        //   content: err.message,
-        // });
+        setDesc("dwkdnj")
+        setJobFetchError(true)
+        setStatus({
+          open: true,
+          topic: "Usuccessful",
+          content: "Couldn't fetch job description for this job role",
+        });
       });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }
+
+  useEffect(() => {
+    const body = {
+      code: code
+    }
+    // const html = convertPlainTextToEditorState("60% OF AMOUNT MOBILIZED THROUGH AN AGENT SHOULD BE RETAINED AT THE END OF PERIODACHIEVE 3,507 CUMULATIVE CUSTOMERS END OF PERIOD")
+    // setEditorState(html)
+    // console.log("work already")
+    postAsync("getJobByCode",body)
+    .then((res) => {
+      if(res.data.length != 0) {
+        const resData = res.data[0]
+        // console.log(resData)
+        setDesc(resData.description)
+        var contentState = stateFromHTML(resData.description);
+        var html = EditorState.createWithContent(contentState);
+        setEditorState(html)
+        const skillString = Array.from(JSON.parse(resData.skills)).join(",")
+        setSkill(skillString)
+        if(resData?.knowledges) {
+          const knowledgeString = Array.from(JSON.parse(resData?.knowledges)).join(",")
+          setKnowledge(knowledgeString)
+        }
+        setExperience(resData.experience.toString())
+        setLocation(resData.location)
+        setJobType(resData.jobtype)
+        setRoleMeta({
+          experience: resData.experience.toString(),
+          course: resData.qualification.split("in")[1],
+          deadline: resData.deadline.split("T")[0],
+          id: resData.id
+        })
+        setqualification(resData.qualification.split("in")[0])
+        // setCourse(resData.qualification.split("in")[1])
+        setIsEditing(true)
+      } else {
+        setIsEditing(false)
+        getJobDescription()
+      }
+    })
+  },[])
+
+  const [editorState, setEditorState] = useState(EditorState.createEmpty());
+
+  useEffect(() => {
+    let htmlText = convertToHTML(editorState?.getCurrentContent());
+    // let plainText = editorState.getCurrentContent().getPlainText();
+    // console.log(plainText)
+    setDescState(htmlText)
+  }, [editorState]);
 
   const locations = [
     "Abia",
@@ -210,14 +297,11 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
   const handleSkillChange = (e: any) => {
     let value = e.target.value
     setSkill(value)
-    // if(value && value != "") {
-      
-    //   // if(value.includes(",")) {
-    //   //   console.log(skill)
-    //   //   let skillList = skill?.split(",")
-    //   //   setReqSkills(skillList as any)
-    //   // }
-    // }
+  }
+
+  const handleKnowledgeChange = (e: any) => {
+    let value = e.target.value
+    setKnowledge(value)
   }
 
   const renderReqSkills = () => {
@@ -228,22 +312,32 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
     ))
   }
 
-  //* renders the job description
-  const displayDesc = () => {
-    return desc?.map((item: { [key: string]: string }, idx: number) => (
-      <div key={idx} className="flex flex-row gap-4 mt-2">
-        <p>{item?.["rownum~~blnk"]}</p>
-        <p className="capitalize">
-          {item?.["job responsibility~~sentc"]?.toLowerCase()}
-        </p>
+  const renderKnowledges = () => {
+    return knowledge?.split(",")?.map((item: string, idx: number) => (
+      <div key={idx} className="bg-white p-2 rounded-lg text-black border-solid border-2 border-green-700 h-[40px]">
+          {item}
       </div>
-    ));
-  };
+    ))
+  }
+
+  //* renders the job description
+  // const displayDesc = () => {
+  //   return desc?.map((item: { [key: string]: string }, idx: number) => (
+  //     <div key={idx} className="flex flex-row gap-4 mt-2">
+  //       <p>{item?.["rownum~~blnk"]}</p>
+  //       <p className="capitalize">
+  //         {item?.["job responsibility~~sentc"]?.toLowerCase()}
+  //       </p>
+  //     </div>
+  //   ));
+  // };
 
   //* clears the notifier state and closes the notifier
   const clearStatus = () => {
     setStatus({ open: false });
-    cancel();
+    if(descState) {
+      cancel();
+    }
   };
 
   const handleDescChange = (e: any) => {
@@ -263,9 +357,9 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
           close={clearStatus}
         />
       </Modal>
-      <Paper className=" md:h-[90vh] bg-slate-100 p-4 align-middle md:mt-[30px] w-[79%] md:fixed overflow-y-scroll">
+      <Paper className=" md:h-[85vh] pb-4 bg-slate-100 p-4 align-middle md:mt-[30px] w-[79%] md:fixed overflow-y-scroll">
         <div className="flex flex-row justify-between">
-          <p className="text-2xl h-[40px]">Add New Job Listing</p>
+          {!isEditing ? <p className="text-2xl h-[40px]">Add New Job Listing</p> : <p className="text-2xl h-[40px]">Edit Job Listing</p>}
           <IconButton onClick={cancel}>
             <ArrowBackIcon className="text-green-700" />
           </IconButton>
@@ -280,9 +374,9 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
               validationSchema={CreateJobValidation}
               initialValues={{
                 name: name,
-                experience: "",
-                deadline: "",
-                course: "",
+                experience: roleMeta.experience ?? "",
+                deadline: roleMeta.deadline ?? "",
+                course: roleMeta.course ?? "",
               }}
               onSubmit={(value, { resetForm }) => {
                 
@@ -290,37 +384,38 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                 //* adds a new job role
                 if(reqSkills && location && qualification && experience) {
                   
-                  let combinedDesc = [
-                    ...(desc as { [key: string]: string }[] ?? [{}]),
-                    {
-                      ["RowNum~~Blnk"]: "",
-                      ["JFR Code~~Blnk"]: "",
-                      ["Job responsibility~~Sentc"]: addDesc,
-                    },
-                  ];
+                  // let combinedDesc = [
+                  //   ...(desc as { [key: string]: string }[] ?? [{}]),
+                  //   {
+                  //     ["RowNum~~Blnk"]: "",
+                  //     ["JFR Code~~Blnk"]: "",
+                  //     ["Job responsibility~~Sentc"]: addDesc,
+                  //   },
+                  // ];
 
                   //* add job role request payload
                   const body: Role = {
+                    id: isEditing ? roleMeta.id : null,
                     name: value.name,
                     experience: parseInt(experience),
-                    description: JSON.stringify(combinedDesc),
+                    description: descState,
                     deadline: value.deadline,
                     status: "active",
                     code,
                     location,
                     skills: JSON.stringify(skill?.split(",")),
+                    knowledges: JSON.stringify(knowledge?.split(",")),
                     qualification: `${qualification} in ${value.course}`,
                     jobtype: jobType
                   };
-                  // console.log(body)
+                  console.log(body)
                   setLoading(true);
                   postAsync(
-                    "createJob",
+                    !isEditing ? "createJob" : "UpdateRole",
                     body,
                   )
                   .then((res) => {
                     setLoading(false);
-                                    
                     if (res.code == 200) {
                       resetForm();
                       setSalary("");
@@ -329,7 +424,7 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                       setStatus({
                         open: true,
                         topic: "Successful",
-                        content: `Successfully created job role ${name}`,
+                        content: !isEditing ? `Successfully created job role ${name}` : `Successfully updated job role ${name}`,
                       });
                     } else {
                       setStatus({
@@ -378,8 +473,8 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                     <div className="">
                       <p className="text-[16px] mt-4 mb-1">Responsibilities</p>
                     </div>
-                    <div className="h-[200px] bg-white p-4 overflow-y-scroll">
-                      {displayDesc()}
+                    <div className="p-2">
+                      {/* {displayDesc()}
                       <div className="mt-6">
                         <p className="font-semibold">Additional data</p>
                         <TextField
@@ -389,10 +484,18 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                           minRows={3}
                           className="bg-white w-[100%]"
                         />
-                      </div>
+                      </div> */}
+                      {desc && (
+                        <Editor
+                        editorState={editorState}
+                        onEditorStateChange={setEditorState}
+                        wrapperClassName="h-[200px]"
+                        editorClassName="bg-white p-4"
+                        toolbarClassName="toolbar-class"
+                      />
+                      )}
                     </div>
-                    <div className=""></div>
-                    <div className="flex flex-row mt-4 justify-between justify-items-center h-[50px]">
+                    <div className="mt-[100px] flex flex-row justify-between justify-items-center h-[50px]">
                       <div className="flex flex-row justify-between w-[100%] justify-items-center">
                         {/* <FormControl>
                           <input
@@ -552,9 +655,9 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                     </div>
                     
                     <div className="flex flex-row gap-4 mt-4">
-                    <FormControl>
-                      <InputLabel>
-                      Skills seperated by commas
+                    <FormControl className="">
+                      <InputLabel className={skill ? "mt-[-22px]" : ""}>
+                      Skills and competencies seperated by commas
                       </InputLabel>
                           <Input
                             value={skill}
@@ -571,6 +674,28 @@ export const AddRole = ({ name, code, cancel, refresh }: Props) => {
                         </FormControl>
                         <div className="flex flex-row flex-wrap gap-4 mt-4">
                           {renderReqSkills()}
+                        </div>
+                    </div>
+                    <div className="flex flex-row gap-4 mt-4">
+                    <FormControl className="">
+                      <InputLabel className={knowledge ? "mt-[-22px]" : ""}>
+                      Knowledges seperated by commas
+                      </InputLabel>
+                          <Input
+                            value={knowledge}
+                            onChange={handleKnowledgeChange}
+                            placeholder="Required skills"
+                            className="bg-white p-2 min-w-[300px] h-[40px]"
+                            type="text"
+                          />
+                          {fieldErrors.reqSkills && (
+                            <div className="text-red-600 text-[10px] ml-4">
+                                This Field is required
+                            </div>
+                          )}
+                        </FormControl>
+                        <div className="flex flex-row flex-wrap gap-4 mt-4">
+                          {renderKnowledges()}
                         </div>
                     </div>
                     <div className="mt-[20px]">

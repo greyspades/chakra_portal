@@ -149,12 +149,14 @@ const urls:UrlData[] = [
     code: "getCv",
     url: process.env.GET_RESUME
   },
-  // {
-  //   code: "getByFlag",
-  //   url: process.env.GET_APPLICANTS_BY_FLAG
-  // },
-
-
+  {
+    code: "getJobByCode",
+    url: process.env.GET_JOB_BY_CODE
+  },
+  {
+    code: "UpdateRole",
+    url: process.env.UPDATE_JOB_ROLE
+  }
 ]
 
 export default async function handler(
@@ -183,13 +185,17 @@ export default async function handler(
   };
 
   const reqUrl: string = urls.find((item: UrlData) => item.code === req.body.url).url
-
-  let response = await fetch(reqUrl, options).then((res) => {
-    let resData = res.json();
-    return resData;
+  let response = await fetch(reqUrl, options).then(async(resDat) => {
+    if(resDat.ok) {
+      let resData = await resDat.json();
+    return resData
+    } else {
+      res.status(400).json({message: "failed to process this request"})
+    }
   }).catch((err) => {
     console.log(err)
   });
 
   res.status(200).json(response)
+  // res.status(200).json({})
 }

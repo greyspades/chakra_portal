@@ -643,7 +643,7 @@ export const Applicant = ({ data, close, role }: ApplicantProps) => {
             className="h-[200px]"
             onLoadError={(e) => console.log(e)}
             onSourceError={(e) => console.log(e)}
-            file={`getResume/${data?.id}`}
+            file={{data: resumeData}}
             onLoadSuccess={onDocumentLoadSuccess}
           >
             <Page pageNumber={page} height={800} />

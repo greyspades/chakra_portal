@@ -17,7 +17,7 @@ import {
 import { AddRole } from "./addRole";
 import { Role } from "../types/roles";
 import { Notifier } from "./notifier";
-import { postAsync } from "../helpers/connection";
+import { postAsync, searchAsync } from "../helpers/connection";
 
 interface Job {
   code: string;
@@ -143,14 +143,20 @@ export const Jobs = () => {
 
   //* selects a job
   const selectJob = (name: string, code: string) => {
-    if (checkJob(code) == "False") {
-      let body = {
-        name: name,
-        code: code,
-      };
-      setJob(body);
-      setViewing(true);
-    }
+    // if (checkJob(code) == "False") {
+    //   let body = {
+    //     name: name,
+    //     code: code,
+    //   };
+    //   setJob(body);
+    //   setViewing(true);
+    // }
+    let body = {
+      name: name,
+      code: code,
+    };
+    setJob(body);
+    setViewing(true);
   };
 
   //* cancels the personal info view
@@ -166,8 +172,8 @@ export const Jobs = () => {
       };
       postAsync("searchJobRoles", body)
         .then((res) => {
-          if (res.length > 0) {
-            setJobs(res);
+          if (res.data.length > 0) {
+            setJobs(res.data);
           }
         });
     }

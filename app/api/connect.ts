@@ -183,9 +183,11 @@ export default async function handler(
   };
 
   const reqUrl: string = urls.find((item: UrlData) => item.code === req.body.url).url
+  console.log(reqUrl)
 
   let response = await fetch(reqUrl, options).then((res) => {
     let resData = res.json();
+    console.log(resData)
     return resData;
   }).catch((err) => {
     console.log(err)
